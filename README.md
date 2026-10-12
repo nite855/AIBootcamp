@@ -1,6 +1,6 @@
 # 감정 분석 웹 MVP
 
-로컬 KcELECTRA 체크포인트로 한국어 문장을 `분노`, `슬픔`, `불안`, `상처`, `당황`, `기쁨` 중 하나로 분류하는 FastAPI 앱입니다. 입력한 각 줄을 독립적인 발화로 분석하고, 대표 감정과 전체 감정 확률을 표시합니다.
+로컬 KcELECTRA 체크포인트로 한국어 문장을 `분노`, `슬픔`, `불안`, `상처`, `당황`, `기쁨` 중 하나로 분류하는 FastAPI 앱입니다. 최대 100줄을 하나의 대화 흐름으로 받아 문장별 감정 변화와 공백 기준 단어 사용 빈도를 표시합니다.
 
 ## 모델 경로
 
@@ -76,9 +76,33 @@ docker run --rm -p 8000:8000 -v "${model}:/models/checkpoint:ro" emotion-mvp
       },
       "input_tokens": 12,
       "truncated": false
+    },
+    {
+      "emotion": "불안",
+      "confidence": 0.86,
+      "probabilities": {
+        "분노": 0.02,
+        "슬픔": 0.03,
+        "불안": 0.86,
+        "상처": 0.03,
+        "당황": 0.04,
+        "기쁨": 0.02
+      },
+      "input_tokens": 14,
+      "truncated": false
     }
+  ],
+  "word_frequencies": [
+    {"word": "오늘은", "count": 1},
+    {"word": "정말", "count": 1},
+    {"word": "행복해.", "count": 1},
+    {"word": "내일", "count": 1},
+    {"word": "면접이라", "count": 1},
+    {"word": "너무", "count": 1},
+    {"word": "불안해.", "count": 1}
   ]
 }
 ```
 
 `confidence`는 감정의 강도가 아니라 모델이 선택한 클래스의 확률입니다.
+상세 구조와 API 계약은 각각 `architecture.md`, `openapi.yaml`에서 확인할 수 있습니다.
