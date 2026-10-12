@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>감정 분석 MVP</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body { max-width: 720px; margin: 40px auto; padding: 0 16px; font-family: sans-serif; }
+    textarea { width: 100%; min-height: 180px; box-sizing: border-box; }
+    button { margin: 12px 0 24px; padding: 8px 16px; }
+    #message { min-height: 24px; color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>감정 분석</h1>
+  <p>분석할 문장을 한 줄에 하나씩 입력하세요.</p>
+  <textarea id="text" placeholder="오늘은 기쁘다.&#10;어제는 슬프다."></textarea>
+  <br>
+  <button id="analyze" type="button">분석</button>
+  <div id="message" role="alert"></div>
+  <canvas id="chart"></canvas>
+
+  <script>
+    const textInput = document.getElementById("text");
+    const button = document.getElementById("analyze");
+    const message = document.getElementById("message");
+    let chart;
+
+    button.addEventListener("click", async () => {
+      message.textContent = "";
+      button.disabled = true;
+
+      try {
+        const response = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textInput.value })
+        });
+
+        if (!response.ok) throw new Error("분석 요청에 실패했습니다.");
+
+        const result = await response.json();
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById("chart"), {
+          type: "line",
+          data: {
+            labels: result.lines.map((_, index) => index + 1),
+            datasets: [{
+              label: "감정점수",
+              data: result.scores,
+              borderColor: "#2563eb",
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: { title: { display: true, text: "줄 번호" } },
+              y: { title: { display: true, text: "감정점수" } }
+            }
+          }
+        });
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
