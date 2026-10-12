@@ -7,7 +7,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from test_emotion_model import EmotionPredictor
+from emotion_service.predictor import EmotionPredictor
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+INDEX_PATH = PROJECT_ROOT / "web" / "index.html"
 
 
 @asynccontextmanager
@@ -58,7 +62,7 @@ def count_words(lines: list[str]) -> list[WordFrequency]:
 
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
-    return FileResponse(Path(__file__).with_name("index.html"))
+    return FileResponse(INDEX_PATH)
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)

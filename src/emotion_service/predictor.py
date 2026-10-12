@@ -7,7 +7,8 @@ import os
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_CHECKPOINT = PROJECT_ROOT / "models" / "emotion-kcelectra" / "checkpoint"
 STUDY_NAME = "emotional-dialogue-input-study-20261007-v1"
 REQUIRED_CHECKPOINT_FILES = (
     "config.json",
@@ -17,19 +18,19 @@ REQUIRED_CHECKPOINT_FILES = (
 
 
 def _default_study_dir() -> Path:
-    """Find a colocated study first, then the extracted Downloads artifact."""
-    candidates = [
-        ROOT / STUDY_NAME,
-        ROOT.parent / "experiments" / STUDY_NAME,
-    ]
+    """Find an externally saved, complete study artifact."""
+    candidates: list[Path] = []
     downloads = Path.home() / "Downloads"
     if downloads.is_dir():
         candidates.extend(downloads.glob(f"{STUDY_NAME}*/{STUDY_NAME}"))
 
-    return next(
-        (candidate for candidate in candidates if (candidate / "study_runs.csv").is_file()),
-        candidates[0],
-    )
+    found = next((candidate for candidate in candidates if (candidate / "study_runs.csv").is_file()), None)
+    if found is None:
+        raise FileNotFoundError(
+            "기본 체크포인트를 찾을 수 없습니다. EMOTION_MODEL_DIR 또는 "
+            f"EMOTION_STUDY_DIR를 설정하세요: {DEFAULT_CHECKPOINT}"
+        )
+    return found
 
 
 def _validate_checkpoint(checkpoint: Path) -> Path:
@@ -73,7 +74,13 @@ def resolve_checkpoint(checkpoint: Path | str | None = None, study: Path | str |
     if configured_checkpoint:
         return _validate_checkpoint(Path(configured_checkpoint))
 
-    configured_study = study or os.getenv("EMOTION_STUDY_DIR") or _default_study_dir()
+    configured_study = study or os.getenv("EMOTION_STUDY_DIR")
+    if configured_study:
+        return select_checkpoint(Path(configured_study))
+    if DEFAULT_CHECKPOINT.is_dir():
+        return _validate_checkpoint(DEFAULT_CHECKPOINT)
+
+    configured_study = _default_study_dir()
     return select_checkpoint(Path(configured_study))
 
 

@@ -5,10 +5,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py test_emotion_model.py index.html ./
+COPY src ./src
+COPY web ./web
 
 ENV EMOTION_MODEL_DIR=/models/checkpoint
+ENV PYTHONPATH=/app/src
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "emotion_service.api:app", "--host", "0.0.0.0", "--port", "8000"]

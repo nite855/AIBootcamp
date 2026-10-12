@@ -7,18 +7,18 @@
 ## 구성 요소
 
 ```text
-브라우저 (index.html, Chart.js)
+브라우저 (web/index.html, Chart.js)
   └─ POST /api/analyze
-       └─ FastAPI (main.py)
+       └─ FastAPI (src/emotion_service/api.py)
             ├─ 입력 정리 및 100줄 제한
             ├─ Counter 기반 단어 빈도 집계
-            └─ EmotionPredictor (test_emotion_model.py)
+            └─ EmotionPredictor (src/emotion_service/predictor.py)
                  └─ 로컬 KcELECTRA 체크포인트
 ```
 
 ### 웹 클라이언트
 
-`index.html`은 별도의 빌드 과정이 없는 정적 화면이다.
+`web/index.html`은 별도의 빌드 과정이 없는 정적 화면이다.
 
 - 입력 중 빈 줄을 제외한 문장 수를 표시하고, 100줄을 초과하면 분석 버튼을 비활성화한다.
 - 분석 결과의 대표 감정과 신뢰도를 문장별로 표시한다.
@@ -27,7 +27,7 @@
 
 ### API 서버
 
-`main.py`의 FastAPI 애플리케이션이 정적 화면과 분석 API를 제공한다.
+`src/emotion_service/api.py`의 FastAPI 애플리케이션이 정적 화면과 분석 API를 제공한다.
 
 1. 입력을 줄바꿈으로 나누고 빈 줄과 줄 앞뒤 공백을 제거한다.
 2. 유효 문장이 없거나 100개를 초과하면 HTTP 422를 반환한다.
@@ -39,7 +39,7 @@
 
 ### 감정 추론
 
-`test_emotion_model.py`는 서버 시작 시 로컬 체크포인트를 한 번 로드한다. 각 문장은 독립적으로 추론되지만, 응답과 화면에서는 입력 순서대로 배열하여 전체 대화의 감정 변화로 표현한다. 모델 출력은 대표 감정, 대표 감정 확률, 전체 감정별 확률, 토큰 수, 잘림 여부를 포함한다.
+`src/emotion_service/predictor.py`는 서버 시작 시 로컬 체크포인트를 한 번 로드한다. 각 문장은 독립적으로 추론되지만, 응답과 화면에서는 입력 순서대로 배열하여 전체 대화의 감정 변화로 표현한다. 모델 출력은 대표 감정, 대표 감정 확률, 전체 감정별 확률, 토큰 수, 잘림 여부를 포함한다.
 
 ## 요청 처리 흐름
 
@@ -67,8 +67,10 @@
 
 ## 관련 파일
 
-- `main.py`: HTTP API, 입력 검증, 단어 빈도 집계
-- `test_emotion_model.py`: 체크포인트 선택 및 감정 추론
-- `index.html`: 입력 화면과 결과 시각화
-- `openapi.yaml`: 분석 API 계약
-- `test_main.py`: 입력 제한과 단어 빈도 집계 단위 테스트
+- `src/emotion_service/api.py`: HTTP API, 입력 검증, 단어 빈도 집계
+- `src/emotion_service/predictor.py`: 체크포인트 선택 및 감정 추론
+- `web/index.html`: 입력 화면과 결과 시각화
+- `docs/openapi.yaml`: 분석 API 계약
+- `tests/`: API 및 추론 단위 테스트
+- `models/emotion-kcelectra/`: 로컬 서빙 체크포인트와 추론 메타데이터
+- `artifacts/emotional-dialogue-study/`: 학습 설정과 평가 산출물

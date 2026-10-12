@@ -1,0 +1,1 @@
+"""Korean emotion analysis service."""
