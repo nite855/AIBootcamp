@@ -13,7 +13,7 @@ services:
         target: /app/web
         read_only: true
       - type: bind
-        source: ${EMOTION_MODEL_PATH:?Set EMOTION_MODEL_PATH to the checkpoint directory}
+        source: ${EMOTION_MODEL_PATH:-./models/emotion-kcelectra/checkpoint}
         target: /models/checkpoint
         read_only: true
     command:
