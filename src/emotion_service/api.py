@@ -57,7 +57,7 @@ def parse_lines(text: str) -> list[str]:
 
 def count_words(lines: list[str]) -> list[WordFrequency]:
     counts = Counter(word for line in lines for word in line.split())
-    return [WordFrequency(word=word, count=count) for word, count in counts.most_common()]
+    return [WordFrequency(word=word, count=count) for word, count in counts.most_common(10)]
 
 
 @app.get("/", include_in_schema=False)
