@@ -54,6 +54,20 @@ class CountWordsTests(unittest.TestCase):
             ],
         )
 
+    def test_accepts_predictor_dictionary_results(self) -> None:
+        frequencies = count_emotion_words(
+            ["행복 행복", "화남"],
+            [
+                {"emotion": "기쁨"},
+                {"emotion": "분노"},
+            ],
+        )
+
+        self.assertEqual(
+            [item.model_dump() for item in frequencies["기쁨"]],
+            [{"word": "행복", "count": 2}],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

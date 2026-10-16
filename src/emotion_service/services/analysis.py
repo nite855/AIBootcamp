@@ -22,7 +22,8 @@ def count_emotion_words(
 ) -> dict[str, list[WordFrequency]]:
     counts_by_emotion: dict[str, Counter[str]] = {}
     for line, prediction in zip(lines, predictions):
-        counts_by_emotion.setdefault(prediction.emotion, Counter()).update(line.split())
+        emotion = prediction["emotion"] if isinstance(prediction, dict) else prediction.emotion
+        counts_by_emotion.setdefault(emotion, Counter()).update(line.split())
     return {
         emotion: [WordFrequency(word=word, count=count) for word, count in counts.most_common(3)]
         for emotion, counts in counts_by_emotion.items()
