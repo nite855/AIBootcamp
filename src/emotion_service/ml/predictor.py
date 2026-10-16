@@ -27,8 +27,8 @@ def _default_study_dir() -> Path:
     found = next((candidate for candidate in candidates if (candidate / "study_runs.csv").is_file()), None)
     if found is None:
         raise FileNotFoundError(
-            "기본 체크포인트를 찾을 수 없습니다. EMOTION_MODEL_DIR 또는 "
-            f"EMOTION_STUDY_DIR를 설정하세요: {DEFAULT_CHECKPOINT}"
+            "�⺻ üũ����Ʈ�� ã�� �� �����ϴ�. EMOTION_MODEL_DIR �Ǵ� "
+            f"EMOTION_STUDY_DIR�� �����ϼ���: {DEFAULT_CHECKPOINT}"
         )
     return found
 
@@ -38,7 +38,7 @@ def _validate_checkpoint(checkpoint: Path) -> Path:
     missing = [name for name in REQUIRED_CHECKPOINT_FILES if not (checkpoint / name).is_file()]
     if missing:
         names = ", ".join(missing)
-        raise FileNotFoundError(f"체크포인트 파일이 없습니다 ({names}): {checkpoint}")
+        raise FileNotFoundError(f"üũ����Ʈ ������ �����ϴ� ({names}): {checkpoint}")
     return checkpoint
 
 
@@ -47,14 +47,14 @@ def select_checkpoint(study: Path) -> Path:
     runs_path = study.expanduser().resolve() / "study_runs.csv"
     if not runs_path.is_file():
         raise FileNotFoundError(
-            "실험 폴더를 찾을 수 없습니다. EMOTION_STUDY_DIR 또는 "
-            f"EMOTION_MODEL_DIR를 설정하세요: {runs_path}"
+            "���� ������ ã�� �� �����ϴ�. EMOTION_STUDY_DIR �Ǵ� "
+            f"EMOTION_MODEL_DIR�� �����ϼ���: {runs_path}"
         )
 
     with runs_path.open(encoding="utf-8-sig", newline="") as stream:
         rows = [row for row in csv.DictReader(stream) if row["split"] == "validation_fixed"]
     if not rows:
-        raise ValueError(f"validation_fixed 결과가 없습니다: {runs_path}")
+        raise ValueError(f"validation_fixed ����� �����ϴ�: {runs_path}")
 
     row = max(rows, key=lambda item: float(item["negative_macro_f1"]))
     checkpoint = (
@@ -88,11 +88,11 @@ def _clean_utterances(utterances: str | list[str]) -> list[str]:
     if isinstance(utterances, str):
         utterances = [utterances]
     if not isinstance(utterances, list) or not 1 <= len(utterances) <= 3:
-        raise ValueError("사용자 발화 1~3개를 문자열 목록으로 입력하세요.")
+        raise ValueError("����� ��ȭ 1~3���� ���ڿ� ������� �Է��ϼ���.")
 
     cleaned = [" ".join(text.split()) if isinstance(text, str) else "" for text in utterances]
     if any(not text for text in cleaned):
-        raise ValueError("빈 발화 또는 문자열이 아닌 발화가 있습니다.")
+        raise ValueError("�� ��ȭ �Ǵ� ���ڿ��� �ƴ� ��ȭ�� �ֽ��ϴ�.")
     return cleaned
 
 
@@ -118,16 +118,16 @@ class EmotionPredictor:
         if metrics_path.is_file():
             settings = json.loads(metrics_path.read_text(encoding="utf-8"))["settings"]
             if settings.get("context_turns") != 0:
-                raise ValueError("이 앱은 context_turns=0 체크포인트만 지원합니다.")
+                raise ValueError("�� ���� context_turns=0 üũ����Ʈ�� �����մϴ�.")
             self.max_length = int(settings["max_length"])
         else:
             self.max_length = 256
 
         if device not in {"auto", "cpu", "cuda"}:
-            raise ValueError("device는 auto, cpu, cuda 중 하나여야 합니다.")
+            raise ValueError("device�� auto, cpu, cuda �� �ϳ����� �մϴ�.")
         self.device = ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
         if self.device == "cuda" and not torch.cuda.is_available():
-            raise RuntimeError("CUDA를 사용할 수 없습니다. device='cpu'를 사용하세요.")
+            raise RuntimeError("CUDA�� ����� �� �����ϴ�. device='cpu'�� ����ϼ���.")
 
         options = {"local_files_only": True, "trust_remote_code": False}
         self.tokenizer = AutoTokenizer.from_pretrained(self.checkpoint, **options)
@@ -172,7 +172,7 @@ def main() -> None:
     parser.add_argument("--study-dir", type=Path)
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
-    parser.add_argument("--text", nargs="+", required=True, help="사용자 발화 1~3개")
+    parser.add_argument("--text", nargs="+", required=True, help="����� ��ȭ 1~3��")
     args = parser.parse_args()
 
     predictor = EmotionPredictor(args.checkpoint, args.study_dir, args.device)
