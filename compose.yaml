@@ -13,6 +13,10 @@ services:
         target: /app/web
         read_only: true
       - type: bind
+        source: ./images
+        target: /app/images
+        read_only: true
+      - type: bind
         source: ${EMOTION_MODEL_PATH:-./models/emotion-kcelectra/checkpoint}
         target: /models/checkpoint
         read_only: true

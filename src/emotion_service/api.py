@@ -5,6 +5,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from emotion_service.predictor import EmotionPredictor
@@ -12,6 +13,7 @@ from emotion_service.predictor import EmotionPredictor
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INDEX_PATH = PROJECT_ROOT / "web" / "index.html"
+IMAGES_PATH = PROJECT_ROOT / "images"
 
 
 @asynccontextmanager
@@ -21,6 +23,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+app.mount("/images", StaticFiles(directory=IMAGES_PATH), name="images")
 
 
 class AnalyzeRequest(BaseModel):

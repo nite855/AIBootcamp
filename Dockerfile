@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src ./src
 COPY web ./web
+COPY images ./images
 
 ENV EMOTION_MODEL_DIR=/models/checkpoint
 ENV PYTHONPATH=/app/src
