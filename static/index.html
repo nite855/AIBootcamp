@@ -13,12 +13,15 @@
 <style>#emotion-gallery-panel{display:none}.keyword-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.emotion-keyword-card{padding:12px;border-radius:16px;background:var(--panel2)}.emotion-keyword-card h3{margin:0 0 8px;font-size:16px}.emotion-keyword-card ol{margin:0;padding-left:24px}@media(max-width:600px){.keyword-layout{grid-template-columns:1fr}}</style>
 <style>
   .brand{display:none}
-  main.shell{position:relative;isolation:isolate;overflow:hidden;background:#1E1E37}
-  main.shell::before{content:"";position:absolute;z-index:-1;inset:0;background:url('/static/images/assets/background.png') center top/cover no-repeat;opacity:.8}
-  .input{margin-top:0;padding:32px;border:1px solid #ffffff24;border-radius:28px;background:#1e1a3fe8;box-shadow:0 18px 48px #09061f80;backdrop-filter:blur(10px);opacity:.3}
+  main.shell{position:relative;isolation:isolate;overflow:hidden;min-height:100vh;background:#1E1E37}
+  main.shell::before{content:"";position:absolute;z-index:0;inset:0;background:url('/static/images/assets/background.png') calc(100% + 100px) 72px/560px auto no-repeat;opacity:.8}
+  main.shell > *{position:relative;z-index:1}
+  #input-screen{position:relative;display:flex;align-items:center;min-height:590px}
+  #input-screen::before{content:"";position:absolute;top:24px;left:0;width:76px;height:76px;border-radius:18px;background:#fff url('/static/images/assets/logo.png') center/contain no-repeat;box-shadow:0 12px 28px #09061f66}
+  .input{width:min(100%,610px);margin:70px 0 0;padding:32px;border:1px solid #ffffff24;border-radius:28px;background:rgba(30,26,63,.92);box-shadow:0 18px 48px #09061f80;backdrop-filter:blur(10px);text-align:left}
+  .input .actions{justify-content:flex-start}
   .panel{background:#1e1a3fe8;backdrop-filter:blur(10px)}
-  .loading::before{content:"";display:block;width:76px;height:76px;border-radius:18px;background:#fff url('/static/images/assets/logo.png') center/contain no-repeat;box-shadow:0 10px 28px #09061f80}
-  @media(max-width:600px){.input{padding:24px 18px;border-radius:22px}.loading::before{width:64px;height:64px}}
+  @media(max-width:600px){main.shell::before{background-position:center 92px;background-size:360px auto}#input-screen{display:block;min-height:0;padding-top:112px}#input-screen::before{top:20px;left:50%;transform:translateX(-50%);width:64px;height:64px}.input{margin:0;padding:24px 18px;border-radius:22px;text-align:center}.input .actions{justify-content:center}}
 </style>
 </head>
 <body><main class="shell">
