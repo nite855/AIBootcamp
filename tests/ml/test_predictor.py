@@ -55,7 +55,7 @@ class EmotionModelPathTests(unittest.TestCase):
 
 class EmotionInputTests(unittest.TestCase):
     def test_cleans_whitespace(self) -> None:
-        self.assertEqual(_clean_utterances("  ������\n �ູ��  "), ["������ �ູ��"])
+        self.assertEqual(_clean_utterances("  오늘은\n 행복해  "), ["오늘은 행복해"])
 
     def test_rejects_empty_utterance(self) -> None:
         with self.assertRaises(ValueError):
@@ -63,7 +63,7 @@ class EmotionInputTests(unittest.TestCase):
 
     def test_rejects_more_than_three_utterances(self) -> None:
         with self.assertRaises(ValueError):
-            _clean_utterances(["�ϳ�", "��", "��", "��"])
+            _clean_utterances(["하나", "둘", "셋", "넷"])
 
 
 if __name__ == "__main__":
