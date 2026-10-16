@@ -1,4 +1,4 @@
-# 감정 분석 웹 MVP
+﻿# 감정 분석 웹 MVP
 
 로컬 KcELECTRA 체크포인트로 한국어 문장을 `분노`, `슬픔`, `불안`, `상처`, `당황`, `기쁨` 중 하나로 분류하는 FastAPI 앱입니다. 최대 100줄을 하나의 대화 흐름으로 받아 문장별 감정 변화와 공백 기준 단어 사용 빈도를 표시합니다.
 
@@ -35,21 +35,21 @@ python -m venv .venv
 pip install -r requirements.txt
 pip install -e .
 
-uvicorn emotion_service.api:app --reload
+uvicorn emotion_service.main:app --reload
 ```
 
 모델이 프로젝트의 `models/emotion-kcelectra/checkpoint`에 없다면 체크포인트 경로를 지정합니다.
 
 ```powershell
 $env:EMOTION_MODEL_DIR = "C:\path\to\checkpoint"
-uvicorn emotion_service.api:app --reload
+uvicorn emotion_service.main:app --reload
 ```
 
 실험 폴더 전체를 사용하는 경우에는 다음처럼 설정할 수 있습니다.
 
 ```powershell
 $env:EMOTION_STUDY_DIR = "C:\path\to\emotional-dialogue-input-study-20261007-v1"
-uvicorn emotion_service.api:app --reload
+uvicorn emotion_service.main:app --reload
 ```
 
 ## Docker Compose로 개발
@@ -64,7 +64,7 @@ docker compose up --build
 실행 후에는 다음 기준으로 변경 사항을 반영합니다.
 
 - `src/` 변경: Uvicorn이 서버를 자동으로 다시 시작합니다. 모델도 다시 로드됩니다.
-- `web/` 변경: 이미지를 다시 빌드하지 않고 브라우저를 새로 고치면 반영됩니다.
+- `static/` 변경: 이미지를 다시 빌드하지 않고 브라우저를 새로 고치면 반영됩니다.
 - `requirements.txt` 또는 `Dockerfile` 변경: `docker compose up --build`로 이미지를 다시 빌드합니다.
 - 모델 파일 변경: `docker compose restart`로 서버와 모델을 다시 로드합니다.
 
@@ -150,9 +150,10 @@ docker run --rm -p 8000:8000 -v "${model}:/models/checkpoint:ro" emotion-mvp
 
 ```text
 src/emotion_service/   FastAPI 서버와 감정 추론 코드
-web/                   정적 웹 화면
+static/                   정적 웹 화면
 tests/                 단위 테스트
 docs/                  구조 및 API 문서
 models/                로컬 서빙 모델(Git 제외)
 artifacts/             학습 설정과 평가 결과
 ```
+

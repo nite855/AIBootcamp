@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CHECKPOINT = PROJECT_ROOT / "models" / "emotion-kcelectra" / "checkpoint"
 STUDY_NAME = "emotional-dialogue-input-study-20261007-v1"
 REQUIRED_CHECKPOINT_FILES = (

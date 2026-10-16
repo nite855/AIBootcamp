@@ -1,4 +1,4 @@
-# 감정 분석 시스템 구조
+﻿# 감정 분석 시스템 구조
 
 ## 개요
 
@@ -7,7 +7,7 @@
 ## 구성 요소
 
 ```text
-브라우저 (web/index.html, Chart.js)
+브라우저 (static/index.html, Chart.js)
   └─ POST /api/analyze
        └─ FastAPI (src/emotion_service/api.py)
             ├─ 입력 정리 및 100줄 제한
@@ -18,7 +18,7 @@
 
 ### 웹 클라이언트
 
-`web/index.html`은 별도의 빌드 과정이 없는 정적 화면이다.
+`static/index.html`은 별도의 빌드 과정이 없는 정적 화면이다.
 
 - 입력 중 빈 줄을 제외한 문장 수를 표시하고, 100줄을 초과하면 분석 버튼을 비활성화한다.
 - 분석 결과의 대표 감정과 신뢰도를 문장별로 표시한다.
@@ -69,8 +69,9 @@
 
 - `src/emotion_service/api.py`: HTTP API, 입력 검증, 단어 빈도 집계
 - `src/emotion_service/predictor.py`: 체크포인트 선택 및 감정 추론
-- `web/index.html`: 입력 화면과 결과 시각화
+- `static/index.html`: 입력 화면과 결과 시각화
 - `docs/openapi.yaml`: 분석 API 계약
 - `tests/`: API 및 추론 단위 테스트
 - `models/emotion-kcelectra/`: 로컬 서빙 체크포인트와 추론 메타데이터
 - `artifacts/emotional-dialogue-study/`: 학습 설정과 평가 산출물
+

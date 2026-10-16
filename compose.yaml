@@ -9,12 +9,8 @@ services:
         target: /app/src
         read_only: true
       - type: bind
-        source: ./web
-        target: /app/web
-        read_only: true
-      - type: bind
-        source: ./images
-        target: /app/images
+        source: ./static
+        target: /app/static
         read_only: true
       - type: bind
         source: ${EMOTION_MODEL_PATH:-./models/emotion-kcelectra/checkpoint}
@@ -22,7 +18,7 @@ services:
         read_only: true
     command:
       - uvicorn
-      - emotion_service.api:app
+      - emotion_service.main:app
       - --host
       - 0.0.0.0
       - --port

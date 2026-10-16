@@ -1,6 +1,7 @@
 import unittest
 
-from emotion_service.api import EmotionPrediction, count_emotion_words, count_words, parse_lines
+from emotion_service.schemas.analysis import EmotionPrediction
+from emotion_service.services.analysis import count_emotion_words, count_words, parse_lines
 
 
 class ParseLinesTests(unittest.TestCase):
