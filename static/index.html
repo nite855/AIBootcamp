@@ -16,12 +16,14 @@
   main.shell{position:relative;isolation:isolate;overflow:hidden;min-height:100vh;background:#1E1E37}
   main.shell::before{content:"";position:absolute;z-index:0;inset:0;background:url('/static/images/assets/background.png') calc(100% + 100px) 72px/560px auto no-repeat;opacity:.8}
   main.shell > *{position:relative;z-index:1}
-  #input-screen{position:relative;display:flex;align-items:center;min-height:590px}
+  #input-screen{position:relative;align-items:center;min-height:590px}
+  #input-screen.active{display:flex}
   #input-screen::before{content:"";position:absolute;top:24px;left:0;width:76px;height:76px;border-radius:18px;background:#fff url('/static/images/assets/logo.png') center/contain no-repeat;box-shadow:0 12px 28px #09061f66}
-  .input{width:min(100%,610px);margin:70px 0 0;padding:32px;border:1px solid #ffffff24;border-radius:28px;background:rgba(30,26,63,.92);box-shadow:0 18px 48px #09061f80;backdrop-filter:blur(10px);text-align:left}
-  .input .actions{justify-content:flex-start}
+  .input{width:min(100%,640px);margin:24px auto 0;padding:32px;border:1px solid #ffffff24;border-radius:28px;background:rgba(30,26,63,.92);box-shadow:0 18px 48px #09061f80;backdrop-filter:blur(10px);text-align:center}
+  .input .actions{justify-content:center}
   .panel{background:#1e1a3fe8;backdrop-filter:blur(10px)}
-  @media(max-width:600px){main.shell::before{background-position:center 92px;background-size:360px auto}#input-screen{display:block;min-height:0;padding-top:112px}#input-screen::before{top:20px;left:50%;transform:translateX(-50%);width:64px;height:64px}.input{margin:0;padding:24px 18px;border-radius:22px;text-align:center}.input .actions{justify-content:center}}
+  .keyword-layout{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  @media(max-width:600px){main.shell::before{background-position:center 92px;background-size:360px auto}#input-screen.active{display:block;min-height:0;padding-top:112px}#input-screen::before{top:20px;left:50%;transform:translateX(-50%);width:64px;height:64px}.input{margin:0;padding:24px 18px;border-radius:22px;text-align:center}.input .actions{justify-content:center}}
 </style>
 </head>
 <body><main class="shell">
