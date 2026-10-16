@@ -1,6 +1,6 @@
 import unittest
 
-from emotion_service.api import count_words, parse_lines
+from emotion_service.api import EmotionPrediction, count_emotion_words, count_words, parse_lines
 
 
 class ParseLinesTests(unittest.TestCase):
@@ -30,6 +30,26 @@ class CountWordsTests(unittest.TestCase):
                 {"word": "나는", "count": 2},
                 {"word": "행복해", "count": 2},
                 {"word": "기뻐", "count": 1},
+            ],
+        )
+
+    def test_counts_top_three_words_by_dominant_emotion(self) -> None:
+        predictions = [
+            EmotionPrediction(emotion="기쁨", confidence=0.9, probabilities={}, input_tokens=1, truncated=False),
+            EmotionPrediction(emotion="기쁨", confidence=0.8, probabilities={}, input_tokens=1, truncated=False),
+            EmotionPrediction(emotion="분노", confidence=0.8, probabilities={}, input_tokens=1, truncated=False),
+        ]
+
+        frequencies = count_emotion_words(
+            ["행복 행복 성공", "행복 성공 즐거움", "화 화 불만"], predictions
+        )
+
+        self.assertEqual(
+            [item.model_dump() for item in frequencies["기쁨"]],
+            [
+                {"word": "행복", "count": 3},
+                {"word": "성공", "count": 2},
+                {"word": "즐거움", "count": 1},
             ],
         )
 

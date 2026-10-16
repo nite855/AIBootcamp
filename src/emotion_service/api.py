@@ -47,6 +47,7 @@ class AnalyzeResponse(BaseModel):
     lines: list[str]
     predictions: list[EmotionPrediction]
     word_frequencies: list[WordFrequency]
+    emotion_word_frequencies: dict[str, list[WordFrequency]]
 
 
 def parse_lines(text: str) -> list[str]:
@@ -61,6 +62,19 @@ def parse_lines(text: str) -> list[str]:
 def count_words(lines: list[str]) -> list[WordFrequency]:
     counts = Counter(word for line in lines for word in line.split())
     return [WordFrequency(word=word, count=count) for word, count in counts.most_common(10)]
+
+
+def count_emotion_words(
+    lines: list[str], predictions: list[EmotionPrediction]
+) -> dict[str, list[WordFrequency]]:
+    counts_by_emotion: dict[str, Counter[str]] = {}
+    for line, prediction in zip(lines, predictions):
+        emotion = prediction["emotion"] if isinstance(prediction, dict) else prediction.emotion
+        counts_by_emotion.setdefault(emotion, Counter()).update(line.split())
+    return {
+        emotion: [WordFrequency(word=word, count=count) for word, count in counts.most_common(3)]
+        for emotion, counts in counts_by_emotion.items()
+    }
 
 
 @app.get("/", include_in_schema=False)
@@ -80,4 +94,5 @@ def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse:
         lines=lines,
         predictions=predictions,
         word_frequencies=count_words(lines),
+        emotion_word_frequencies=count_emotion_words(lines, predictions),
     )
