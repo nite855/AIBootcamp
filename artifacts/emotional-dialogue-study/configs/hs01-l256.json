@@ -1,0 +1,36 @@
+{
+  "output_root": "D:\\감정분석\\experiments\\emotional-dialogue-input-study-20261007-v1\\hs01-l256",
+  "models": {
+    "kcelectra": "D:/감정분석/conversation-emotion/models/kcelectra"
+  },
+  "datasets": {
+    "emotional_dialogue": {
+      "data": "D:/감정분석/prepared/emotional_dialogue/data.jsonl",
+      "schema": "D:/감정분석/prepared/emotional_dialogue/schema.json"
+    }
+  },
+  "seeds": [
+    17,
+    42,
+    83
+  ],
+  "modes": [
+    "finetune"
+  ],
+  "settings": {
+    "epochs": 5,
+    "batch_size": 16,
+    "lr": 3e-05,
+    "threads": 4,
+    "device": "cuda",
+    "bf16": false,
+    "allow_truncation": true,
+    "selection_metric": "negative_macro_f1",
+    "negative_labels": "분노,불안,상처,슬픔",
+    "negative_weight": 1.0,
+    "lr_schedule": "constant",
+    "warmup_ratio": 0.0,
+    "max_length": 256,
+    "context_turns": 0
+  }
+}

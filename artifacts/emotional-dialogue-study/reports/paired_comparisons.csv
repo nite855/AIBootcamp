@@ -1,0 +1,13 @@
+﻿comparison,seed,split,accuracy_delta_pp,macro_f1_delta_pp,negative_macro_f1_delta_pp
+hs01-l256 minus hs01-l128,17,validation_fixed,0.0,0.0,0.0
+hs01-l256 minus hs01-l128,17,test_fixed,0.0,0.0,0.0
+hs01-l256 minus hs01-l128,42,validation_fixed,0.0,0.0,0.0
+hs01-l256 minus hs01-l128,42,test_fixed,0.0,0.0,0.0
+hs01-l256 minus hs01-l128,83,validation_fixed,0.0,0.0,0.0
+hs01-l256 minus hs01-l128,83,test_fixed,0.0,0.0,0.0
+human-dialogue-l256 minus hs01-l256,17,validation_fixed,10.61018266614846,10.35206045569016,10.584607401989722
+human-dialogue-l256 minus hs01-l256,17,test_fixed,5.542168674698789,5.445145812529062,5.790815277440764
+human-dialogue-l256 minus hs01-l256,42,validation_fixed,10.299261562378547,10.204050354866567,10.339067204059592
+human-dialogue-l256 minus hs01-l256,42,test_fixed,5.572289156626509,5.6782725496903215,6.150610960918479
+human-dialogue-l256 minus hs01-l256,83,validation_fixed,10.707345511076571,10.494530370751198,10.304880797309213
+human-dialogue-l256 minus hs01-l256,83,test_fixed,5.512048192771091,5.424357304742921,4.994149996590902

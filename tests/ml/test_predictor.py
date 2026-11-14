@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from test_emotion_model import _clean_utterances, resolve_checkpoint, select_checkpoint
+from emotion_service.ml.predictor import _clean_utterances, resolve_checkpoint, select_checkpoint
 
 
 class EmotionModelPathTests(unittest.TestCase):

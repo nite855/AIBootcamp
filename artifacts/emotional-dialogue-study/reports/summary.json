@@ -1,0 +1,17 @@
+{
+  "planned_runs": 3,
+  "missing_runs": 0,
+  "results": [
+    {
+      "dataset": "emotional_dialogue",
+      "model": "kcelectra",
+      "mode": "finetune",
+      "context_turns": 0,
+      "completed_seeds": 3,
+      "expected_seeds": 3,
+      "macro_f1_mean": 0.7589213813752443,
+      "macro_f1_sample_std": 0.010423481683417151
+    }
+  ],
+  "ranking_scope": "within each dataset only"
+}

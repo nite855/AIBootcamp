@@ -1,0 +1,171 @@
+openapi: 3.1.0
+info:
+  title: 감정 분석 API
+  version: 1.0.0
+  description: 여러 문장을 하나의 대화 흐름으로 분석하고 단어 빈도와 문장별 감정 확률을 반환합니다.
+paths:
+  /api/analyze:
+    post:
+      summary: 대화 감정과 단어 빈도 분석
+      description: |
+        입력 텍스트에서 빈 줄을 제외한 각 줄을 한 문장으로 처리합니다.
+        유효 문장은 최대 100줄이며, 각 문장의 감정 확률과 공백 기준 단어 빈도를 반환합니다.
+      operationId: analyzeConversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+            examples:
+              conversation:
+                value:
+                  text: |-
+                    오늘은 정말 행복해.
+                    내일 면접이라 정말 불안해.
+      responses:
+        '200':
+          description: 분석 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+              examples:
+                result:
+                  value:
+                    lines:
+                      - 오늘은 정말 행복해.
+                      - 내일 면접이라 정말 불안해.
+                    predictions:
+                      - emotion: 기쁨
+                        confidence: 0.94
+                        probabilities:
+                          분노: 0.01
+                          슬픔: 0.01
+                          불안: 0.01
+                          상처: 0.01
+                          당황: 0.02
+                          기쁨: 0.94
+                        input_tokens: 12
+                        truncated: false
+                      - emotion: 불안
+                        confidence: 0.86
+                        probabilities:
+                          분노: 0.02
+                          슬픔: 0.03
+                          불안: 0.86
+                          상처: 0.03
+                          당황: 0.04
+                          기쁨: 0.02
+                        input_tokens: 14
+                        truncated: false
+                    word_frequencies:
+                      - word: 정말
+                        count: 2
+                      - word: 오늘은
+                        count: 1
+                      - word: 행복해.
+                        count: 1
+                      - word: 내일
+                        count: 1
+                      - word: 면접이라
+                        count: 1
+                      - word: 불안해.
+                        count: 1
+        '422':
+          description: 본문 형식 오류, 빈 입력 또는 100줄 초과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                tooManyLines:
+                  value:
+                    detail: 문장은 빈 줄을 제외하고 100줄 이하로 입력하세요.
+components:
+  schemas:
+    AnalyzeRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+          description: 빈 줄을 제외하고 1~100줄인 대화 텍스트입니다. 각 줄은 하나의 문장입니다.
+    AnalyzeResponse:
+      type: object
+      required:
+        - lines
+        - predictions
+        - word_frequencies
+      properties:
+        lines:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        predictions:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/EmotionPrediction'
+        word_frequencies:
+          type: array
+          description: 사용 횟수 내림차순으로 정렬된 단어 목록입니다.
+          items:
+            $ref: '#/components/schemas/WordFrequency'
+    EmotionPrediction:
+      type: object
+      required:
+        - emotion
+        - confidence
+        - probabilities
+        - input_tokens
+        - truncated
+      properties:
+        emotion:
+          type: string
+          description: 확률이 가장 높은 감정입니다.
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        probabilities:
+          type: object
+          description: 모델이 반환한 감정별 확률입니다.
+          additionalProperties:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 1
+        input_tokens:
+          type: integer
+          minimum: 1
+        truncated:
+          type: boolean
+    WordFrequency:
+      type: object
+      required:
+        - word
+        - count
+      properties:
+        word:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
