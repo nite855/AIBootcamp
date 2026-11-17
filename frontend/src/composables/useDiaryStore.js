@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, toRaw } from "vue";
 import {
   CardexCore,
   DiaryCards,
@@ -14,6 +14,25 @@ import {
 } from "../services/backupService.js";
 import { exportCardPng } from "../services/cardRenderer.js";
 import { createAnalysisCoordinator } from "../services/analysisCoordinator.mjs";
+
+/** Recursively unwrap Vue reactive proxies into plain objects/arrays before structuredClone or IndexedDB writes. */
+function toPlain(value) {
+  const raw = toRaw(value);
+  if (Array.isArray(raw)) {
+    return raw.map(toPlain);
+  }
+  if (raw && typeof raw === "object") {
+    const proto = Object.getPrototypeOf(raw);
+    if (proto === Object.prototype || proto === null) {
+      const out = {};
+      for (const [key, entry] of Object.entries(raw)) {
+        out[key] = toPlain(entry);
+      }
+      return out;
+    }
+  }
+  return raw;
+}
 
 export function localDate(d = new Date()) {
   return [
@@ -280,7 +299,7 @@ export function useDiaryStore() {
     return {
       text: state.text,
       date: state.date,
-      sessions: state.sessions,
+      sessions: toPlain(state.sessions),
       policy: state.policy,
       currentEntryId: state.currentEntryId || null,
       savedText: state.savedText ?? null,
@@ -731,7 +750,7 @@ export function useDiaryStore() {
       analysisCoordinator.cancelRecordAnalysis(list[index].id);
     }
     const deleted = {
-      entry: structuredClone(list[index]),
+      entry: structuredClone(toPlain(list[index])),
       index,
       mode: state.mode,
       currentEntryId: state.currentEntryId,
@@ -865,10 +884,12 @@ export function useDiaryStore() {
         throw Error("저장소를 사용할 수 없어요. 기존 기록은 유지됩니다.");
       }
       analysisCoordinator.cancelAllAnalyses();
-      const mergedEntries = plan.entries.map((r) => ({
-        ...r,
-        analysis: r.analysis || { status: "pending" },
-      }));
+      const mergedEntries = toPlain(
+        plan.entries.map((r) => ({
+          ...r,
+          analysis: r.analysis || { status: "pending" },
+        })),
+      );
       await storage.save({ ...snapshot(), sessions: mergedEntries });
       state.sessions = mergedEntries;
       incomingBackup.value = null;
@@ -933,7 +954,7 @@ export function useDiaryStore() {
     window.addEventListener("hashchange", onHashChange);
 
     window.DiaryReview = Object.freeze({
-      getState: () => structuredClone({ ...state, sessions: state.sessions.map((s) => ({ ...s })) }),
+      getState: () => structuredClone(toPlain(state)),
       isReady: () => !loading.value,
       localDate,
     });
