@@ -1,0 +1,209 @@
+{
+  "contract_version": "2.0.0",
+  "endpoint": "POST /api/analyze",
+  "taxonomy_version": "emotion-cardex-3plus9-v1",
+  "card_policy_version": "card-stage-strict-gt-v1",
+  "synthetic": true,
+  "valid_exchange_cases": [
+    {
+      "id": "valid_single_record",
+      "description": "유효한 기록 분석 요청 및 200 응답 계약 (원문 text 미복제)",
+      "request": {
+        "record_id": "rec-contract-001",
+        "version": 1,
+        "request_id": "req-contract-001",
+        "text": "CONTRACT-01 합성 기록: 창가에 앉아 따뜻한 차를 마셨다."
+      },
+      "expected_status": 200,
+      "response": {
+        "record_id": "rec-contract-001",
+        "version": 1,
+        "request_id": "req-contract-001",
+        "status": "valid",
+        "taxonomy_version": "emotion-cardex-3plus9-v1",
+        "model_version": "model-placeholder-v1",
+        "probabilities": {
+          "pos_1": 0.1,
+          "pos_2": 0.45,
+          "pos_3": 0.15,
+          "neg_1": 0.05,
+          "neg_2": 0.05,
+          "neg_3": 0.05,
+          "neu_1": 0.05,
+          "neu_2": 0.04,
+          "neu_3": 0.06
+        },
+        "truncated": false,
+        "dominant_emotion": "pos_2",
+        "dominant_ratio": 0.45,
+        "ties": [
+          "pos_2"
+        ],
+        "card_stage": 2,
+        "card_key": "pos_2:2",
+        "card_policy_version": "card-stage-strict-gt-v1"
+      }
+    },
+    {
+      "id": "unissuable_truncated_response",
+      "description": "모델 입력 길이 초과(truncated=true) 시 카드를 발급하지 않는 200 분석 불가 응답 형태",
+      "request": {
+        "record_id": "rec-contract-002",
+        "version": 2,
+        "request_id": "req-contract-002",
+        "text": "CONTRACT-01 합성 기록: 입력 길이 초과로 분석 불가 응답을 검증한다."
+      },
+      "expected_status": 200,
+      "response": {
+        "record_id": "rec-contract-002",
+        "version": 2,
+        "request_id": "req-contract-002",
+        "status": "error",
+        "taxonomy_version": "emotion-cardex-3plus9-v1",
+        "model_version": "model-placeholder-v1",
+        "probabilities": null,
+        "truncated": true,
+        "dominant_emotion": null,
+        "dominant_ratio": null,
+        "ties": [],
+        "card_stage": null,
+        "card_key": null,
+        "card_policy_version": "card-stage-strict-gt-v1",
+        "error_code": "INPUT_TRUNCATED",
+        "message": "모델 최대 입력 길이를 초과하여 카드를 발급할 수 없습니다."
+      }
+    }
+  ],
+  "text_length_boundary_cases": [
+    {
+      "id": "exact_10000_code_points_with_surrogate_pair",
+      "description": "비BMP 이모지(UTF-16 길이 2, Unicode 코드 포인트 1) 포함 정확히 10,000코드포인트 → 허용",
+      "repeat_char": "가",
+      "repeat_count": 9999,
+      "suffix": "😊",
+      "expected_code_points": 10000,
+      "expected_valid": true
+    },
+    {
+      "id": "over_10000_code_points",
+      "description": "10,001코드포인트 → 422 거부 (자동 자르기 금지)",
+      "repeat_char": "가",
+      "repeat_count": 10001,
+      "suffix": "",
+      "expected_code_points": 10001,
+      "expected_valid": false,
+      "expected_status": 422
+    }
+  ],
+  "invalid_request_cases": [
+    {
+      "id": "empty_text",
+      "description": "빈 문자열 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 1,
+        "request_id": "req-1",
+        "text": ""
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "whitespace_only_text",
+      "description": "공백·줄바꿈만 있는 입력 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 1,
+        "request_id": "req-1",
+        "text": " \n\t  "
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "null_byte_in_text",
+      "description": "널 바이트 포함 입력 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 1,
+        "request_id": "req-1",
+        "text": "오늘\u0000기록"
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "missing_request_id",
+      "description": "필수 필드 request_id 누락 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 1,
+        "text": "오늘의 기록"
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "missing_record_id",
+      "description": "필수 필드 record_id 누락 → 422",
+      "payload": {
+        "version": 1,
+        "request_id": "req-1",
+        "text": "오늘의 기록"
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "invalid_version_zero",
+      "description": "version < 1 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 0,
+        "request_id": "req-1",
+        "text": "오늘의 기록"
+      },
+      "expected_status": 422
+    },
+    {
+      "id": "extra_unexpected_field",
+      "description": "계약 외 추가 필드 금지 → 422",
+      "payload": {
+        "record_id": "rec-1",
+        "version": 1,
+        "request_id": "req-1",
+        "text": "오늘의 기록",
+        "unexpected": true
+      },
+      "expected_status": 422
+    }
+  ],
+  "server_error_cases": [
+    {
+      "id": "model_not_ready",
+      "description": "모델 준비 전·사용 불가 시 503",
+      "expected_status": 503,
+      "response": {
+        "detail": "감정 분석 모델이 아직 준비되지 않았습니다.",
+        "code": "MODEL_NOT_READY",
+        "request_id": "req-contract-503"
+      }
+    },
+    {
+      "id": "inference_internal_error",
+      "description": "추론 내부 오류 시 500",
+      "expected_status": 500,
+      "response": {
+        "detail": "감정 분석 처리 중 내부 오류가 발생했습니다.",
+        "code": "INFERENCE_ERROR",
+        "request_id": "req-contract-500"
+      }
+    },
+    {
+      "id": "invalid_model_output_must_not_be_422",
+      "description": "모델이 잘못된 확률 분포(예: 합계 오류·p=0)를 반환해도 사용자 입력 오류(422)로 돌리지 않고 500 반환",
+      "expected_status": 500,
+      "must_not_be_422": true,
+      "response": {
+        "detail": "모델 출력 확률 검증에 실패했습니다.",
+        "code": "INVALID_MODEL_OUTPUT",
+        "request_id": "req-contract-500-model"
+      }
+    }
+  ]
+}

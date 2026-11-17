@@ -1,0 +1,472 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://moment.local/contracts/analysis.schema.json",
+  "title": "오늘의 모먼트 3+9 감정 분석 및 카드 판정 계약",
+  "description": "POST /api/analyze 요청·응답 계약 및 9소분류·엄격 초과(>) 카드 단계 판정 규칙",
+  "x-cardex-contract": {
+    "contract_version": "2.0.0",
+    "endpoint": "POST /api/analyze",
+    "taxonomy_version": "emotion-cardex-3plus9-v1",
+    "card_policy_version": "card-stage-strict-gt-v1",
+    "text_max_code_points": 10000,
+    "probability_sum_tolerance": 1e-06,
+    "stage_rule": {
+      "operator": "strict_gt",
+      "thresholds": [
+        {
+          "stage": 3,
+          "min_exclusive_numerator": 2,
+          "min_exclusive_denominator": 3,
+          "max_inclusive": 1
+        },
+        {
+          "stage": 2,
+          "min_exclusive_numerator": 1,
+          "min_exclusive_denominator": 3,
+          "max_inclusive_numerator": 2,
+          "max_inclusive_denominator": 3
+        },
+        {
+          "stage": 1,
+          "min_exclusive": 0,
+          "max_inclusive_numerator": 1,
+          "max_inclusive_denominator": 3
+        }
+      ],
+      "evaluation_order": [
+        "stage_3",
+        "stage_2",
+        "stage_1"
+      ]
+    },
+    "tie_breaking": "core_taxonomy_id_order_exact_max_equality",
+    "parents": [
+      {
+        "id": "positive",
+        "name": "긍정",
+        "children": [
+          "pos_1",
+          "pos_2",
+          "pos_3"
+        ]
+      },
+      {
+        "id": "negative",
+        "name": "부정",
+        "children": [
+          "neg_1",
+          "neg_2",
+          "neg_3"
+        ]
+      },
+      {
+        "id": "neutral",
+        "name": "중립",
+        "children": [
+          "neu_1",
+          "neu_2",
+          "neu_3"
+        ]
+      }
+    ],
+    "emotions": [
+      {
+        "id": "pos_1",
+        "number": "001",
+        "name": "기쁨·활력",
+        "parent": "positive"
+      },
+      {
+        "id": "pos_2",
+        "number": "002",
+        "name": "만족·감사",
+        "parent": "positive"
+      },
+      {
+        "id": "pos_3",
+        "number": "003",
+        "name": "안정·자신감",
+        "parent": "positive"
+      },
+      {
+        "id": "neg_1",
+        "number": "004",
+        "name": "불안",
+        "parent": "negative"
+      },
+      {
+        "id": "neg_2",
+        "number": "005",
+        "name": "슬픔",
+        "parent": "negative"
+      },
+      {
+        "id": "neg_3",
+        "number": "006",
+        "name": "분노",
+        "parent": "negative"
+      },
+      {
+        "id": "neu_1",
+        "number": "007",
+        "name": "객관적 서술",
+        "parent": "neutral"
+      },
+      {
+        "id": "neu_2",
+        "number": "008",
+        "name": "의문",
+        "parent": "neutral"
+      },
+      {
+        "id": "neu_3",
+        "number": "009",
+        "name": "놀람·당황",
+        "parent": "neutral"
+      }
+    ],
+    "http_status_map": {
+      "200": "분석 완료(유효 결과 또는 분석 불가/잘림 상태)",
+      "422": "요청 형식 오류, 필수 필드 누락, 공백 전용 입력, 널 문자(\\u0000), 10,000코드포인트 초과",
+      "503": "모델 미준비 또는 추론기 사용 불가",
+      "500": "추론 내부 오류 또는 모델이 유효하지 않은 확률 분포를 생성한 경우(사용자 422로 반환 금지)"
+    }
+  },
+  "$defs": {
+    "EmotionId": {
+      "type": "string",
+      "enum": [
+        "pos_1",
+        "pos_2",
+        "pos_3",
+        "neg_1",
+        "neg_2",
+        "neg_3",
+        "neu_1",
+        "neu_2",
+        "neu_3"
+      ]
+    },
+    "Probabilities": {
+      "type": "object",
+      "description": "9개 세부 감정 확률. 각 값은 0 이상 1 이하 유한수이며 전체 합계는 1 ± 1e-6 이어야 한다.",
+      "required": [
+        "pos_1",
+        "pos_2",
+        "pos_3",
+        "neg_1",
+        "neg_2",
+        "neg_3",
+        "neu_1",
+        "neu_2",
+        "neu_3"
+      ],
+      "properties": {
+        "pos_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pos_2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pos_3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neg_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neg_2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neg_3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neu_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neu_2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neu_3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CardStage": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    },
+    "CardKey": {
+      "type": "string",
+      "pattern": "^(pos_[1-3]|neg_[1-3]|neu_[1-3]):[1-3]$"
+    },
+    "AnalyzeRequest": {
+      "type": "object",
+      "description": "POST /api/analyze 요청 본문. text는 Unicode 코드 포인트 기준 1~10,000자(앞뒤 공백 제거 후 비어 있지 않고 널 문자 없음)여야 한다.",
+      "required": [
+        "record_id",
+        "version",
+        "request_id",
+        "text"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": ".*\\S.*"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": ".*\\S.*"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000,
+          "pattern": ".*\\S.*"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnalyzeSuccessResponse": {
+      "type": "object",
+      "description": "유효한 9감정 분석 및 카드 판정 결과. 원문(text)을 응답에 복제하지 않는다.",
+      "required": [
+        "record_id",
+        "version",
+        "request_id",
+        "status",
+        "taxonomy_version",
+        "model_version",
+        "probabilities",
+        "truncated",
+        "dominant_emotion",
+        "dominant_ratio",
+        "ties",
+        "card_stage",
+        "card_key",
+        "card_policy_version"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "status": {
+          "const": "valid"
+        },
+        "taxonomy_version": {
+          "const": "emotion-cardex-3plus9-v1"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "probabilities": {
+          "$ref": "#/$defs/Probabilities"
+        },
+        "truncated": {
+          "const": false
+        },
+        "dominant_emotion": {
+          "$ref": "#/$defs/EmotionId"
+        },
+        "dominant_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "ties": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/EmotionId"
+          }
+        },
+        "card_stage": {
+          "$ref": "#/$defs/CardStage"
+        },
+        "card_key": {
+          "$ref": "#/$defs/CardKey"
+        },
+        "card_policy_version": {
+          "const": "card-stage-strict-gt-v1"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnalyzeUnissuableResponse": {
+      "type": "object",
+      "description": "입력 잘림(truncated=true) 등으로 인해 카드를 발급할 수 없는 분석 결과. 카드 단계와 키는 항상 null이다.",
+      "required": [
+        "record_id",
+        "version",
+        "request_id",
+        "status",
+        "taxonomy_version",
+        "model_version",
+        "probabilities",
+        "truncated",
+        "dominant_emotion",
+        "dominant_ratio",
+        "ties",
+        "card_stage",
+        "card_key",
+        "card_policy_version"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "status": {
+          "const": "error"
+        },
+        "taxonomy_version": {
+          "const": "emotion-cardex-3plus9-v1"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "probabilities": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Probabilities"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "dominant_emotion": {
+          "type": "null"
+        },
+        "dominant_ratio": {
+          "type": "null"
+        },
+        "ties": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "card_stage": {
+          "type": "null"
+        },
+        "card_key": {
+          "type": "null"
+        },
+        "card_policy_version": {
+          "const": "card-stage-strict-gt-v1"
+        },
+        "error_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnalyzeResponse": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AnalyzeSuccessResponse"
+        },
+        {
+          "$ref": "#/$defs/AnalyzeUnissuableResponse"
+        }
+      ]
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "description": "HTTP 422 / 500 / 503 오류 응답 계약",
+      "required": [
+        "detail"
+      ],
+      "properties": {
+        "detail": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object"
+              }
+            }
+          ]
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

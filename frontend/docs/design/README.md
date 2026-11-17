@@ -8,6 +8,8 @@
 
 [화면 명세](../UI_SPEC.md), [문구](CONTENT.md), [자산](ASSETS.md), [접근성](ACCESSIBILITY.md), [구조](../ARCHITECTURE.md), [작업 목록](../ROADMAP.md), [QA](../QA.md), [결정 기록](DECISIONS.md).
 
+프레임워크 이식 전 메인 화면 기준은 [BASE-01 디자인 기준선](BASELINE_2026-11-17.md)입니다. 현재 구현·합성 검수 자료·과거 캡처의 출처, 새 화면 비교 목록과 명세 차이를 구분해 기록합니다.
+
 ## 수정 위치
 
 | 작업 | 편집 원본 | 확인 위치 |

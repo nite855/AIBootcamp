@@ -1,0 +1,54 @@
+{
+  "executedAt": "2026-11-17T05:44:53.148Z",
+  "baseUrl": "http://127.0.0.1:18080",
+  "checks": [
+    {
+      "name": "missing_model_host_path_behavior",
+      "passed": true,
+      "details": {
+        "composeExitCode": 0,
+        "dockerDesktopAutoCreatedEmptyDir": true,
+        "emptyMountReadyStatus": 503,
+        "failClosedProtected": true
+      }
+    },
+    {
+      "name": "invalid_model_not_ready_and_isolation",
+      "passed": true,
+      "details": {
+        "notReadyDetail": "10감정 모델이 아닙니다 (라벨 6개). 임의 6→10 변환은 허용되지 않습니다.",
+        "analyze503Code": "MODEL_NOT_READY",
+        "apiHealthStatus": "unhealthy",
+        "missingAssetStatus": 404,
+        "directPort8000Published": false
+      }
+    },
+    {
+      "name": "mock_mode_ready_proxy_and_422_limits",
+      "passed": true,
+      "details": {
+        "readyJson": {
+          "status": "ready",
+          "model_loaded": true,
+          "model_version": "contract-mock-v1",
+          "detail": null
+        },
+        "apiHealthy": "healthy",
+        "webHealthy": "healthy",
+        "validCardKey": "neg_2:2",
+        "emptyStatus": 422,
+        "overLimitStatus": 422,
+        "exactLimitStatus": 200
+      }
+    },
+    {
+      "name": "api_restart_recovery_and_outage_isolation",
+      "passed": true,
+      "details": {
+        "postRestartStatus": 200,
+        "webStatusWhenApiStopped": 200,
+        "apiStatusWhenApiStopped": 504
+      }
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "contract_version": "2.0.0",
+  "taxonomy_version": "emotion-cardex-3plus9-v1",
+  "purpose": "MODEL-01 새 모델 인수 시 10감정 의미 매핑, 기록 단위 분포 합계(1±1e-6), 줄바꿈/긴 입력 잘림 처리, 재현성을 검수하기 위한 합성 샘플 세트",
+  "synthetic": true,
+  "samples": [
+    {
+      "id": "sample-pos-1",
+      "category_hint": "pos_1",
+      "expected_parent_hint": "positive",
+      "text": "오랜만에 공원을 가볍게 뛰고 나니 몸도 마음도 한결 가볍고 활력이 돈다.",
+      "notes": "긍정(기쁨·활력) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-pos-2",
+      "category_hint": "pos_2",
+      "expected_parent_hint": "positive",
+      "text": "오늘 하루 큰 탈 없이 마무리할 수 있어서 고맙고 조용히 만족스럽다.",
+      "notes": "긍정(만족·감사) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-pos-3",
+      "category_hint": "pos_3",
+      "expected_parent_hint": "positive",
+      "text": "준비를 차근차근 해 두었더니 발표 앞에서도 마음이 차분하고 든든하다.",
+      "notes": "긍정(안정·자신감) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-neg-1",
+      "category_hint": "neg_1",
+      "expected_parent_hint": "negative",
+      "text": "내일 일정이 잘 풀릴지 자꾸 걱정이 앞서는 밤이라 쉽게 잠이 오지 않는다.",
+      "notes": "부정(불안) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-neg-2",
+      "category_hint": "neg_2",
+      "expected_parent_hint": "negative",
+      "text": "아끼던 물건을 잃어버리고 돌아오는 길에 괜히 마음이 가라앉고 서운했다.",
+      "notes": "부정(슬픔) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-neg-3",
+      "category_hint": "neg_3",
+      "expected_parent_hint": "negative",
+      "text": "미리 정해 둔 약속을 아무 연락도 없이 어겨서 정말 화가 나고 답답했다.",
+      "notes": "부정(분노) 의미 점검용 합성 문장"
+    },
+    {
+      "id": "sample-neu-1",
+      "category_hint": "neu_1",
+      "expected_parent_hint": "neutral",
+      "text": "오전 9시에 도서관에 도착해 자료 세 권을 대출하고 오후 2시에 귀가했다.",
+      "notes": "중립(객관적 서술) 구분용 합성 문장"
+    },
+    {
+      "id": "sample-neu-2",
+      "category_hint": "neu_2",
+      "expected_parent_hint": "neutral",
+      "text": "이번 주 금요일 회의 시간이 오전인지 오후인지 다시 한번 확인해 봐야겠다.",
+      "notes": "중립(의문) 구분용 합성 문장"
+    },
+    {
+      "id": "sample-neu-3",
+      "category_hint": "neu_3",
+      "expected_parent_hint": "neutral",
+      "text": "예상하지 못했던 자리에서 오래전 동창을 우연히 마주쳐서 깜짝 놀랐다.",
+      "notes": "중립(놀람) 구분용 합성 문장"
+    },
+    {
+      "id": "sample-neu-4",
+      "category_hint": "neu_3",
+      "expected_parent_hint": "neutral",
+      "text": "발표 순서를 착각해서 다른 자료를 먼저 띄우는 바람에 잠시 당황했다.",
+      "notes": "중립(당황) 구분용 합성 문장"
+    },
+    {
+      "id": "sample-multiline-diary",
+      "category_hint": null,
+      "expected_parent_hint": null,
+      "text": "아침에는 비가 와서 우산을 챙겨 나갔다.\n점심 무렵에는 하늘이 맑게 개어서 잠깐 산책을 했다.\n저녁에는 따뜻한 차를 마시며 하루 일정을 정리했다.",
+      "notes": "줄바꿈이 포함된 단일 기록에 대해 기록 단위 10감정 합계 1±1e-6 분포 산출 검증용"
+    },
+    {
+      "id": "sample-long-truncation-check",
+      "category_hint": null,
+      "expected_parent_hint": null,
+      "text": "창가에 앉아 오늘 있었던 일들을 천천히 돌아보았다. 오전에는 밀린 문서를 정리했고 오후에는 회의를 마친 뒤 짧은 산책을 했다. 여러 장면이 머릿속에 스쳐 지나가면서 하루의 흐름을 차분히 기록했다. 창가에 앉아 오늘 있었던 일들을 천천히 돌아보았다. 오전에는 밀린 문서를 정리했고 오후에는 회의를 마친 뒤 짧은 산책을 했다. 여러 장면이 머릿속에 스쳐 지나가면서 하루의 흐름을 차분히 기록했다. 창가에 앉아 오늘 있었던 일들을 천천히 돌아보았다. 오전에는 밀린 문서를 정리했고 오후에는 회의를 마친 뒤 짧은 산책을 했다. 여러 장면이 머릿속에 스쳐 지나가면서 하루의 흐름을 차분히 기록했다. 창가에 앉아 오늘 있었던 일들을 천천히 돌아보았다. 오전에는 밀린 문서를 정리했고 오후에는 회의를 마친 뒤 짧은 산책을 했다. 여러 장면이 머릿속에 스쳐 지나가면서 하루의 흐름을 차분히 기록했다. 창가에 앉아 오늘 있었던 일들을 천천히 돌아보았다. 오전에는 밀린 문서를 정리했고 오후에는 회의를 마친 뒤 짧은 산책을 했다. 여러 장면이 머릿속에 스쳐 지나가면서 하루의 흐름을 차분히 기록했다.",
+      "notes": "모델 max_length 초과 시 truncated 정확 보고 및 카드 미발급(또는 승인된 청크 정책 적용) 검증용"
+    }
+  ]
+}

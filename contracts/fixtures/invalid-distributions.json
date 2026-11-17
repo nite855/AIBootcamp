@@ -1,0 +1,194 @@
+{
+  "taxonomy_version": "emotion-cardex-3plus9-v1",
+  "card_policy_version": "card-stage-strict-gt-v1",
+  "synthetic": true,
+  "probability_cases": [
+    {
+      "id": "all_zero",
+      "probabilities": {
+        "pos_1": 0,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neu_1": 0,
+        "neu_2": 0,
+        "neu_3": 0
+      },
+      "expected_error": "invalid_sum"
+    },
+    {
+      "id": "negative",
+      "probabilities": {
+        "pos_1": -0.1,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05
+      },
+      "expected_error": "out_of_range"
+    },
+    {
+      "id": "above_one",
+      "probabilities": {
+        "pos_1": 1.1,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05
+      },
+      "expected_error": "out_of_range"
+    },
+    {
+      "id": "bad_sum",
+      "probabilities": {
+        "pos_1": 0.01,
+        "pos_2": 0.01,
+        "pos_3": 0.01,
+        "neg_1": 0.01,
+        "neg_2": 0.01,
+        "neg_3": 0.01,
+        "neu_1": 0.01,
+        "neu_2": 0.01,
+        "neu_3": 0.01
+      },
+      "expected_error": "invalid_sum"
+    },
+    {
+      "id": "missing_neu3",
+      "probabilities": {
+        "pos_1": 0.6,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05
+      },
+      "expected_error": "key_mismatch"
+    },
+    {
+      "id": "legacy_10",
+      "probabilities": {
+        "pos_1": 0.6,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05,
+        "neu_4": 0.0
+      },
+      "expected_error": "key_mismatch"
+    },
+    {
+      "id": "null",
+      "probabilities": {
+        "pos_1": null,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05
+      },
+      "expected_error": "non_finite_number"
+    },
+    {
+      "id": "boolean",
+      "probabilities": {
+        "pos_1": true,
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05
+      },
+      "expected_error": "non_finite_number"
+    },
+    {
+      "id": "string",
+      "probabilities": {
+        "pos_1": "NaN",
+        "pos_2": 0.05,
+        "pos_3": 0.05,
+        "neg_1": 0.05,
+        "neg_2": 0.05,
+        "neg_3": 0.05,
+        "neu_1": 0.05,
+        "neu_2": 0.05,
+        "neu_3": 0.05
+      },
+      "expected_error": "non_finite_number"
+    }
+  ],
+  "analysis_cases": [
+    {
+      "id": "truncated",
+      "analysis": {
+        "status": "valid",
+        "version": 1,
+        "taxonomy_version": "emotion-cardex-3plus9-v1",
+        "truncated": true,
+        "probabilities": {
+          "pos_1": 0.6,
+          "pos_2": 0.05,
+          "pos_3": 0.05,
+          "neg_1": 0.05,
+          "neg_2": 0.05,
+          "neg_3": 0.05,
+          "neu_1": 0.05,
+          "neu_2": 0.05,
+          "neu_3": 0.05
+        }
+      },
+      "expected_error": "truncated_unanalyzable"
+    },
+    {
+      "id": "old_taxonomy",
+      "analysis": {
+        "status": "valid",
+        "version": 1,
+        "taxonomy_version": "emotion-cardex-3plus10-v1",
+        "truncated": false,
+        "probabilities": {
+          "pos_1": 0.6,
+          "pos_2": 0.05,
+          "pos_3": 0.05,
+          "neg_1": 0.05,
+          "neg_2": 0.05,
+          "neg_3": 0.05,
+          "neu_1": 0.05,
+          "neu_2": 0.05,
+          "neu_3": 0.05
+        }
+      },
+      "expected_error": "taxonomy_mismatch"
+    },
+    {
+      "id": "pending",
+      "analysis": {
+        "status": "pending",
+        "taxonomy_version": "emotion-cardex-3plus9-v1"
+      },
+      "expected_error": "not_valid_status"
+    }
+  ]
+}

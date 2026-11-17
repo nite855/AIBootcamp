@@ -1,0 +1,6 @@
+{
+  "epoch": 4,
+  "step": 96,
+  "validation_macro_f1": 0.7242157402844716,
+  "test_used_for_selection": false
+}

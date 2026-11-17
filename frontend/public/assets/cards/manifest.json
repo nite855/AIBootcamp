@@ -1,0 +1,278 @@
+{
+  "manifest_version": "provided-9class-v1",
+  "taxonomy_version": "emotion-cardex-3plus9-v1",
+  "card_policy_version": "card-stage-strict-gt-v1",
+  "all_provided": true,
+  "cards": [
+    {
+      "card_key": "pos_1:1",
+      "emotion_id": "pos_1",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_1-1-0880d260ccc7.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "0880d260ccc70171a6f46782fa4beb1299bfed0f99e77e0b7eb1e27cdda5ee7a"
+    },
+    {
+      "card_key": "pos_1:2",
+      "emotion_id": "pos_1",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_1-2-47b1d05fa368.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "47b1d05fa3685e5e153c59ebc4db54de7a2e2e04fb8ce0c5caff2e34370370a1"
+    },
+    {
+      "card_key": "pos_1:3",
+      "emotion_id": "pos_1",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_1-3-bc6ac20a939a.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "bc6ac20a939ae2a9a4ea1128d33b7c2696ac74c154edcffd3e6af58093b7177f"
+    },
+    {
+      "card_key": "pos_2:1",
+      "emotion_id": "pos_2",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_2-1-5d0d4fdf452a.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "5d0d4fdf452a7f77314f099429eaeedaca1cd310d2ef9060ba6ab3fc573c653e"
+    },
+    {
+      "card_key": "pos_2:2",
+      "emotion_id": "pos_2",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_2-2-ba99f3c7ca0a.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "ba99f3c7ca0ae4c7092883c1175dcc7b8cf7cecbd2332eec5001cc6a02db00c4"
+    },
+    {
+      "card_key": "pos_2:3",
+      "emotion_id": "pos_2",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_2-3-89c1ec37253c.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "89c1ec37253c5bfa435a50961f66e5730f299d4e5d7d7fcae8d98b7f9603920f"
+    },
+    {
+      "card_key": "pos_3:1",
+      "emotion_id": "pos_3",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_3-1-b880b6201f88.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "b880b6201f883bc07c43628255c36fa2ad77ce109f19037484adcb68e068629e"
+    },
+    {
+      "card_key": "pos_3:2",
+      "emotion_id": "pos_3",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_3-2-e0e2f92ab6e3.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "e0e2f92ab6e37ab7980de7a09cba85f49fca25c4be8b5a3f95e38865f97e20e3"
+    },
+    {
+      "card_key": "pos_3:3",
+      "emotion_id": "pos_3",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/pos_3-3-7cb7cc0b8861.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "7cb7cc0b8861e8f2c0f48f3fef5e7cf94a25cb2f5166bffb6929e3a52b7c2523"
+    },
+    {
+      "card_key": "neg_1:1",
+      "emotion_id": "neg_1",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_1-1-ebb90e96ac1b.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "ebb90e96ac1b9e3d7492ddd6c62dc64b521c8188e895186c92c5c662ed61442b"
+    },
+    {
+      "card_key": "neg_1:2",
+      "emotion_id": "neg_1",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_1-2-c190280ca9e6.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "c190280ca9e68fded5b41ddf5816c4029618985bf79fe45f999209adfc27264f"
+    },
+    {
+      "card_key": "neg_1:3",
+      "emotion_id": "neg_1",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_1-3-ab7fcc6a11b5.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "ab7fcc6a11b5a27c2937de9af3761fd86a0fd0e46a56a637cdd70cf838517f94"
+    },
+    {
+      "card_key": "neg_2:1",
+      "emotion_id": "neg_2",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_2-1-1965469955b1.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "1965469955b146ae98802cf73336ff9fc4e95a8f18d81c8b290bbd05dde601c2"
+    },
+    {
+      "card_key": "neg_2:2",
+      "emotion_id": "neg_2",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_2-2-c9e71d910fe6.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "c9e71d910fe6d3fc1d87a65365165b71e88ddf3c6fb76b44621a85a5109f330d"
+    },
+    {
+      "card_key": "neg_2:3",
+      "emotion_id": "neg_2",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_2-3-9332c1b42572.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "9332c1b4257275b4d3f6760cf265efea74178151051bc91981585a055459bb81"
+    },
+    {
+      "card_key": "neg_3:1",
+      "emotion_id": "neg_3",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_3-1-9423c1a686c4.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "9423c1a686c45142c1db1ef9d7c2ccb587e4e3e2c318587087cb20cf94090b2b"
+    },
+    {
+      "card_key": "neg_3:2",
+      "emotion_id": "neg_3",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_3-2-36ef6297f1ef.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "36ef6297f1efd2fe841406bc1cdafc202901654e990d62521a08b9aea1779ad5"
+    },
+    {
+      "card_key": "neg_3:3",
+      "emotion_id": "neg_3",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neg_3-3-75db95dc4fa5.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "75db95dc4fa5129c6b44fcbe4bd86defaac9d5e18906d48179f6ebe03151ca65"
+    },
+    {
+      "card_key": "neu_1:1",
+      "emotion_id": "neu_1",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_1-1-a3eee07e6e3b.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "a3eee07e6e3bfccb38f0f9c86f9af4a512aaa3e2cc4601b1b29c7dfb29436814"
+    },
+    {
+      "card_key": "neu_1:2",
+      "emotion_id": "neu_1",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_1-2-7e07563b7114.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "7e07563b71145d542cc0a0bff88ab3d1ed275c8862fdf5a9fedc75b9162bf552"
+    },
+    {
+      "card_key": "neu_1:3",
+      "emotion_id": "neu_1",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_1-3-eb8d326c0439.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "eb8d326c0439ead04c619e69310734f712bdfa27ac94b79d7c017dbb0d344c29"
+    },
+    {
+      "card_key": "neu_2:1",
+      "emotion_id": "neu_2",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_2-1-6e1122013700.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "6e1122013700d02924579da050fc16779116fa6527d4a435bc471e31b83776be"
+    },
+    {
+      "card_key": "neu_2:2",
+      "emotion_id": "neu_2",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_2-2-99e484d73746.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "99e484d73746c5e0694f88994e852edc7cb70176ec86a5bb8a1f50316f571fc1"
+    },
+    {
+      "card_key": "neu_2:3",
+      "emotion_id": "neu_2",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_2-3-3664319404f2.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "3664319404f2438fd5bfb06e0d2de480edb8ec50c23b167d42dc092e60f59eb8"
+    },
+    {
+      "card_key": "neu_3:1",
+      "emotion_id": "neu_3",
+      "stage": 1,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_3-1-7c0e9561a0a7.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "7c0e9561a0a704a961f5eac2ca399ab9faf9dc094e7bfd8705b30aa0098a22b6"
+    },
+    {
+      "card_key": "neu_3:2",
+      "emotion_id": "neu_3",
+      "stage": 2,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_3-2-cd1126993178.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "cd112699317844428af7c0225faf04bc1998ac55f697da0ae1f34831f8467bf9"
+    },
+    {
+      "card_key": "neu_3:3",
+      "emotion_id": "neu_3",
+      "stage": 3,
+      "kind": "full_card",
+      "src": "/assets/cards/neu_3-3-8eb156a51c37.png",
+      "placeholder": false,
+      "source": "user-provided",
+      "sha256": "8eb156a51c37101a0eca47eb354aab9fb86ac43d4ff14fde576eabcf943c9a78"
+    }
+  ]
+}

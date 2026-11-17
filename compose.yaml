@@ -1,28 +1,46 @@
 services:
-  app:
-    build: .
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend.Dockerfile
     ports:
-      - "8000:8000"
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    expose:
+      - "8000"
+    environment:
+      EMOTION_MODEL_DIR: /models/checkpoint
+      EMOTION_MOCK_MODE: ${EMOTION_MOCK_MODE:-0}
     volumes:
       - type: bind
-        source: ./src
-        target: /app/src
-        read_only: true
-      - type: bind
-        source: ./static
-        target: /app/static
-        read_only: true
-      - type: bind
-        source: ${EMOTION_MODEL_PATH:-./models/emotion-kcelectra/checkpoint}
+        source: ${EMOTION_MODEL_PATH:?EMOTION_MODEL_PATH must be set in .env}
         target: /models/checkpoint
         read_only: true
-    command:
-      - uvicorn
-      - emotion_service.main:app
-      - --host
-      - 0.0.0.0
-      - --port
-      - "8000"
-      - --reload
-      - --reload-dir
-      - /app/src
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    restart: unless-stopped

@@ -1,0 +1,29 @@
+{
+  "seed": 42,
+  "labels": [
+    "기쁨·활력",
+    "만족·감사",
+    "안정·자신감",
+    "분노",
+    "슬픔",
+    "불안",
+    "객관적 서술",
+    "의문",
+    "놀람·당황"
+  ],
+  "weights": [
+    0.5,
+    0.5
+  ],
+  "components": [
+    {
+      "folder": "D:\\감정분석\\outputs\\FL03_neutral9_weighted_rdrop_ensemble_seed10_20261113\\weighted_CE_seed42",
+      "sha256": "0d8b1030640aaa0066cb097e8c4e5068eb27bfa43a2dff759b3d655302e29804"
+    },
+    {
+      "folder": "D:\\감정분석\\outputs\\FL03_neutral9_weighted_rdrop_ensemble_seed10_20261113\\weighted_RDrop_seed42",
+      "sha256": "7aa8e4fe93f14fbc7dfcf24ada6bb83a0cf162aa92d66ecd743bd382614d490e"
+    }
+  ],
+  "selection": "component epochs by validation Macro-F1; weights fixed50:50"
+}

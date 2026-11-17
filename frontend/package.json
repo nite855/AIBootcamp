@@ -1,0 +1,20 @@
+{
+  "name": "moment-diary-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --config vite.config.mjs --configLoader native",
+    "build": "vite build --config vite.config.mjs --configLoader native",
+    "preview": "vite preview --config vite.config.mjs --configLoader native",
+    "tokens:build": "node tools/build-tokens.mjs",
+    "tokens:check": "node tools/build-tokens.mjs --check",
+    "test:legacy": "node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.11"
+  }
+}
