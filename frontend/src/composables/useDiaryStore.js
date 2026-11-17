@@ -1,9 +1,11 @@
 import { computed, reactive, ref, toRaw } from "vue";
 import {
+  ACCOUNT_MAX_RECORDS,
   CardexCore,
   DiaryCards,
   DiaryCore,
   MomentRecordId,
+  cardLabel,
 } from "../domain/index.js";
 import { createDiaryStorage } from "../services/diaryStorage.js";
 import {
@@ -14,8 +16,19 @@ import {
 } from "../services/backupService.js";
 import { exportCardPng } from "../services/cardRenderer.js";
 import { createAnalysisCoordinator } from "../services/analysisCoordinator.mjs";
+import {
+  createAccountRecord,
+  deleteAccountRecord,
+  deleteAllAccountRecords,
+  fetchAccountRecords,
+  fetchCollectedCards,
+  fetchDeleteImpact,
+  importAccountRecords,
+  setAccountRecordFavorite,
+  updateAccountRecord,
+} from "../services/recordsClient.mjs";
 
-/** Recursively unwrap Vue reactive proxies into plain objects/arrays before structuredClone or IndexedDB writes. */
+/** Recursively unwrap Vue reactive proxies into plain objects/arrays before structuredClone or serialization. */
 function toPlain(value) {
   const raw = toRaw(value);
   if (Array.isArray(raw)) {
@@ -40,53 +53,6 @@ export function localDate(d = new Date()) {
     String(d.getMonth() + 1).padStart(2, "0"),
     String(d.getDate()).padStart(2, "0"),
   ].join("-");
-}
-
-function createExampleRecords() {
-  return Array.from({ length: 65 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - Math.floor(i / 2));
-    return {
-      id: "sample-" + i,
-      text: [
-        "퇴근길에 작은 꽃을 샀다. 별일 없는 하루에도 좋아하는 순간이 있었다.",
-        "오랜만에 친구와 산책했다. 천천히 이야기하니 마음이 가벼워졌다.",
-        "바쁜 하루 끝, 따뜻한 차 한 잔으로 나를 돌봤다.",
-      ][i % 3],
-      recordDate: localDate(d),
-      createdAt: d.toISOString(),
-      updatedAt: d.toISOString(),
-      version: 1,
-      analysis:
-        i === 0
-          ? { status: "pending" }
-          : i === 63
-            ? { status: "error" }
-            : {
-                status: "valid",
-                version: i === 64 ? 0 : 1,
-                taxonomy_version: CardexCore.TAXONOMY,
-                probabilities: Object.fromEntries(
-                  CardexCore.IDS.map((id, j) => {
-                    if (i === 61) {
-                      return [id, 1 / CardexCore.IDS.length];
-                    }
-                    if (i === 62) {
-                      return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
-                    }
-                    const score =
-                      [0.25, 0.5, 0.85][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
-                    return [
-                      id,
-                      j === (i - 1) % CardexCore.IDS.length
-                        ? score
-                        : (1 - score) / (CardexCore.IDS.length - 1),
-                    ];
-                  }),
-                ),
-              },
-    };
-  });
 }
 
 let singleton = null;
@@ -130,11 +96,12 @@ export function useDiaryStore() {
     clearAllConfirm: false,
   });
 
-  const examples = reactive(createExampleRecords());
+  const collectedCards = ref([]);
+  const legacyMigrationEntries = ref([]);
   const loading = ref(true);
   const storeReady = ref(false);
   const lastStorageError = ref(null);
-  const storageMessage = ref("기록을 불러오는 중…");
+  const storageMessage = ref("계정 기록을 불러오는 중…");
   const savingRetry = ref(false);
   const generation = ref(0);
   const savedGeneration = ref(0);
@@ -155,28 +122,26 @@ export function useDiaryStore() {
   const readFullModal = ref({ open: false, date: "", text: "" });
   const themeDialogState = ref({ open: false, themeId: null, mode: "light" });
 
-  let storage = null;
+  let activeUserId = null;
   let persistTimer = null;
-  let undoTimer = null;
   let toastTimer = 0;
   let celebrateTimer = 0;
   let openerReturnEl = null;
-  let pendingDeleted = null;
-  const seenSlots = { real: null, example: null };
+  const seenSlots = { real: null };
   const analysisCoordinator = createAnalysisCoordinator({
     onAnalyzingChange: (nextSet) => {
       analyzingIds.value = nextSet;
     },
   });
 
-  const activeRecords = () => (state.mode === "example" ? examples : state.sessions);
+  const activeRecords = () => state.sessions;
 
   const compareRecords = (a, b) =>
     b.recordDate.localeCompare(a.recordDate) ||
     (b.createdAt || "").localeCompare(a.createdAt || "");
 
-  const currentRecord = computed(() =>
-    activeRecords().find((r) => r.id === state.selected) || null,
+  const currentRecord = computed(
+    () => activeRecords().find((r) => r.id === state.selected) || null,
   );
 
   const currentTab = computed(() => {
@@ -190,6 +155,14 @@ export function useDiaryStore() {
     }
     return "today";
   });
+
+  function draftStorageKey(userId = activeUserId) {
+    return userId ? `moment:draft:${userId}` : null;
+  }
+
+  function legacyMigratedKey(userId = activeUserId) {
+    return userId ? `moment:legacy-migrated:${userId}` : null;
+  }
 
   function queryRecords({ month = "", date = "" } = {}) {
     return activeRecords()
@@ -234,93 +207,20 @@ export function useDiaryStore() {
     toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
   }
 
-  function hideUndo() {
-    clearTimeout(undoTimer);
-    undoTimer = null;
-    pendingDeleted = null;
-    if (typeof document === "undefined") return;
-    const toast = document.getElementById("toast");
-    if (toast) toast.hidden = true;
-  }
-
-  function showUndo(deleted) {
-    if (typeof document === "undefined") return;
-    const toast = document.getElementById("toast");
-    if (!toast) return;
-    hideUndo();
-    pendingDeleted = deleted;
-    const copyEl = toast.querySelector("#toast-copy");
-    if (copyEl) copyEl.textContent = "기록을 삭제했어요.";
-    toast.hidden = false;
-
-    const arm = () => {
-      clearTimeout(undoTimer);
-      undoTimer = setTimeout(hideUndo, 8000);
-    };
-    toast.onmouseenter = toast.onfocusin = () => clearTimeout(undoTimer);
-    toast.onmouseleave = toast.onfocusout = arm;
-    arm();
-
-    const undoBtn = toast.querySelector("[data-toast-undo]");
-    if (undoBtn) {
-      undoBtn.onclick = async () => {
-        const snap = pendingDeleted;
-        hideUndo();
-        if (!snap) return;
-        if (state.mode !== snap.mode || activeRecords().some((r) => r.id === snap.entry.id)) return;
-        if (snap.mode === "real" && state.sessions.length >= DiaryCore.MAX_RECORDS) {
-          state.error = true;
-          state.status = "보관 한도 30편에 도달해 되돌릴 수 없어요.";
-          return;
-        }
-        activeRecords().splice(
-          Math.min(Math.max(snap.index, 0), activeRecords().length),
-          0,
-          snap.entry,
-        );
-        if (snap.mode === "real" && snap.currentEntryId === snap.entry.id) {
-          state.currentEntryId = snap.currentEntryId;
-          state.savedText = snap.savedText;
-        }
-        state.error = false;
-        state.status = "삭제한 기록을 되돌렸어요.";
-        if (snap.mode === "real") {
-          markChanged();
-          if (!(await persist())) {
-            state.status = "되돌린 기록을 저장하지 못했어요. 저장 재시도를 눌러 주세요.";
-          }
-        }
-        announce(state.status);
-      };
-    }
-  }
-
-  function snapshot() {
-    return {
-      text: state.text,
-      date: state.date,
-      sessions: toPlain(state.sessions),
-      policy: state.policy,
-      currentEntryId: state.currentEntryId || null,
-      savedText: state.savedText ?? null,
-    };
-  }
-
   function markChanged() {
     generation.value++;
     storageMessage.value = "아직 저장되지 않은 변경이 있어요.";
   }
 
   function celebrateUnlocks() {
-    const mode = state.mode;
-    if (mode === "real" && (loading.value || !storeReady.value)) return;
+    if (loading.value || !storeReady.value) return;
     const keys = DiaryCards.unlockedKeys(activeRecords());
-    if (mode === "real" && seenSlots.real === null) {
+    if (seenSlots.real === null) {
       seenSlots.real = keys;
       return;
     }
-    const fresh = DiaryCards.newlyUnlocked(seenSlots[mode], keys);
-    seenSlots[mode] = Array.from(new Set([...(seenSlots[mode] || []), ...keys]));
+    const fresh = DiaryCards.newlyUnlocked(seenSlots.real, keys);
+    seenSlots.real = Array.from(new Set([...(seenSlots.real || []), ...keys]));
     if (fresh.length && document.documentElement.dataset.motion !== "off") {
       const [type, stage] = fresh[0].split(":");
       const info = CardexCore.type(type);
@@ -341,15 +241,37 @@ export function useDiaryStore() {
     }
   }
 
+  function saveLocalDraft() {
+    const key = draftStorageKey();
+    if (!key || typeof localStorage === "undefined") return true;
+    const payload = {
+      text: state.text,
+      date: state.date,
+      policy: state.policy,
+      currentEntryId: state.currentEntryId || null,
+      savedText: state.savedText ?? null,
+    };
+    localStorage.setItem(key, JSON.stringify(payload));
+    return true;
+  }
+
+  function loadLocalDraft(userId) {
+    const key = draftStorageKey(userId);
+    if (!key || typeof localStorage === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function persist() {
     clearTimeout(persistTimer);
     const savingGeneration = generation.value;
     storageMessage.value = "초안 저장 중";
     try {
-      if (!storeReady.value || !storage) {
-        throw Error("저장소를 사용할 수 없어요. 재시도하거나 내용을 복사해 주세요.");
-      }
-      await storage.save(snapshot());
+      saveLocalDraft();
       savedGeneration.value = Math.max(savedGeneration.value, savingGeneration);
       if (state.status === lastStorageError.value) {
         state.error = false;
@@ -375,41 +297,142 @@ export function useDiaryStore() {
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => {
       void persist();
-    }, 500);
+    }, 400);
   }
 
-  async function restore() {
-    loading.value = true;
+  async function refreshCollectedCards() {
     try {
-      const candidate = createDiaryStorage(window.indexedDB);
-      const data = await candidate.load();
-      if (generation.value !== savedGeneration.value && data) {
-        throw Error("보관된 기록이 있어요. 현재 내용을 복사한 뒤 새로고침해 주세요.");
+      const data = await fetchCollectedCards();
+      collectedCards.value = Array.isArray(data?.cards) ? data.cards : [];
+    } catch {
+      // Keep UI responsive; CatalogView computes slots from activeRecords() as well.
+    }
+  }
+
+  async function checkLegacyIndexedDb(userId) {
+    const flagKey = legacyMigratedKey(userId);
+    if (
+      typeof window === "undefined" ||
+      !window.indexedDB ||
+      (flagKey && typeof localStorage !== "undefined" && localStorage.getItem(flagKey))
+    ) {
+      legacyMigrationEntries.value = [];
+      return;
+    }
+    try {
+      const storage = createDiaryStorage(window.indexedDB);
+      const data = await storage.load();
+      if (data?.sessions?.length) {
+        legacyMigrationEntries.value = data.sessions;
+      } else {
+        legacyMigrationEntries.value = [];
       }
-      storage = candidate;
+    } catch {
+      legacyMigrationEntries.value = [];
+    }
+  }
+
+  async function restore(userId = activeUserId) {
+    if (!userId) {
+      resetAccountState();
+      return;
+    }
+    activeUserId = userId;
+    loading.value = true;
+    storeReady.value = false;
+    lastStorageError.value = null;
+    storageMessage.value = "계정 기록을 불러오는 중…";
+    try {
+      const [recordsRes, cardsRes] = await Promise.all([
+        fetchAccountRecords(),
+        fetchCollectedCards(),
+      ]);
+      state.sessions = recordsRes.records;
+      collectedCards.value = Array.isArray(cardsRes?.cards) ? cardsRes.cards : [];
+
+      const draft = loadLocalDraft(userId);
+      state.text = typeof draft?.text === "string" ? draft.text : "";
+      state.date = localDate();
+      state.policy = draft?.policy === "multi" ? "multi" : "single";
+      state.currentEntryId =
+        draft?.currentEntryId && state.sessions.some((r) => r.id === draft.currentEntryId)
+          ? draft.currentEntryId
+          : null;
+      state.savedText = state.currentEntryId ? draft?.savedText ?? null : null;
+
       storeReady.value = true;
-      if (data) {
-        state.text = data.text;
-        state.date = data.date;
-        state.sessions = data.sessions;
-        state.policy = data.policy;
-        state.currentEntryId = data.currentEntryId;
-        state.savedText = data.savedText;
-      }
-      storageMessage.value = "자동 저장 준비됨";
-      if (generation.value !== savedGeneration.value || data?.migratedFrom === 1) {
-        await persist();
-      }
+      storageMessage.value = "계정 저장 준비됨";
+      seenSlots.real = DiaryCards.unlockedKeys(state.sessions);
+      await checkLegacyIndexedDb(userId);
     } catch (error) {
       storeReady.value = false;
+      lastStorageError.value = error.message;
       state.error = true;
-      state.status =
-        "저장소를 열지 못했어요. 메모리에서 계속 작성할 수 있어요. " + error.message;
+      state.status = error.message || "계정 기록을 불러오지 못했어요.";
       storageMessage.value = state.status;
     } finally {
       loading.value = false;
-      celebrateUnlocks();
     }
+  }
+
+  function resetAccountState({ clearDraft = false } = {}) {
+    clearTimeout(persistTimer);
+    analysisCoordinator.cancelAllAnalyses();
+    if (clearDraft && activeUserId && typeof localStorage !== "undefined") {
+      const key = draftStorageKey(activeUserId);
+      if (key) localStorage.removeItem(key);
+    }
+    activeUserId = null;
+    state.sessions = [];
+    state.text = "";
+    state.savedText = null;
+    state.currentEntryId = null;
+    state.selected = null;
+    state.view = "write";
+    state.editing = false;
+    state.deleteConfirm = false;
+    state.clearDraftConfirm = false;
+    state.clearAllConfirm = false;
+    state.error = false;
+    state.status = "";
+    collectedCards.value = [];
+    legacyMigrationEntries.value = [];
+    incomingBackup.value = null;
+    backupPlan.value = null;
+    seenSlots.real = null;
+    storeReady.value = false;
+    loading.value = false;
+    storageMessage.value = "로그인이 필요해요.";
+  }
+
+  async function migrateLegacyRecords() {
+    if (!legacyMigrationEntries.value.length) return;
+    loading.value = true;
+    try {
+      const res = await importAccountRecords(legacyMigrationEntries.value);
+      const flagKey = legacyMigratedKey();
+      if (flagKey && typeof localStorage !== "undefined") {
+        localStorage.setItem(flagKey, new Date().toISOString());
+      }
+      legacyMigrationEntries.value = [];
+      await restore(activeUserId);
+      state.error = false;
+      state.status = `브라우저에 있던 기록 ${res.added}편을 계정으로 가져왔어요.`;
+      showMiniToast("기록을 가져왔어요");
+    } catch (error) {
+      state.error = true;
+      state.status = error.message || "기존 기록 가져오기에 실패했어요.";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function dismissLegacyMigration() {
+    const flagKey = legacyMigratedKey();
+    if (flagKey && typeof localStorage !== "undefined") {
+      localStorage.setItem(flagKey, "dismissed");
+    }
+    legacyMigrationEntries.value = [];
   }
 
   function askConfirm(copy, opener = null, { title = "삭제 확인", accept = "삭제" } = {}) {
@@ -525,61 +548,57 @@ export function useDiaryStore() {
     state.deleteConfirm = false;
   }
 
-  async function saveRecord(opener = null) {
+  async function saveRecord() {
     if (loading.value) return false;
-    if (state.mode === "example") {
-      const accepted = await askConfirm(
-        "예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.",
-        opener,
-        { title: "실제 기록으로 저장", accept: "실제 기록으로 저장" },
-      );
-      if (!accepted) return false;
-    }
     state.error = false;
     state.status = "";
     try {
       const v = DiaryCore.validate([{ text: state.text }]);
-      state.mode = "real";
       state.date = localDate();
-      const now = new Date().toISOString();
       const previous =
         state.policy === "single"
           ? state.sessions.filter((x) => x.recordDate === state.date).at(-1)
           : state.sessions.find((x) => x.id === state.currentEntryId);
-      if (!previous && state.sessions.length >= DiaryCore.MAX_RECORDS) {
-        throw Error("기록은 최대 30편까지 보관할 수 있어요.");
+      if (!previous && state.sessions.length >= ACCOUNT_MAX_RECORDS) {
+        throw Error(`기록은 계정당 최대 ${ACCOUNT_MAX_RECORDS}편까지 보관할 수 있어요.`);
       }
-      const entry = {
-        id: previous?.id || MomentRecordId.create(),
-        favorite: previous?.favorite ?? false,
-        text: v.records[0].text,
-        recordDate: previous?.recordDate || state.date,
-        version: (previous?.version || 0) + 1,
-        analysis: { status: "pending" },
-        createdAt: previous?.createdAt || now,
-        updatedAt: now,
-      };
+
+      let savedEntry;
       if (previous) {
         analysisCoordinator.cancelRecordAnalysis(previous.id);
-        Object.assign(previous, entry);
+        savedEntry = await updateAccountRecord(previous.id, {
+          text: v.records[0].text,
+          recordDate: previous.recordDate || state.date,
+        });
+        Object.assign(previous, savedEntry);
+        savedEntry = previous;
       } else {
-        state.sessions.push(entry);
+        const candidateId = MomentRecordId.create();
+        savedEntry = await createAccountRecord({
+          id: candidateId,
+          text: v.records[0].text,
+          recordDate: state.date,
+          favorite: false,
+        });
+        state.sessions.push({
+          ...savedEntry,
+          analysis: { status: "pending" },
+        });
+        savedEntry = state.sessions[state.sessions.length - 1];
       }
-      const savedTarget = previous || entry;
 
       state.savedText = state.text;
-      state.currentEntryId = entry.id;
-      state.selected = entry.id;
-      state.status = "기록을 저장 중이에요. 감정 분석은 준비 중이에요.";
+      state.currentEntryId = savedEntry.id;
+      state.selected = savedEntry.id;
       state.preview = false;
       state.view = "write";
+      state.status = "기록을 계정에 저장했어요. 감정을 분석하고 있어요…";
 
       markChanged();
-      if (await persist()) {
-        state.status = "기록을 저장했어요. 감정을 분석하고 있어요…";
-        showMiniToast("저장했어요");
-        void analyzeRecord(savedTarget);
-      }
+      await persist();
+      showMiniToast("저장했어요");
+      await refreshCollectedCards();
+      void analyzeRecord(savedEntry);
       celebrateUnlocks();
       return true;
     } catch (e) {
@@ -599,30 +618,25 @@ export function useDiaryStore() {
     state.view = "write";
     state.error = false;
     state.status = "";
-    if (state.mode === "real") {
-      markChanged();
-      await persist();
-    }
+    markChanged();
+    await persist();
   }
 
   async function analyzeRecord(record) {
-    if (!record || state.mode !== "real") {
+    if (!record) {
       return { ignored: true, ok: false };
     }
     return analysisCoordinator.runRecordAnalysis({
       record,
       getRecordById: (id) => state.sessions.find((r) => r.id === id) || null,
-      isRealMode: () => state.mode === "real",
-      isActiveRecord: (item) => Boolean(item) && pendingDeleted?.entry?.id !== item.id,
+      isRealMode: () => Boolean(activeUserId),
+      isActiveRecord: (item) => Boolean(item),
       onApplyAnalysis: async (currentRecord, nextAnalysis) => {
         currentRecord.analysis = nextAnalysis;
-        markChanged();
-        const saved = await persist();
+        await refreshCollectedCards();
         if (nextAnalysis.status === "valid") {
-          if (saved) {
-            state.error = false;
-            state.status = "감정 분석을 마쳤어요.";
-          }
+          state.error = false;
+          state.status = "감정 분석을 마쳤어요.";
           celebrateUnlocks();
         } else if (!lastStorageError.value) {
           state.error = true;
@@ -634,7 +648,7 @@ export function useDiaryStore() {
   }
 
   async function retryAnalysis(recordId) {
-    if (loading.value || state.mode !== "real") return false;
+    if (loading.value) return false;
     const target = state.sessions.find((r) => r.id === recordId);
     if (!target || analysisCoordinator.isAnalyzing(target.id)) return false;
     target.analysis = { status: "pending" };
@@ -647,7 +661,7 @@ export function useDiaryStore() {
   async function retrySave() {
     if (loading.value) return;
     if (!storeReady.value) {
-      await restore();
+      await restore(activeUserId);
       return;
     }
     savingRetry.value = true;
@@ -674,24 +688,47 @@ export function useDiaryStore() {
 
   async function deleteAllRecords(opener = null) {
     if (loading.value) return;
-    hideUndo();
-    const accepted = await askConfirm(
-      "실제 기록 전체와 초안을 삭제합니다. 표시 설정과 예시 기록은 유지됩니다.",
+    const hasUnlocked =
+      collectedCards.value.length > 0 ||
+      state.sessions.some((r) => DiaryCards.resolve(r).status === "ready");
+
+    const accepted1 = await askConfirm(
+      hasUnlocked
+        ? "계정의 모든 기록과 초안을 삭제합니다. 수집·해금된 카드 도감 기록도 함께 삭제됩니다."
+        : "계정의 모든 기록과 초안을 삭제합니다. 화면 설정은 유지됩니다.",
       opener,
     );
-    if (!accepted) return;
-    analysisCoordinator.cancelAllAnalyses();
-    state.text = "";
-    state.savedText = null;
-    state.currentEntryId = null;
-    state.sessions = [];
-    state.selected = null;
-    state.clearAllConfirm = false;
-    state.error = false;
-    state.status = "";
-    markChanged();
-    await persist();
-    celebrateUnlocks();
+    if (!accepted1) return;
+
+    if (hasUnlocked) {
+      const accepted2 = await askConfirm(
+        "전체 기록을 삭제하면 지금까지 해금한 감정 카드 도감 기록도 모두 삭제되어 미발견 상태로 돌아갑니다. 정말 모두 삭제할까요?",
+        opener,
+        { title: "해금 기록 포함 전체 삭제 2차 확인", accept: "기록·해금 기록 모두 삭제" },
+      );
+      if (!accepted2) return;
+    }
+
+    try {
+      analysisCoordinator.cancelAllAnalyses();
+      await deleteAllAccountRecords({ confirmCardDeletion: true });
+      state.text = "";
+      state.savedText = null;
+      state.currentEntryId = null;
+      state.sessions = [];
+      collectedCards.value = [];
+      state.selected = null;
+      state.clearAllConfirm = false;
+      state.error = false;
+      state.status = "모든 기록과 해금된 카드 기록을 삭제했어요.";
+      seenSlots.real = [];
+      markChanged();
+      await persist();
+      showMiniToast("모두 삭제했어요");
+    } catch (error) {
+      state.error = true;
+      state.status = error.message || "전체 삭제에 실패했어요.";
+    }
   }
 
   async function saveEditedRecord(nextText) {
@@ -702,30 +739,26 @@ export function useDiaryStore() {
       DiaryCore.validate([{ text: nextText }]);
       const entry = currentRecord.value;
       if (!entry) return false;
-      if (state.mode === "real") {
-        analysisCoordinator.cancelRecordAnalysis(entry.id);
-      }
-      Object.assign(entry, {
+      analysisCoordinator.cancelRecordAnalysis(entry.id);
+
+      const updated = await updateAccountRecord(entry.id, {
         text: nextText,
-        updatedAt: new Date().toISOString(),
-        version: (entry.version || 1) + 1,
-        analysis: { status: "pending" },
+        recordDate: entry.recordDate,
       });
+      Object.assign(entry, updated);
+      entry.analysis = { status: "pending" };
       state.editing = false;
-      state.status = state.mode === "example" ? "예시를 수정했어요." : "기록을 수정했어요.";
-      if (state.mode === "real" && state.currentEntryId === entry.id) {
+      state.status = "기록을 수정했어요. 감정을 분석하고 있어요…";
+      if (state.currentEntryId === entry.id) {
         state.text = nextText;
         state.savedText = nextText;
       }
-      if (state.mode === "real") {
-        markChanged();
-        if (await persist()) {
-          state.status = "기록을 수정했어요. 감정을 분석하고 있어요…";
-          showMiniToast("저장했어요");
-          void analyzeRecord(entry);
-        }
-      }
-      celebrateUnlocks();
+      markChanged();
+      await persist();
+      await refreshCollectedCards();
+      seenSlots.real = DiaryCards.unlockedKeys(state.sessions);
+      showMiniToast("저장했어요");
+      void analyzeRecord(entry);
       return true;
     } catch (e) {
       state.error = true;
@@ -736,43 +769,69 @@ export function useDiaryStore() {
 
   async function deleteCurrentRecord(opener = null) {
     if (loading.value) return;
-    const accepted = await askConfirm(
-      "이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.",
-      opener,
-    );
-    if (!accepted) return;
-
-    const list = activeRecords();
-    const index = list.findIndex((r) => r.id === state.selected);
+    const index = state.sessions.findIndex((r) => r.id === state.selected);
     if (index < 0) return;
+    const target = state.sessions[index];
 
-    if (state.mode === "real") {
-      analysisCoordinator.cancelRecordAnalysis(list[index].id);
+    let impact = null;
+    try {
+      impact = await fetchDeleteImpact(target.id);
+    } catch {
+      const localCard = DiaryCards.resolve(target);
+      impact = {
+        has_card_unlock: localCard.status === "ready",
+        will_relock_card:
+          localCard.status === "ready" &&
+          state.sessions.filter((r) => {
+            const c = DiaryCards.resolve(r);
+            return r.id !== target.id && c.status === "ready" && c.cardKey === localCard.cardKey;
+          }).length === 0,
+        remaining_records_with_card: 0,
+      };
     }
-    const deleted = {
-      entry: structuredClone(toPlain(list[index])),
-      index,
-      mode: state.mode,
-      currentEntryId: state.currentEntryId,
-      savedText: state.savedText,
-    };
-    list.splice(index, 1);
-    if (state.mode === "real" && state.currentEntryId === state.selected) {
-      state.currentEntryId = null;
-      state.savedText = null;
-    }
-    state.view = state.entryFrom === "write" ? "write" : "history";
-    state.deleteConfirm = false;
-    showUndo(deleted);
 
-    if (state.mode === "real") {
-      markChanged();
-      if (await persist()) {
-        state.status = "기록을 삭제했어요.";
-        showMiniToast("삭제했어요");
+    const label = impact.has_card_unlock ? cardLabel(target) : null;
+    const firstCopy = impact.has_card_unlock
+      ? `이 기록을 삭제합니다.\n연결된 감정 카드(${label}) 해금 기록도 함께 삭제됩니다.`
+      : "이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.";
+    const accepted1 = await askConfirm(firstCopy, opener);
+    if (!accepted1) return;
+
+    if (impact.has_card_unlock) {
+      const secondCopy = impact.will_relock_card
+        ? `이 기록을 삭제하면 '${label}' 카드 해금 기록도 함께 삭제되어 도감에서 다시 미발견 상태로 돌아갑니다. 계속 삭제할까요?`
+        : `이 기록을 삭제하면 이 기록으로 얻은 '${label}' 카드 해금 이력이 삭제됩니다(같은 카드를 해금한 다른 기록 ${impact.remaining_records_with_card}편은 유지). 계속 삭제할까요?`;
+      const accepted2 = await askConfirm(secondCopy, opener, {
+        title: "해금 기록 삭제 2차 확인",
+        accept: "기록·해금 기록 삭제",
+      });
+      if (!accepted2) return;
+    }
+
+    try {
+      analysisCoordinator.cancelRecordAnalysis(target.id);
+      await deleteAccountRecord(target.id, { confirmCardDeletion: true });
+      state.sessions.splice(index, 1);
+      if (state.currentEntryId === target.id) {
+        state.currentEntryId = null;
+        state.savedText = null;
       }
+      state.selected = null;
+      state.view = state.entryFrom === "write" ? "write" : "history";
+      state.deleteConfirm = false;
+      await refreshCollectedCards();
+      seenSlots.real = DiaryCards.unlockedKeys(state.sessions);
+      state.error = false;
+      state.status = impact.has_card_unlock
+        ? "기록과 연결된 카드 해금 기록을 삭제했어요."
+        : "기록을 삭제했어요.";
+      markChanged();
+      await persist();
+      showMiniToast("삭제했어요");
+    } catch (error) {
+      state.error = true;
+      state.status = error.message || "기록 삭제에 실패했어요.";
     }
-    celebrateUnlocks();
   }
 
   async function toggleFavorite() {
@@ -780,11 +839,13 @@ export function useDiaryStore() {
     if (!r || loading.value) return;
     const previous = Boolean(r.favorite);
     r.favorite = !previous;
-    if (state.mode === "real") {
-      markChanged();
-      if (!(await persist())) {
-        r.favorite = previous;
-      }
+    try {
+      const updated = await setAccountRecordFavorite(r.id, r.favorite);
+      Object.assign(r, updated);
+    } catch (error) {
+      r.favorite = previous;
+      state.error = true;
+      state.status = error.message || "즐겨찾기 변경에 실패했어요.";
     }
   }
 
@@ -796,11 +857,8 @@ export function useDiaryStore() {
     state.busy = true;
     state.error = false;
     try {
-      await exportCardPng(record, state.mode, state.date);
-      state.status =
-        state.mode === "example"
-          ? "예시 이미지 다운로드를 요청했어요."
-          : "카드 이미지 다운로드를 요청했어요.";
+      await exportCardPng(record, "real", state.date);
+      state.status = "카드 이미지 다운로드를 요청했어요.";
     } catch (e) {
       state.error = true;
       state.status = e.message;
@@ -817,22 +875,6 @@ export function useDiaryStore() {
     state.status = "기록 방식을 바꿨어요. 기존 기록은 유지돼요.";
     markChanged();
     await persist();
-  }
-
-  function toggleExampleMode() {
-    if (loading.value) return;
-    hideUndo();
-    state.mode = state.mode === "real" ? "example" : "real";
-    state.selected =
-      activeRecords().find((r) => DiaryCards.resolve(r).status === "ready")?.id || null;
-    state.view = "history";
-    state.archiveTab = "records";
-    state.page = 0;
-    state.cardFilter = null;
-    state.dateFilter = "";
-    state.error = false;
-    state.status = "";
-    celebrateUnlocks();
   }
 
   function exportBackup() {
@@ -876,27 +918,14 @@ export function useDiaryStore() {
     restoringBackup.value = true;
     loading.value = true;
     try {
-      clearTimeout(persistTimer);
-      if (generation.value !== savedGeneration.value && !(await persist())) {
-        throw Error("현재 변경을 먼저 저장해 주세요.");
-      }
-      if (!storeReady.value || !storage) {
-        throw Error("저장소를 사용할 수 없어요. 기존 기록은 유지됩니다.");
-      }
-      analysisCoordinator.cancelAllAnalyses();
-      const mergedEntries = toPlain(
-        plan.entries.map((r) => ({
-          ...r,
-          analysis: r.analysis || { status: "pending" },
-        })),
-      );
-      await storage.save({ ...snapshot(), sessions: mergedEntries });
-      state.sessions = mergedEntries;
+      const existingIds = new Set(state.sessions.map((r) => r.id));
+      const newEntries = incomingBackup.value.filter((r) => !existingIds.has(r.id));
+      await importAccountRecords(newEntries);
       incomingBackup.value = null;
       backupPlan.value = null;
-      state.status = "새 기록을 합쳤어요. 기존 기록과 초안은 유지했어요.";
+      await restore(activeUserId);
+      state.status = "새 기록을 계정에 합쳤어요. 기존 기록과 초안은 유지했어요.";
       state.error = false;
-      celebrateUnlocks();
     } catch (error) {
       state.error = true;
       state.status = error.message;
@@ -971,7 +1000,8 @@ export function useDiaryStore() {
 
   singleton = {
     state,
-    examples,
+    collectedCards,
+    legacyMigrationEntries,
     loading,
     storeReady,
     lastStorageError,
@@ -995,6 +1025,9 @@ export function useDiaryStore() {
     queryRecords,
     announce,
     restore,
+    resetAccountState,
+    migrateLegacyRecords,
+    dismissLegacyMigration,
     persist,
     schedulePersist,
     markChanged,
@@ -1020,7 +1053,6 @@ export function useDiaryStore() {
     toggleFavorite,
     downloadCurrentCardPng,
     setPolicy,
-    toggleExampleMode,
     exportBackup,
     selectBackupFile,
     cancelBackupImport,

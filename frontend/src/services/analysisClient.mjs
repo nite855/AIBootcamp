@@ -3,6 +3,7 @@ import {
   TAXONOMY_VERSION,
   evaluateCardProbabilities,
 } from "../domain/cardPolicy.mjs";
+import { authorizedFetch } from "./authClient.mjs";
 
 export function isResponseCurrent({ activeRequests, record, expectedRecordId, expectedVersion, expectedRequestId }) {
   if (!record) return false;
@@ -126,46 +127,57 @@ export async function requestRecordAnalysis({
 
   let response;
   try {
-    response = await fetchImpl(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        record_id: recordId,
-        version,
-        request_id: requestId,
-        text,
-      }),
-      signal,
-    });
+    response = await authorizedFetch(
+      endpoint,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          record_id: recordId,
+          version,
+          request_id: requestId,
+          text,
+        }),
+        signal,
+      },
+      { fetchImpl },
+    );
   } catch (error) {
     if (error?.name === "AbortError") {
       return { ok: false, aborted: true, errorCode: "ABORTED", message: "", retryable: false };
     }
     return {
       ok: false,
-      errorCode: "NETWORK_ERROR",
-      message: "감정 분석 서버에 연결하지 못했어요. 기록은 안전하게 보관됐어요.",
-      retryable: true,
+      errorCode: error?.code || "NETWORK_ERROR",
+      message: error?.message || "감정 분석 서버에 연결하지 못했어요. 기록은 안전하게 보관됐어요.",
+      retryable: error?.status !== 401 && error?.status !== 403,
     };
   }
 
   const body = await response.json().catch(() => null);
   if (!response.ok) {
-    const code = body?.code || (response.status === 503 ? "MODEL_NOT_READY" : `HTTP_${response.status}`);
+    const code =
+      body?.code ||
+      body?.detail?.code ||
+      (response.status === 503 ? "MODEL_NOT_READY" : `HTTP_${response.status}`);
     const detail =
       typeof body?.detail === "string" && body.detail
         ? body.detail
-        : response.status === 503
-          ? "감정 분석 모델이 아직 준비되지 않았어요."
-          : response.status === 422
-            ? "분석 요청 형식을 확인해 주세요."
-            : "감정 분석 중 오류가 발생했어요.";
+        : typeof body?.detail?.message === "string" && body.detail.message
+          ? body.detail.message
+          : response.status === 503
+            ? "감정 분석 모델이 아직 준비되지 않았어요."
+            : response.status === 401 || response.status === 403
+              ? "로그인 및 개인정보·민감정보 동의 확인이 필요해요."
+              : response.status === 422
+                ? "분석 요청 형식을 확인해 주세요."
+                : "감정 분석 중 오류가 발생했어요.";
     return {
       ok: false,
       status: response.status,
       errorCode: code,
       message: detail,
-      retryable: response.status !== 422,
+      retryable: ![401, 403, 422].includes(response.status),
     };
   }
 

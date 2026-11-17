@@ -6,7 +6,10 @@ from typing import AsyncIterator
 from fastapi import FastAPI
 
 from backend.app.api.analyze import router as analyze_router
+from backend.app.api.auth import router as auth_router
 from backend.app.api.health import router as health_router
+from backend.app.api.records import router as records_router
+from backend.app.db.session import ensure_database_ready
 from backend.app.ml.predictor import create_predictor
 from backend.app.services.card_policy import evaluate_card
 
@@ -17,7 +20,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.model_ready = False
     app.state.model_version = None
     app.state.model_error = None
+    app.state.db_ready = False
+    app.state.db_error = None
     app.state.card_evaluator = evaluate_card
+
+    try:
+        ensure_database_ready()
+        app.state.db_ready = True
+    except Exception as error:
+        app.state.db_error = str(error)
 
     try:
         predictor = create_predictor()
@@ -41,6 +52,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     application.include_router(health_router)
+    application.include_router(auth_router)
+    application.include_router(records_router)
     application.include_router(analyze_router)
     return application
 

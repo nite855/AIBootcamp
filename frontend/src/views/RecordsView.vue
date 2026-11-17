@@ -96,7 +96,7 @@ function backToCatalog() {
       <h2>지난 기록</h2>
     </div>
     <p class="muted">
-      {{ store.state.mode === "example" ? "예시 모드 · 내 기록과 분리" : "내 기록 · 이 브라우저에 보관" }}
+      내 기록 · 로그인 계정에 보관 (최대 100편)
     </p>
     <div v-if="store.state.dateFilter" class="row">
       <span>{{ store.state.dateFilter }}</span>

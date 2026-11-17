@@ -40,7 +40,6 @@ const cardSvgHtml = computed(() => {
 });
 
 const storageLabel = computed(() => {
-  if (store.state.mode === "example") return "예시 기록";
   if (store.lastStorageError.value || !store.storeReady.value) return "기록을 보관하지 못했어요";
   return store.generation.value === store.savedGeneration.value
     ? "기록을 보관했어요"
@@ -48,7 +47,7 @@ const storageLabel = computed(() => {
 });
 
 const isAnalyzing = computed(() =>
-  Boolean(props.record && store.state.mode === "real" && store.isAnalyzingRecord(props.record.id)),
+  Boolean(props.record && store.isAnalyzingRecord(props.record.id)),
 );
 
 const captionLine1 = computed(() =>
@@ -56,7 +55,6 @@ const captionLine1 = computed(() =>
 );
 
 const captionLine2 = computed(() => {
-  if (store.state.mode === "example") return "예시 모드 · 실제 입력 분석 아님";
   if (isAnalyzing.value) return "감정 분석 중이에요…";
   if (card.value.status === "ready") return "감정 분석을 마쳤어요.";
   if (card.value.status === "error") {
@@ -178,7 +176,7 @@ function onDeleteRecord() {
     </p>
     <div class="card-actions">
       <button
-        v-if="record && store.state.mode === 'real' && (store.lastStorageError.value || !store.storeReady.value)"
+        v-if="record && (store.lastStorageError.value || !store.storeReady.value)"
         type="button"
         data-action="retry-save"
         class="quiet"
@@ -188,7 +186,7 @@ function onDeleteRecord() {
         저장 재시도
       </button>
       <button
-        v-if="record && store.state.mode === 'real' && ['pending', 'error'].includes(card.status)"
+        v-if="record && ['pending', 'error'].includes(card.status)"
         type="button"
         data-action="retry-analysis"
         class="quiet"

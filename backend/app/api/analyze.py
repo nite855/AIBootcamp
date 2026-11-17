@@ -1,8 +1,12 @@
-"""POST /api/analyze endpoint following contracts/analysis.schema.json."""
+"""POST /api/analyze endpoint following contracts/analysis.schema.json with JWT & PIPA consent gating."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
+from backend.app.api.deps import require_active_consents
+from backend.app.db.models import User
+from backend.app.db.session import get_db
 from backend.app.ml.intake import ModelIntakeError, validate_probabilities
 from backend.app.ml.predictor import ModelNotReadyError
 from backend.app.schemas.analysis import (
@@ -13,6 +17,7 @@ from backend.app.schemas.analysis import (
     ErrorResponse,
 )
 from backend.app.services.card_policy import evaluate_card
+from backend.app.services.record_service import persist_analysis_for_record
 
 router = APIRouter(prefix="/api", tags=["analysis"])
 
@@ -23,7 +28,12 @@ def _error_json(status_code: int, detail: str, code: str, request_id: str) -> JS
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse | JSONResponse:
+def analyze(
+    payload: AnalyzeRequest,
+    request: Request,
+    current_user: User = Depends(require_active_consents),
+    db: Session = Depends(get_db),
+) -> AnalyzeResponse | JSONResponse:
     predictor = getattr(request.app.state, "predictor", None)
     is_ready = bool(getattr(request.app.state, "model_ready", False))
     if not is_ready or predictor is None:
@@ -61,7 +71,7 @@ def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse | JSON
     )
     truncated = bool(raw_result.get("truncated", False))
     if truncated:
-        return AnalyzeUnissuableResponse(
+        unissuable = AnalyzeUnissuableResponse(
             record_id=payload.record_id,
             version=payload.version,
             request_id=payload.request_id,
@@ -72,6 +82,14 @@ def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse | JSON
             error_code="INPUT_TRUNCATED",
             message="모델 최대 입력 길이를 초과하여 카드를 발급할 수 없습니다.",
         )
+        persist_analysis_for_record(
+            db,
+            current_user,
+            client_record_id=payload.record_id,
+            expected_version=payload.version,
+            result=unissuable,
+        )
+        return unissuable
 
     try:
         probabilities = validate_probabilities(raw_result.get("probabilities"))
@@ -85,7 +103,7 @@ def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse | JSON
 
     card_evaluator = getattr(request.app.state, "card_evaluator", None) or evaluate_card
     card = card_evaluator(probabilities)
-    return AnalyzeSuccessResponse(
+    success = AnalyzeSuccessResponse(
         record_id=payload.record_id,
         version=payload.version,
         request_id=payload.request_id,
@@ -100,3 +118,11 @@ def analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse | JSON
         card_key=card["card_key"],
         card_policy_version=card["card_policy_version"],
     )
+    persist_analysis_for_record(
+        db,
+        current_user,
+        client_record_id=payload.record_id,
+        expected_version=payload.version,
+        result=success,
+    )
+    return success

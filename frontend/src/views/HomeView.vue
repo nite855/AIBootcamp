@@ -16,11 +16,10 @@ const recentRecords = computed(() =>
 const latestRecord = computed(() => recentRecords.value[0] || null);
 const latestCard = computed(() => DiaryCards.resolve(latestRecord.value));
 const latestAnalyzing = computed(() =>
-  Boolean(latestRecord.value && store.state.mode === "real" && store.isAnalyzingRecord(latestRecord.value.id)),
+  Boolean(latestRecord.value && store.isAnalyzingRecord(latestRecord.value.id)),
 );
 const latestStatusText = computed(() => {
   if (storageFailed.value) return "저장 확인이 필요해요";
-  if (store.state.mode === "example") return "예시 · 실제 입력 분석 아님";
   if (latestAnalyzing.value) return "감정 분석 중이에요…";
   if (latestCard.value.status === "ready") return "감정 분석을 마쳤어요";
   if (latestCard.value.status === "error") {
@@ -67,7 +66,7 @@ const charCount = computed(() => {
 });
 
 const limitNotice = computed(() =>
-  DiaryCore.recordLimitState(store.state.mode === "real" ? store.state.sessions.length : 0),
+  DiaryCore.recordLimitState(store.state.sessions.length),
 );
 
 function onDraftInput(event) {
@@ -123,7 +122,6 @@ async function onGoBackupManage() {
     <div class="editor-content">
       <div class="row">
         <span class="eyebrow">TODAY'S PAGE</span>
-        <span v-if="store.state.mode === 'example'" class="example-badge">예시 모드</span>
         <span class="muted">{{ store.state.date }}</span>
       </div>
       <h1 id="write-title">
@@ -155,15 +153,15 @@ async function onGoBackupManage() {
         </button>
       </div>
       <p v-if="limitNotice.level === 'full'" id="privacy" class="privacy-note limit-note" data-level="full">
-        보관 한도 30편에 도달했어요. 새 기록은 정리한 뒤에 남길 수 있어요.
+        보관 한도 100편에 도달했어요. 새 기록은 정리한 뒤에 남길 수 있어요.
         <button type="button" data-action="backup-manage" class="quiet" @click="onGoBackupManage">
           백업 후 정리하기
         </button>
       </p>
       <p v-else-if="limitNotice.level === 'near'" id="privacy" class="privacy-note limit-note" data-level="near">
-        이 브라우저에만 보관돼요 · <strong>{{ limitNotice.remaining }}편 남았어요</strong> (최대 30편)
+        계정에 안전하게 보관돼요 · <strong>{{ limitNotice.remaining }}편 남았어요</strong> (최대 100편)
       </p>
-      <p v-else id="privacy" class="muted privacy-note">이 브라우저에만 보관돼요 · 최대 30편</p>
+      <p v-else id="privacy" class="muted privacy-note">로그인 계정에 보관돼요 · 최대 100편</p>
     </div>
     <div class="write-actions">
       <button
@@ -199,7 +197,7 @@ async function onGoBackupManage() {
           초안 지우기
         </button>
         <p class="menu-note">
-          기록은 다른 기기와 동기화되지 않아요. 브라우저 데이터를 삭제하면 기록도 사라져요.
+          작성 중인 초안은 이 브라우저에 임시 보관되며, 저장된 기록과 카드는 계정에 보관돼요.
         </p>
       </div>
     </div>
@@ -209,7 +207,7 @@ async function onGoBackupManage() {
     <section class="panel latest-panel" aria-labelledby="latest-title">
       <div class="row">
         <span class="eyebrow">MY MOMENT</span>
-        <span class="small muted">{{ store.state.mode === "example" ? "예시 모드" : "나의 기록" }}</span>
+        <span class="small muted">나의 기록</span>
       </div>
       <div class="latest-content">
         <div class="latest-art" aria-hidden="true">
@@ -229,7 +227,7 @@ async function onGoBackupManage() {
               {{ latestStatusText }}
             </p>
             <button
-              v-if="store.state.mode === 'real' && ['pending', 'error'].includes(latestCard.status)"
+              v-if="['pending', 'error'].includes(latestCard.status)"
               type="button"
               data-action="retry-analysis"
               class="quiet"
@@ -246,7 +244,7 @@ async function onGoBackupManage() {
               <li>분석된 감정이 카드와 캐릭터 도감으로 모여요.</li>
             </ol>
             <p class="small muted latest-storage">
-              분류 확률은 감정의 강도가 아니에요. 설정 › 예시 모드에서 미리 볼 수 있어요.
+              분류 확률은 감정의 강도가 아니에요. 기록을 남기면 계정 도감에 카드가 모여요.
             </p>
           </template>
         </div>

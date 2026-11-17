@@ -1,171 +1,191 @@
 openapi: 3.1.0
 info:
-  title: 감정 분석 API
-  version: 1.0.0
-  description: 여러 문장을 하나의 대화 흐름으로 분석하고 단어 빈도와 문장별 감정 확률을 반환합니다.
+  title: 오늘의 모먼트 API
+  version: 2.0.0
+  description: |
+    JWT 인증, 한국 개인정보 보호법(PIPA) 기반 분리 동의, 계정별 대화·일기 기록 및
+    3+9 감정 분석·수집 카드 도감 영속 저장을 제공하는 FastAPI 서비스 계약입니다.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 paths:
-  /api/analyze:
-    post:
-      summary: 대화 감정과 단어 빈도 분석
-      description: |
-        입력 텍스트에서 빈 줄을 제외한 각 줄을 한 문장으로 처리합니다.
-        유효 문장은 최대 100줄이며, 각 문장의 감정 확률과 공백 기준 단어 빈도를 반환합니다.
-      operationId: analyzeConversation
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AnalyzeRequest'
-            examples:
-              conversation:
-                value:
-                  text: |-
-                    오늘은 정말 행복해.
-                    내일 면접이라 정말 불안해.
+  /api/health/live:
+    get:
+      summary: 프로세스 생존 확인
       responses:
         '200':
-          description: 분석 성공
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AnalyzeResponse'
-              examples:
-                result:
-                  value:
-                    lines:
-                      - 오늘은 정말 행복해.
-                      - 내일 면접이라 정말 불안해.
-                    predictions:
-                      - emotion: 기쁨
-                        confidence: 0.94
-                        probabilities:
-                          분노: 0.01
-                          슬픔: 0.01
-                          불안: 0.01
-                          상처: 0.01
-                          당황: 0.02
-                          기쁨: 0.94
-                        input_tokens: 12
-                        truncated: false
-                      - emotion: 불안
-                        confidence: 0.86
-                        probabilities:
-                          분노: 0.02
-                          슬픔: 0.03
-                          불안: 0.86
-                          상처: 0.03
-                          당황: 0.04
-                          기쁨: 0.02
-                        input_tokens: 14
-                        truncated: false
-                    word_frequencies:
-                      - word: 정말
-                        count: 2
-                      - word: 오늘은
-                        count: 1
-                      - word: 행복해.
-                        count: 1
-                      - word: 내일
-                        count: 1
-                      - word: 면접이라
-                        count: 1
-                      - word: 불안해.
-                        count: 1
+          description: 생존 상태
+  /api/health/ready:
+    get:
+      summary: 모델 및 PostgreSQL 준비 상태 확인
+      responses:
+        '200':
+          description: 모델 및 DB 연결 준비 완료
+        '503':
+          description: 모델 또는 DB 미준비
+  /api/auth/consent-policies:
+    get:
+      summary: 활성 개인정보·민감정보 동의 약관 목록 조회
+      responses:
+        '200':
+          description: 최신 활성 동의 항목 목록
+  /api/auth/register:
+    post:
+      summary: 회원가입 및 분리 동의 등록
+      responses:
+        '201':
+          description: 가입 성공 (Access JWT + HttpOnly Refresh 쿠키 발급)
+        '409':
+          description: 아이디 또는 이메일 중복
         '422':
-          description: 본문 형식 오류, 빈 입력 또는 100줄 초과
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-              examples:
-                tooManyLines:
-                  value:
-                    detail: 문장은 빈 줄을 제외하고 100줄 이하로 입력하세요.
-components:
-  schemas:
-    AnalyzeRequest:
-      type: object
-      required:
-        - text
-      properties:
-        text:
-          type: string
-          minLength: 1
-          description: 빈 줄을 제외하고 1~100줄인 대화 텍스트입니다. 각 줄은 하나의 문장입니다.
-    AnalyzeResponse:
-      type: object
-      required:
-        - lines
-        - predictions
-        - word_frequencies
-      properties:
-        lines:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            type: string
-        predictions:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/EmotionPrediction'
-        word_frequencies:
-          type: array
-          description: 사용 횟수 내림차순으로 정렬된 단어 목록입니다.
-          items:
-            $ref: '#/components/schemas/WordFrequency'
-    EmotionPrediction:
-      type: object
-      required:
-        - emotion
-        - confidence
-        - probabilities
-        - input_tokens
-        - truncated
-      properties:
-        emotion:
-          type: string
-          description: 확률이 가장 높은 감정입니다.
-        confidence:
-          type: number
-          format: float
-          minimum: 0
-          maximum: 1
-        probabilities:
-          type: object
-          description: 모델이 반환한 감정별 확률입니다.
-          additionalProperties:
-            type: number
-            format: float
-            minimum: 0
-            maximum: 1
-        input_tokens:
-          type: integer
-          minimum: 1
-        truncated:
-          type: boolean
-    WordFrequency:
-      type: object
-      required:
-        - word
-        - count
-      properties:
-        word:
-          type: string
-        count:
-          type: integer
-          minimum: 1
-    ValidationError:
-      type: object
-      required:
-        - detail
-      properties:
-        detail:
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: object
+          description: 입력 검증 오류 또는 필수·민감정보 동의 누락
+  /api/auth/login:
+    post:
+      summary: 로그인 및 최신 동의 버전 확인(Consent Gate)
+      responses:
+        '200':
+          description: 로그인 성공 (미동의·버전 변경 시 consent_required=true 반환)
+        '401':
+          description: 인증 실패
+  /api/auth/refresh:
+    post:
+      summary: HttpOnly Refresh 쿠키 기반 세션 갱신(Rotation)
+      responses:
+        '200':
+          description: 새 Access JWT 및 회전된 Refresh 쿠키 발급
+        '401':
+          description: 세션 만료 또는 유효하지 않은 Refresh 토큰
+  /api/auth/logout:
+    post:
+      summary: 로그아웃 및 Refresh 세션 폐기
+      responses:
+        '200':
+          description: 로그아웃 완료
+  /api/auth/me:
+    get:
+      summary: 현재 로그인 사용자 및 동의 상태 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 사용자 및 동의 상태 반환
+  /api/auth/consents:
+    put:
+      summary: 동의 갱신(Consent Gate 완료) 또는 선택 동의 철회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 동의 반영 및 갱신된 토큰 반환
+        '422':
+          description: 필수/민감정보 동의 누락 또는 회원 탈퇴 안내 필요
+  /api/auth/withdraw:
+    post:
+      summary: 회원 탈퇴 및 개인정보·민감정보·기록·카드 즉시 파기
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 탈퇴 및 파기 완료
+  /api/records:
+    get:
+      summary: 계정별 기록 목록 조회 (계정당 최대 100편)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 기록 목록 반환
+    post:
+      summary: 계정별 새 기록 생성
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: 생성 완료
+        '409':
+          description: 보관 한도(100편) 초과 또는 중복 ID
+    delete:
+      summary: 계정 전체 기록 및 해금 카드 삭제 (confirm_card_deletion=true 필수)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: confirm_card_deletion
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 전체 삭제 완료
+        '409':
+          description: 해금 카드 동반 삭제 2차 확인 필요
+  /api/records/import:
+    post:
+      summary: 로컬 백업/IndexedDB 기록 일괄 가져오기
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 가져오기 결과 반환
+  /api/records/{record_id}:
+    put:
+      summary: 기록 본문 수정 (버전 증가 및 분석 대기 초기화)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 수정 완료
+    delete:
+      summary: 기록 삭제 및 연결된 해금 카드 재계산/삭제 (2차 확인 필수)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: confirm_card_deletion
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 삭제 완료
+        '409':
+          description: 해금 카드 삭제 2차 확인 필요 (CARD_UNLOCK_CONFIRM_REQUIRED)
+  /api/records/{record_id}/favorite:
+    patch:
+      summary: 기록 즐겨찾기 토글
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 변경 완료
+  /api/records/{record_id}/delete-impact:
+    get:
+      summary: 기록 삭제 시 해금 카드 삭제 영향도 사전 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 영향도 반환
+  /api/cards:
+    get:
+      summary: 계정별 수집 카드 도감 조회 (최대 27슬롯)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 수집 카드 목록 반환
+  /api/analyze:
+    post:
+      summary: 3+9 감정 분석 및 계정 기록·수집 카드 원자적 반영 (JWT + 필수/민감정보 동의 필수)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: contracts/analysis.schema.json 준수 분석 응답
+        '401':
+          description: 인증 실패
+        '403':
+          description: 필수 개인정보·민감정보 동의 미완료
+        '503':
+          description: 모델 미준비

@@ -1,77 +1,29 @@
-﻿# 감정 분석 시스템 구조
+﻿# 오늘의 모먼트 시스템 구조
+
+기준일: 2026-11-17
 
 ## 개요
 
-이 시스템은 여러 줄의 한국어 문장을 하나의 대화 흐름으로 받아 문장별 감정 확률과 전체 입력의 단어 사용 빈도를 시각화하는 단일 서버 애플리케이션이다. 빈 줄을 제외한 각 줄을 대화의 한 문장으로 취급하며, 한 요청에는 최대 100개 문장을 허용한다.
+**오늘의 모먼트**는 Vue 3 프론트엔드, FastAPI 백엔드 API, 별도 PostgreSQL 16 RDBMS 컨테이너로 구성된 감정 일기·대화 분석 및 카드 수집 서비스다.
 
-## 구성 요소
+- **인증 및 동의:** JWT Access Token(메모리 보관) + HttpOnly SameSite=Lax Refresh Token Rotation 방식을 사용하며, 회원가입 및 로그인 시 한국 「개인정보 보호법」(제15조, 제22조, 제22조의2, 제23조)에 따라 만 14세 이상 확인·개인정보 수집·이용·민감정보(대화/감정 데이터) 처리 동의를 분리 수집·검증한다.
+- **영속 저장:** 계정 정보, 동의·철회 감사 이력, 계정별 대화/일기 기록(계정당 최대 100편), 감정 분석 결과, 수집 카드 도감(27슬롯)을 PostgreSQL 컨테이너(`postgres_data` 볼륨)에 저장한다.
 
-```text
-브라우저 (static/index.html, Chart.js)
-  └─ POST /api/analyze
-       └─ FastAPI (src/emotion_service/api.py)
-            ├─ 입력 정리 및 100줄 제한
-            ├─ Counter 기반 단어 빈도 집계
-            └─ EmotionPredictor (src/emotion_service/predictor.py)
-                 └─ 로컬 KcELECTRA 체크포인트
-```
-
-### 웹 클라이언트
-
-`static/index.html`은 별도의 빌드 과정이 없는 정적 화면이다.
-
-- 입력 중 빈 줄을 제외한 문장 수를 표시하고, 100줄을 초과하면 분석 버튼을 비활성화한다.
-- 분석 결과의 대표 감정과 신뢰도를 문장별로 표시한다.
-- API가 반환한 단어 빈도를 내림차순 목록으로 표시한다.
-- 각 감정을 하나의 데이터 계열로 두고, 문장 순서에 따른 확률 변화를 Chart.js 꺾은선 그래프로 표시한다.
-
-### API 서버
-
-`src/emotion_service/api.py`의 FastAPI 애플리케이션이 정적 화면과 분석 API를 제공한다.
-
-1. 입력을 줄바꿈으로 나누고 빈 줄과 줄 앞뒤 공백을 제거한다.
-2. 유효 문장이 없거나 100개를 초과하면 HTTP 422를 반환한다.
-3. 각 문장을 `EmotionPredictor.predict()`에 개별 전달한다.
-4. 모든 문장의 단어를 공백 기준으로 나누고 `collections.Counter`로 집계한다.
-5. 문장 목록, 문장별 감정 결과, 빈도 내림차순 단어 목록을 한 응답으로 반환한다.
-
-동일 빈도의 단어는 `Counter.most_common()`의 동작에 따라 입력에서 처음 등장한 순서를 유지한다.
-
-### 감정 추론
-
-`src/emotion_service/predictor.py`는 서버 시작 시 로컬 체크포인트를 한 번 로드한다. 각 문장은 독립적으로 추론되지만, 응답과 화면에서는 입력 순서대로 배열하여 전체 대화의 감정 변화로 표현한다. 모델 출력은 대표 감정, 대표 감정 확률, 전체 감정별 확률, 토큰 수, 잘림 여부를 포함한다.
-
-## 요청 처리 흐름
+## 컨테이너 구성 (`compose.yaml`)
 
 ```text
-사용자 입력
-  → 클라이언트 100줄 검사
-  → POST /api/analyze
-  → 서버 입력 정리 및 100줄 재검사
-  → 문장별 감정 추론
-  → 전체 단어 빈도 집계
-  → JSON 응답
-  → 문장별 결과 + 단어 빈도 + 감정 변화 그래프 렌더링
+브라우저 (Vue 3 SPA)
+  └─ Nginx (:8080, web 컨테이너)
+       ├─ /           → 정적 SPA 번들 (frontend/dist)
+       └─ /api/       → FastAPI (api:8000, Cache-Control: no-store)
+                            ├─ KcELECTRA 감정 추론 (/models/checkpoint:ro)
+                            └─ PostgreSQL 16 (postgres:5432, postgres_data 볼륨)
 ```
 
-클라이언트 검사는 빠른 사용자 피드백을 위한 것이며, API를 직접 호출하는 경우도 보호하도록 서버가 같은 제한을 최종 적용한다.
+## 핵심 백엔드 모듈 (`backend/app/`)
 
-## 실행 및 배포
-
-- 애플리케이션: FastAPI/Uvicorn 단일 프로세스
-- 모델: 로컬 파일 시스템에 저장된 PyTorch/Transformers 체크포인트
-- 프런트엔드: FastAPI가 `/`에서 제공하는 정적 HTML
-- 컨테이너: 모델을 이미지에 포함하지 않고 읽기 전용 볼륨으로 연결
-
-모델 추론은 요청 안에서 문장 수만큼 순차 실행된다. 최대 100줄 제한은 과도한 추론 시간과 메모리 사용을 제한하는 경계이기도 하다.
-
-## 관련 파일
-
-- `src/emotion_service/api.py`: HTTP API, 입력 검증, 단어 빈도 집계
-- `src/emotion_service/predictor.py`: 체크포인트 선택 및 감정 추론
-- `static/index.html`: 입력 화면과 결과 시각화
-- `docs/openapi.yaml`: 분석 API 계약
-- `tests/`: API 및 추론 단위 테스트
-- `models/emotion-kcelectra/`: 로컬 서빙 체크포인트와 추론 메타데이터
-- `artifacts/emotional-dialogue-study/`: 학습 설정과 평가 산출물
-
+- `core/config.py`, `core/security.py`: 환경변수 설정, Argon2 비밀번호 해싱, JWT Access Token 발급/검증, Refresh Token 해싱, 동의 로그 메타데이터 해싱
+- `db/models.py`, `db/session.py`, `db/consent_seed.py`, `db/migrations/`: SQLAlchemy ORM 모델(`users`, `refresh_tokens`, `consent_policies`, `user_consents`, `user_consent_logs`, `diary_records`, `collected_cards`) 및 Alembic 마이그레이션
+- `api/auth.py`, `services/auth_service.py`, `services/consent_service.py`: 회원가입, 로그인(Consent Gate), 토큰 갱신/로그아웃, 동의 갱신/선택 철회, 회원 탈퇴 및 즉시 파기
+- `api/records.py`, `services/record_service.py`, `api/analyze.py`: 계정별 기록 CRUD(한도 100편), 일괄 가져오기(`/api/records/import`), 2차 확인 기반 기록 및 해금 카드 삭제, 감정 분석(`POST /api/analyze`)과 `collected_cards` 원자적 갱신
+- `api/health.py`: `/api/health/live` 및 모델+DB 연결 상태를 점검하는 `/api/health/ready`

@@ -7,7 +7,7 @@ import {
 export const DB_NAME = "moment-diary-main";
 export const CURRENT_SCHEMA_VERSION = 2;
 const LIMIT = 10000;
-const MAX_RECORDS = 30;
+const MAX_RECORDS = 100;
 
 const fail = () => {
   throw Error("저장된 기록 형식을 확인할 수 없어요. 원본 저장소는 변경하지 않았어요.");

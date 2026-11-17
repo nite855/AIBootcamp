@@ -18,6 +18,7 @@ test("all Vue SFC components and views compile cleanly with @vue/compiler-sfc", 
     "src/components/EmptyCard.vue",
     "src/components/EmotionCard.vue",
     "src/components/AppDialogs.vue",
+    "src/views/AuthView.vue",
     "src/views/HomeView.vue",
     "src/views/RecordsView.vue",
     "src/views/RecordDetail.vue",
@@ -96,7 +97,15 @@ test("migrated Vue views preserve BASE-01 classes, IDs, dialogs, and accessibili
   assert.ok(settingsVue.includes('id="backup-file"'));
   assert.ok(settingsVue.includes('id="backup-preview"'));
   assert.ok(settingsVue.includes('data-action="delete-all"'));
-  assert.ok(settingsVue.includes('data-action="preview"'));
+  assert.ok(settingsVue.includes('data-action="logout"'));
+  assert.ok(settingsVue.includes('data-action="withdraw-account"'));
+  assert.ok(!settingsVue.includes('data-action="preview"'));
+
+  const authVue = read("src/views/AuthView.vue");
+  assert.ok(authVue.includes('data-auth-tab="login"'));
+  assert.ok(authVue.includes('data-auth-tab="register"'));
+  assert.ok(authVue.includes("data-consent-code"));
+  assert.ok(authVue.includes("민감정보 별도 동의"));
 
   const galleryVue = read("src/views/ThemeGallery.vue");
   assert.ok(galleryVue.includes('id="theme-current"'));

@@ -37,7 +37,7 @@ function selectStage(stage) {
       <h2>캐릭터 도감</h2>
     </div>
     <p class="muted">
-      {{ store.state.mode === "example" ? "예시 도감" : "내 도감" }} · 기록에서 만난 감정들 ·
+      내 도감 · 기록에서 만난 감정들 ·
       {{ unlockedCount }} / {{ slots.length }}
     </p>
     <label>

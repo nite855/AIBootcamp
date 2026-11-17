@@ -121,3 +121,28 @@ html[data-appearance="blossom"][data-theme="dark"] body { background-image: none
 #moment-toast.show { opacity: 1; transform: translate(-50%, 0); }
 html[data-motion="off"] #moment-toast { transition: none; }
 .emotion-filter { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+
+/* ── Auth & Korean PIPA Consent UI ── */
+.auth-workspace { grid-template-columns: minmax(0, 680px); justify-content: center; align-items: start; overflow-y: auto; }
+.auth-panel { gap: 16px; }
+.auth-head { display: grid; gap: 6px; }
+.auth-tabs { display: flex; gap: 8px; }
+.auth-form { display: grid; gap: 14px; }
+.auth-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .auth-fields-grid { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 6px; font-size: 13px; font-weight: 500; }
+.field input { width: 100%; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); color: var(--ink); }
+.consent-box { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: color-mix(in srgb, var(--tint) 35%, var(--surface)); }
+.consent-all { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.consent-item { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.consent-check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; line-height: 1.45; }
+.consent-check input, .consent-all input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.consent-badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: color-mix(in srgb, var(--blue) 14%, var(--surface)); color: var(--blue); }
+.consent-badge.sensitive { background: color-mix(in srgb, #c34b52 15%, var(--surface)); color: #b23a42; }
+.consent-badge.optional { background: color-mix(in srgb, var(--muted) 15%, var(--surface)); color: var(--muted); }
+.consent-details { font-size: 12px; color: var(--muted); }
+.consent-details summary { cursor: pointer; font-weight: 500; }
+.consent-details ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.consent-switch { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.auth-error { margin: 0; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 500; color: #a62b33; background: color-mix(in srgb, #c34b52 12%, var(--surface)); }
+.account-summary, .legacy-migration-box, .withdraw-box { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 16px; padding: 14px; }

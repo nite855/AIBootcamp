@@ -1,25 +1,55 @@
-"""ASGI tests for unified backend.app.main:app (requires fastapi)."""
+"""ASGI tests for unified backend.app.main:app with JWT auth and PIPA consent gating."""
 
 import json
+import os
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from backend.app.core.config import reset_settings_cache
+from backend.app.db.session import reset_db_engine
 from backend.app.main import app
 
 
 class AppMainTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.db_path = Path(self.tmpdir.name) / "test_app_main.db"
+        self.prev_db_url = os.environ.get("DATABASE_URL")
+        os.environ["DATABASE_URL"] = f"sqlite:///{self.db_path.as_posix()}"
+        reset_settings_cache()
+        reset_db_engine()
+
         self.predictor_patch = patch("backend.app.main.create_predictor")
         self.predictor_cls = self.predictor_patch.start()
         self.addCleanup(self.predictor_patch.stop)
         self.predictor_cls.side_effect = FileNotFoundError("EMOTION_MODEL_DIR이 설정되지 않았습니다.")
         await self.enterAsyncContext(app.router.lifespan_context(app))
 
+        self.access_token = await self._register_consented_user()
+
+    async def asyncTearDown(self) -> None:
+        reset_db_engine()
+        if self.prev_db_url is None:
+            os.environ.pop("DATABASE_URL", None)
+        else:
+            os.environ["DATABASE_URL"] = self.prev_db_url
+        reset_settings_cache()
+        self.tmpdir.cleanup()
+
     async def request(
-        self, method: str, path: str, payload: object = None
+        self,
+        method: str,
+        path: str,
+        payload: object = None,
+        token: str | None = None,
     ) -> tuple[int, bytes]:
         body = json.dumps(payload).encode() if payload is not None else b""
         messages = []
+        headers = [(b"content-type", b"application/json")]
+        if token:
+            headers.append((b"authorization", f"Bearer {token}".encode()))
 
         async def receive() -> dict:
             return {"type": "http.request", "body": body, "more_body": False}
@@ -38,7 +68,7 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
                 "raw_path": path.encode(),
                 "query_string": b"",
                 "root_path": "",
-                "headers": [(b"content-type", b"application/json")],
+                "headers": headers,
                 "client": ("127.0.0.1", 1234),
                 "server": ("testserver", 80),
             },
@@ -57,6 +87,26 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
         )
         return status, content
 
+    async def _register_consented_user(self) -> str:
+        _, policies_bytes = await self.request("GET", "/api/auth/consent-policies")
+        policies = json.loads(policies_bytes)
+        consents = [
+            {"code": p["code"], "version": p["version"], "agreed": True}
+            for p in policies
+        ]
+        status, body = await self.request(
+            "POST",
+            "/api/auth/register",
+            {
+                "login_id": "tester01",
+                "email": "tester01@example.com",
+                "password": "StrongPassword1!",
+                "consents": consents,
+            },
+        )
+        self.assertEqual(status, 201)
+        return json.loads(body)["access_token"]
+
     async def test_health_live_and_ready_when_model_missing(self) -> None:
         live_status, live_body = await self.request("GET", "/api/health/live")
         self.assertEqual(live_status, 200)
@@ -67,16 +117,26 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
         ready_json = json.loads(ready_body)
         self.assertEqual(ready_json["status"], "not_ready")
         self.assertFalse(ready_json["model_loaded"])
+        self.assertTrue(ready_json["database_connected"])
 
     async def test_api_only_does_not_serve_root_html(self) -> None:
         status, _ = await self.request("GET", "/")
         self.assertEqual(status, 404)
+
+    async def test_analyze_requires_authentication(self) -> None:
+        status, _ = await self.request(
+            "POST",
+            "/api/analyze",
+            {"record_id": "r1", "version": 1, "request_id": "req-1", "text": "오늘의 기록"},
+        )
+        self.assertEqual(status, 401)
 
     async def test_analyze_returns_503_when_model_not_ready(self) -> None:
         status, content = await self.request(
             "POST",
             "/api/analyze",
             {"record_id": "r1", "version": 1, "request_id": "req-1", "text": "오늘의 기록"},
+            token=self.access_token,
         )
         self.assertEqual(status, 503)
         self.assertEqual(json.loads(content)["code"], "MODEL_NOT_READY")
@@ -86,6 +146,7 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
             "POST",
             "/api/analyze",
             {"record_id": "r1", "version": 1, "request_id": "req-1", "text": "   \n "},
+            token=self.access_token,
         )
         self.assertEqual(status, 422)
 
@@ -104,6 +165,7 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
             "POST",
             "/api/analyze",
             {"record_id": "r1", "version": 1, "request_id": "req-1", "text": "오늘의 기록"},
+            token=self.access_token,
         )
         self.assertEqual(status, 500)
         self.assertEqual(json.loads(content)["code"], "INVALID_MODEL_OUTPUT")
@@ -123,6 +185,7 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
             "POST",
             "/api/analyze",
             {"record_id": "r1", "version": 2, "request_id": "req-2", "text": "긴 기록"},
+            token=self.access_token,
         )
         self.assertEqual(status, 200)
         body = json.loads(content)
@@ -132,33 +195,33 @@ class AppMainTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(body["card_key"])
         self.assertEqual(body["error_code"], "INPUT_TRUNCATED")
 
-    async def test_valid_10_emotion_prediction_returns_evaluated_card(self) -> None:
+    async def test_valid_9_emotion_prediction_returns_evaluated_card(self) -> None:
         probs = {
             "pos_1": 0.05,
             "pos_2": 0.5,
             "pos_3": 0.05,
-            "neg_1": 0.05,
-            "neg_2": 0.05,
+            "neg_1": 0.1,
+            "neg_2": 0.1,
             "neg_3": 0.05,
             "neu_1": 0.05,
             "neu_2": 0.05,
             "neu_3": 0.05,
-            "neu_4": 0.1,
         }
         mock_predictor = MagicMock()
         mock_predictor.predict_record.return_value = {
-            "model_version": "mock-3plus10-v1",
+            "model_version": "mock-3plus9-v1",
             "truncated": False,
             "probabilities": probs,
         }
         app.state.predictor = mock_predictor
         app.state.model_ready = True
-        app.state.model_version = "mock-3plus10-v1"
+        app.state.model_version = "mock-3plus9-v1"
 
         status, content = await self.request(
             "POST",
             "/api/analyze",
             {"record_id": "r-valid", "version": 1, "request_id": "req-valid", "text": "오늘의 기록"},
+            token=self.access_token,
         )
         self.assertEqual(status, 200)
         body = json.loads(content)

@@ -116,4 +116,5 @@ class HealthReadyResponse(BaseModel):
     status: Literal["ready", "not_ready"]
     model_loaded: bool
     model_version: str | None = None
+    database_connected: bool | None = None
     detail: str | None = None

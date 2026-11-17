@@ -43,6 +43,16 @@ class OpsConfigTests(unittest.TestCase):
         self.assertIn("try_files $uri =404;", conf)
         self.assertIn("location = /assets/cards/manifest.json", conf)
         self.assertIn("client_max_body_size 256k;", conf)
+        self.assertIn('add_header Cache-Control "no-store" always;', conf)
+
+    def test_compose_configures_postgres_container_and_volume(self) -> None:
+        compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
+        self.assertIn("postgres:", compose)
+        self.assertIn("postgres:16-alpine", compose)
+        self.assertIn("postgres_data:/var/lib/postgresql/data", compose)
+        self.assertIn("pg_isready", compose)
+        self.assertIn("condition: service_healthy", compose)
+        self.assertIn("DATABASE_URL:", compose)
 
     def test_dockerignore_excludes_sensitive_and_legacy_artifacts(self) -> None:
         dockerignore = (ROOT / ".dockerignore").read_text(encoding="utf-8")

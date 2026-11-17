@@ -564,9 +564,9 @@ test("store and UI components wire post-save analysis, manual retry, and backup 
     "utf8",
   );
 
-  // API call occurs inside `if (await persist())` blocks, never before persist
-  assert.match(storeSource, /if \(await persist\(\)\) \{\s*state\.status = "기록을 저장했어요[\s\S]*?void analyzeRecord\(savedTarget\)/);
-  assert.match(storeSource, /if \(await persist\(\)\) \{\s*state\.status = "기록을 수정했어요[\s\S]*?void analyzeRecord\(entry\)/);
+  // Server record persistence occurs before post-save analysis call
+  assert.match(storeSource, /await (?:create|update)AccountRecord[\s\S]*?void analyzeRecord\(savedEntry\)/);
+  assert.match(storeSource, /await updateAccountRecord\(entry\.id[\s\S]*?void analyzeRecord\(entry\)/);
   assert.match(storeSource, /cancelRecordAnalysis/);
   assert.match(storeSource, /cancelAllAnalyses/);
   assert.match(storeSource, /retryAnalysis/);
