@@ -253,6 +253,11 @@
 
 ## 카드 블롭 캐릭터·외곽선 정합·글꼴 교체 (2026-11-22)
 
+- **프로필 아이콘**: 토끼·곰·고양이·병아리·구름·별 6종을 카드 블롭과 같은 화풍(안쪽 그림자·그레인·빛나는 알약 눈)의 256×256 투명 PNG로 바꿨습니다.
+  - 파일은 `assets/profile/{id}.png`(SVG 원본 `{id}.svg`)이고, `tools/build-profile-icons.mjs`가 `MomentBlob.skinFilter`·`eyeFilter`·`eye`로 그려 Playwright로 렌더링합니다.
+  - `tools/build.mjs`가 data URI로 `home-view.js`의 `/*__PROFILE_ASSETS__*/`에 넣습니다. `profileIcon(icon)`은 `<img class="profile-icon" alt="">`이며, 알 수 없는 값은 토끼입니다.
+  - 몸통 색은 고정이고(40px에서도 흰 눈이 보이도록 진한 톤), 뒤의 원은 지금처럼 프로필 색과 테마 톤을 섞습니다. 예전 SVG 아이콘(`.pi-*`, `--avatar-figure`)은 없앴습니다.
+
 - **글꼴**: 한글 UI·본문은 Gothic A1 대신 **Moment Sans**입니다. Pretendard Variable 1.3.9를 서브셋한 글꼴이며, OFL의 예약 글꼴 이름 때문에 서브셋 이름을 바꿨습니다(`docs/licenses/pretendard-ofl.txt`).
   - 가변 글꼴 하나(`font-weight: 45 930`)로 모든 굵기를 실제 글꼴로 그리고, 한글 11,172자 전부와 호환 자모를 담아 입력한 드문 음절도 시스템 글꼴로 바뀌지 않습니다.
   - 생성: `tools/subset-ui-fonts.py --pretendard <PretendardVariable.ttf>`.

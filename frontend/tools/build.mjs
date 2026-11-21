@@ -17,12 +17,18 @@ const statisticsView =
   (await read("scripts/profile-view.js"));
 // 2026-11-22: cards draw the Figma blob (scripts/blob-art.js); only the empty-card heart PNG is still embedded.
 const assetNames = ["heart"];
+// Profile avatar icons (2026-11-22): assets/profile/*.png from tools/build-profile-icons.mjs.
+const profileIcons = ["bunny", "bear", "cat", "chick", "cloud", "star"];
+const profileAssets = Object.fromEntries(await Promise.all(profileIcons.map(async name => [name, "data:image/png;base64," + (await readFile(new URL("assets/profile/" + name + ".png", base))).toString("base64")])));
 const assets = Object.fromEntries(await Promise.all(assetNames.map(async name => [name, "data:image/png;base64," + (await readFile(new URL("assets/characters/" + name + ".png", base))).toString("base64")])));
 const persistence = await read("scripts/persistence.js");
 const benchmark = await read("scripts/benchmark.js");
 const app = (await read("scripts/app.js")).replace("/*__OBJECT_ASSETS__*/", () => JSON.stringify(assets)).replace("/*__PERSISTENCE__*/", () => persistence + "\n" + benchmark).replace(
   "/*__STATISTICS_VIEW__*/",
-  () => statisticsView,
+  () => {
+    if (!statisticsView.includes("/*__PROFILE_ASSETS__*/{}")) throw Error("Missing marker PROFILE_ASSETS");
+    return statisticsView.replace("/*__PROFILE_ASSETS__*/{}", () => JSON.stringify(profileAssets));
+  },
 );
 const fonts = (await read("styles/base.css"))
   .split("\n")

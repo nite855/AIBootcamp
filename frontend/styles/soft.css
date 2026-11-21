@@ -108,29 +108,19 @@ header .screen-title { font-size: inherit; }
   background: transparent;
 }
 /* 2026-11-21 avatar tone blend: the chosen color is mixed with the theme surface and edged with
-   the theme line, so the avatar sits in every theme (dark ones too). The icon body is a fixed deep
-   tone of the avatar color instead of --ink, which turns light on night/tearoom. Defined on the
-   elements (not :root) so the inline --avatar on each avatar is the one being mixed. */
+   the theme line, so the avatar sits in every theme (dark ones too). Defined on the elements
+   (not :root) so the inline --avatar on each avatar is the one being mixed. */
 :is(.avatar-face, .profile-avatar, .color-option span[aria-hidden], .icon-option span[aria-hidden]) {
   --avatar-fill: color-mix(in srgb, var(--avatar, #f3cdb6) 62%, var(--surface));
-  --avatar-figure: color-mix(in srgb, var(--avatar, #f3cdb6) 40%, #2b2b33);
   --avatar-edge: inset 0 0 0 1px var(--line);
 }
-/* Dark schemes (night, tearoom): a deeper tone of the color with a light silhouette. */
+/* Dark schemes (night, tearoom): a deeper tone of the color. */
 html[data-theme="dark"] :is(.avatar-face, .profile-avatar, .color-option span[aria-hidden], .icon-option span[aria-hidden]) {
   --avatar-fill: color-mix(in srgb, var(--avatar, #f3cdb6) 38%, var(--surface));
-  --avatar-figure: color-mix(in srgb, var(--avatar, #f3cdb6) 30%, #fff);
 }
 .avatar-face { display: grid; place-items: center; overflow: hidden; width: 40px; height: 40px; border-radius: 50%; background: var(--avatar-fill); box-shadow: var(--avatar-edge); transition: box-shadow .2s ease; }
-/* Avatar icon (2026-11-21, six faces from profileIcon(icon)): body in --avatar-figure, eyes and
-   mouth cut out in the avatar fill, pink blush and a warm beak that read on light and dark figures. */
-.profile-icon { display: block; width: 82%; height: 82%; fill: var(--avatar-figure, #5c5a60); pointer-events: none; }
-.profile-icon .pi-hole { fill: var(--avatar-fill, #fff); }
-.profile-icon .pi-line { fill: none; stroke: var(--avatar-fill, #fff); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
-.profile-icon .pi-cheek { fill: #ff8fab; opacity: .6; }
-.profile-icon .pi-beak { fill: #f6a93b; }
-.profile-icon .pi-star { stroke: var(--avatar-figure, #5c5a60); stroke-width: 1.6; stroke-linejoin: round; }
-@media (forced-colors: active) { .profile-icon { fill: CanvasText; } .profile-icon .pi-star { stroke: CanvasText; } .profile-icon :is(.pi-hole, .pi-cheek, .pi-beak) { fill: Canvas; opacity: 1; } .profile-icon .pi-line { stroke: Canvas; } }
+/* Avatar icon (2026-11-22): a blob-style PNG face (fixed colors, glowing eyes) on the tone-blended circle. */
+.profile-icon { display: block; width: 86%; height: 86%; object-fit: contain; pointer-events: none; user-select: none; }
 .avatar[aria-current="page"] .avatar-face { box-shadow: var(--avatar-edge), 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
 .avatar:hover .avatar-face { box-shadow: var(--avatar-edge), 0 0 0 2px var(--surface), 0 0 0 4px var(--line); }
 

@@ -278,21 +278,11 @@ function mainNavigation() {
   const tabs = NAV_TABS.map(t => btn(t.action, `<svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">${t.icon}</svg><span>${t.label}</span>`, "tab", t.id === current ? 'aria-current="page"' : "")).join("");
   return `<button type="button" class="brand" data-action="write" aria-label="오늘의 모먼트 · 기록으로"><span class="brand-dot" aria-hidden="true"></span><span class="brand-word">moment</span><span class="screen-title sr-only">${title}</span></button><nav class="tabs" aria-label="주요 메뉴">${tabs}</nav><button type="button" class="avatar" data-action="settings" aria-label="프로필·설정"${current === "profile" ? ' aria-current="page"' : ""}><span class="avatar-face" style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(profile.icon)}</span></button>`;
 }
-// Avatar icons (2026-11-21): six small faces drawn on the avatar color (top bar, profile card,
-// icon and color options in the edit dialog). The body takes the .profile-icon fill
-// (--avatar-figure); .pi-hole/.pi-line are eyes and mouths in the avatar fill, .pi-cheek is blush.
-const PI_EYES = (y, l = 9.3, r = 14.7, s = 1.1) => `<circle class="pi-hole" cx="${l}" cy="${y}" r="${s}"/><circle class="pi-hole" cx="${r}" cy="${y}" r="${s}"/>`;
-const PI_CHEEKS = (y, l = 7.4, r = 16.6) => `<ellipse class="pi-cheek" cx="${l}" cy="${y}" rx="1.4" ry="1"/><ellipse class="pi-cheek" cx="${r}" cy="${y}" rx="1.4" ry="1"/>`;
-const PI_SMILE = (y, x = 12) => `<path class="pi-line" d="M${x - 1.1} ${y}q1.1 1 2.2 0"/>`;
-const PROFILE_ICONS = {
-  bunny: `<ellipse cx="8.8" cy="6.2" rx="2.3" ry="4.8"/><ellipse cx="15.2" cy="6.2" rx="2.3" ry="4.8"/><ellipse class="pi-cheek" cx="8.8" cy="6.6" rx=".9" ry="2.8"/><ellipse class="pi-cheek" cx="15.2" cy="6.6" rx=".9" ry="2.8"/><ellipse cx="12" cy="15" rx="7.6" ry="6.8"/>${PI_EYES(14.4)}${PI_CHEEKS(16.4)}${PI_SMILE(16.6)}`,
-  bear: `<circle cx="6.2" cy="7.6" r="3.1"/><circle cx="17.8" cy="7.6" r="3.1"/><circle class="pi-cheek" cx="6.2" cy="7.6" r="1.5"/><circle class="pi-cheek" cx="17.8" cy="7.6" r="1.5"/><circle cx="12" cy="13.8" r="7.8"/><ellipse class="pi-hole" cx="12" cy="16.6" rx="3.2" ry="2.5"/><ellipse cx="12" cy="15.7" rx="1.2" ry=".85"/>${PI_EYES(12.6, 8.9, 15.1, 1.05)}${PI_CHEEKS(15.4, 6.9, 17.1)}`,
-  cat: `<path d="M4.6 10.2 5.3 3.6 10 7.2Q12 6.7 14 7.2L18.7 3.6 19.4 10.2Q20.8 12.5 20.3 15.3 19.4 20.9 12 20.9 4.6 20.9 3.7 15.3 3.2 12.5 4.6 10.2Z"/><path class="pi-cheek" d="M6.4 6.4 6.1 9.2 8.4 8ZM17.6 6.4 17.9 9.2 15.6 8Z"/>${PI_EYES(13.2, 8.9, 15.1)}<path class="pi-cheek" d="M11.2 15.1h1.6L12 16Z"/><path class="pi-line" d="M10.5 16.6q.75.8 1.5 0q.75.8 1.5 0"/>${PI_CHEEKS(16.1, 6.6, 17.4)}`,
-  chick: `<path d="M11.2 6.6Q10.6 3.6 12.4 3.2 11.8 4.8 13.4 4.4 13.4 6 12.6 6.6Z"/><circle cx="12" cy="13.8" r="7.9"/><path class="pi-beak" d="M10.5 14.2 12 13.1 13.5 14.2 12 15.5Z"/>${PI_EYES(12, 8.9, 15.1)}${PI_CHEEKS(15, 6.9, 17.1)}`,
-  cloud: `<path d="M7.2 19.4A4.6 4.6 0 0 1 6.4 10.3 6 6 0 0 1 17.5 9.4 5 5 0 0 1 17 19.4Z"/>${PI_EYES(14, 9.6, 14.4, 1)}${PI_CHEEKS(15.8, 7.6, 16.4)}${PI_SMILE(16)}`,
-  star: `<path class="pi-star" d="M12 3.3 14.7 9.1 21 9.9 16.4 14.2 17.6 20.5 12 17.4 6.4 20.5 7.6 14.2 3 9.9 9.3 9.1Z"/>${PI_EYES(12.8, 10.2, 13.8, .95)}${PI_SMILE(14.6)}`,
-};
+// Avatar icons (2026-11-22): six blob-style PNG faces (tools/build-profile-icons.mjs → assets/profile/*.png,
+// embedded by tools/build.mjs) on the avatar color circle (top bar, profile card, icon and color options).
+const PROFILE_ASSETS = /*__PROFILE_ASSETS__*/{};
 function profileIcon(icon) {
-  const id = Object.hasOwn(PROFILE_ICONS, icon) ? icon : MomentProfile.DEFAULTS.icon;
-  return `<svg class="profile-icon" data-icon="${id}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${PROFILE_ICONS[id]}</svg>`;
+  const id = MomentProfile.ICONS.includes(icon) ? icon : MomentProfile.DEFAULTS.icon;
+  const src = PROFILE_ASSETS[id] || "";
+  return `<img class="profile-icon" data-icon="${id}" src="${src}" alt="" draggable="false" decoding="async">`;
 }

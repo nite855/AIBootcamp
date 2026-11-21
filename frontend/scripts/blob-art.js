@@ -24,31 +24,41 @@
     const id = String(value || "").replace(/[^A-Za-z0-9_-]/g, "");
     return id || "blob" + (++seq);
   }
-  // Filter and shape markup only (no <svg>), for embedding in another SVG.
-  function blobBody(color, uid) {
-    const fill = safeColor(color), id = safeId(uid);
-    const eye = x => `<g filter="url(#${id}-eye)"><rect x="${x}" y="88.4" width="10.4" height="23.4" rx="5.2" transform="rotate(8 ${x} 88.4)" fill="#ffffff"/></g>`;
-    return `<defs>`
-      + `<filter id="${id}-glow" x="0" y="0" width="213.2" height="213.2" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="14.3"/></filter>`
-      + `<filter id="${id}-skin" x="32.4226" y="32.4321" width="140.555" height="136" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">`
+  // Figma filters, reusable for other blob-style drawings (profile icons). Region = [x, y, width, height]
+  // in user space; the defaults are the card character's.
+  function skinFilter(id, region = [32.4226, 32.4321, 140.555, 136]) {
+    const [x, y, w, h] = region;
+    return `<filter id="${id}-skin" x="${x}" y="${y}" width="${w}" height="${h}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">`
       + `<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>`
       + `<feOffset dx="-7.8" dy="-10.4"/><feGaussianBlur stdDeviation="10.4"/><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>`
       + `<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0"/><feBlend mode="normal" in2="SourceGraphic" result="shade"/>`
       + `<feTurbulence type="fractalNoise" baseFrequency="0.76923072338104248" stitchTiles="stitch" numOctaves="3" seed="0" result="noise"/>`
       + `<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise"/><feComponentTransfer in="alphaNoise" result="grain"><feFuncA type="discrete" tableValues="${GRAIN}"/></feComponentTransfer>`
       + `<feComposite operator="in" in="grain" in2="shade" result="grainClip"/><feFlood flood-color="#ffffff" flood-opacity="0.6"/><feComposite operator="in" in2="grainClip" result="grainColor"/>`
-      + `<feMerge><feMergeNode in="shade"/><feMergeNode in="grainColor"/></feMerge></filter>`
-      + `<filter id="${id}-eye" x="78" y="78.6" width="54" height="44.2" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">`
-      + `<feGaussianBlur in="SourceAlpha" stdDeviation="5.2"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`
+      + `<feMerge><feMergeNode in="shade"/><feMergeNode in="grainColor"/></feMerge></filter>`;
+  }
+  function eyeFilter(id, region = [78, 78.6, 54, 44.2]) {
+    const [x, y, w, h] = region;
+    return `<filter id="${id}-eye" x="${x}" y="${y}" width="${w}" height="${h}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">`
+      + `<feGaussianBlur in="SourceAlpha" stdDeviation="5.2"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  }
+  // Glowing pill eye (10.4 × 23.4, rx 5.2, tilted 8°) at its top-left corner.
+  const eye = (id, x, y = 88.4) => `<g filter="url(#${id}-eye)"><rect x="${x}" y="${y}" width="10.4" height="23.4" rx="5.2" transform="rotate(8 ${x} ${y})" fill="#ffffff"/></g>`;
+  // Filter and shape markup only (no <svg>), for embedding in another SVG.
+  function blobBody(color, uid) {
+    const fill = safeColor(color), id = safeId(uid);
+    return `<defs>`
+      + `<filter id="${id}-glow" x="0" y="0" width="213.2" height="213.2" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="14.3"/></filter>`
+      + skinFilter(id) + eyeFilter(id)
       + `</defs>`
       + `<g data-blob-part="glow" opacity="0.45" filter="url(#${id}-glow)"><circle cx="106.6" cy="106.6" r="78" fill="${fill}"/></g>`
       + `<g data-blob-part="body" filter="url(#${id}-skin)"><path d="${PATH}" fill="${fill}"/></g>`
-      + eye(91) + eye(111.8);
+      + eye(id, 91) + eye(id, 111.8);
   }
   // A standalone <svg> (attrs: class, or x/y/width/height when nested in the card SVG).
   function blobSVG({ color, uid, attrs = "", character = "" } = {}) {
     const data = character ? ` data-character="${String(character).replace(/[^a-z0-9_]/gi, "")}"` : "";
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEW} ${VIEW}" overflow="visible"${data} ${attrs} aria-hidden="true" focusable="false">${blobBody(color, uid)}</svg>`;
   }
-  return { VIEW, DEFAULT_COLOR, PATH, safeColor, blobBody, blobSVG };
+  return { VIEW, DEFAULT_COLOR, PATH, safeColor, skinFilter, eyeFilter, eye, blobBody, blobSVG };
 });
