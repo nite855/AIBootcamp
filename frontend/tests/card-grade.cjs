@@ -119,7 +119,24 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
       await page.evaluate(() => { const t = document.querySelector('.tilt-layer'); t.style.setProperty('--tilt-x', '0deg'); t.style.setProperty('--tilt-y', '0deg'); });
       a.forEach((v, i) => assert.ok(Math.abs(v - f[i]) <= (i < 2 ? 3 : 12), `halo follows the tilted card (${a.map(Math.round)} vs ${f.map(Math.round)})`));
     };
-    await auraFollows();
+    // 2026-11-22: the halo hugs the card (no gap) with the card's own corner radius (SVG rx 96 of 1080),
+    // and every outer ring is concentric: radius - inset = card radius.
+    const ringsHug = async label => {
+      const g = await page.evaluate(() => {
+        const px = v => parseFloat(v) || 0;
+        const aura = document.querySelector('.grade-aura'), front = document.querySelector('.flip-front');
+        const a = aura.getBoundingClientRect(), f = front.getBoundingClientRect();
+        const rings = ['::before', '::after'].map(p => getComputedStyle(aura, p)).filter(cs => cs.content !== 'none' && cs.display !== 'none')
+          .map(cs => [px(cs.borderTopLeftRadius), -px(cs.top)]);
+        return {a: [a.x, a.y, a.width, a.height], f: [f.x, f.y, f.width, f.height], r: px(getComputedStyle(aura).borderTopLeftRadius), fr: px(getComputedStyle(front).borderTopLeftRadius), rings, grade: aura.closest('.card-box').dataset.grade};
+      });
+      const want = g.f[2] * 96 / 1080;
+      g.a.forEach((v, i) => assert.ok(Math.abs(v - g.f[i]) <= 1, `${label}: halo box = card box (${g.a.map(Math.round)} vs ${g.f.map(Math.round)})`));
+      assert.ok(Math.abs(g.r - want) <= 1, `${label}: halo radius ${g.r} = card radius ${want.toFixed(1)}`);
+      assert.ok(Math.abs(g.fr - want) <= 1, `${label}: card face radius ${g.fr} = SVG radius ${want.toFixed(1)}`);
+      for (const [r, inset] of g.rings) assert.ok(Math.abs(r - inset - want) <= 1, `${label}: ${g.grade} ring concentric (r ${r} - inset ${inset} vs ${want.toFixed(1)})`);
+    };
+    await ringsHug('desktop');
 
     await click('catalog');
     const stage1 = page.locator('.slot[data-grade="stage-1"]').first();
@@ -176,6 +193,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'no overflow during the burst (390)');
       assert.ok(await unseal(page));
       await auraFollows();
+      await ringsHug('phone');
       // The status chip sits above the card, not on it.
       const chip = await page.locator('.stage-chip').boundingBox(), card = await page.locator('.flip-scene').boundingBox();
       assert.ok(chip.y + chip.height <= card.y + 1, `stage chip above the card on phones (${chip.y + chip.height} <= ${card.y})`);

@@ -36,13 +36,17 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
             const css = getComputedStyle(selector ? el.querySelector(selector) : el);
             return keys.map(key => css[key]);
           };
-          return { art: read('.art-card', ['borderRadius', 'filter']), rear: read('.flip-back', ['borderRadius', 'boxShadow']),
+          return { width: el.getBoundingClientRect().width, art: read('.art-card', ['borderRadius', 'filter']), rear: read('.flip-back', ['borderRadius', 'boxShadow']),
             perspective: read(null, ['perspective']), flip: read('.flip-inner', ['transitionDuration']),
             tilt: read('.tilt-layer', ['transitionDuration']), light: read('.flip-light', ['borderRadius', 'transitionDuration', 'backgroundImage', 'mixBlendMode']) };
         });
-        if (!baseline) baseline = styles;
-        assert.deepEqual(styles, baseline, `${id}/${mode}: common effects`);
-        // 5:7 card corners follow the SVG (rx 96 of 1080 ≈ 8.9% of the width).
+        // 5:7 card corners follow the SVG at every width (rx 96 of 1080 ≈ 8.9% of the width, 2026-11-22: --card-r).
+        const radius = styles.width * 96 / 1080;
+        for (const value of [styles.art[0], styles.rear[0], styles.light[0]]) assert.ok(Math.abs(parseFloat(value) - radius) <= 1, `${id}/${mode}: card corner ${value} = ${radius.toFixed(1)}px`);
+        // Everything else is the same in every theme and viewport.
+        const common = { ...styles, width: 0, art: styles.art.slice(1), rear: styles.rear.slice(1), light: styles.light.slice(1) };
+        if (!baseline) baseline = common;
+        assert.deepEqual(common, baseline, `${id}/${mode}: common effects`);
         assert.ok(parseFloat(styles.art[0]) >= 20, 'rounded card corners ' + styles.art[0]); assert.notEqual(styles.art[1], 'none');
         assert.equal(styles.rear[0], styles.art[0]); assert.notEqual(styles.rear[1], 'none');
         assert.deepEqual(styles.perspective, ['1200px']); assert.deepEqual(styles.flip, ['0.6s']);

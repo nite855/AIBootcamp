@@ -234,7 +234,7 @@ footer { display: none; }
 /* ── Moment card (5:7, Figma v1.1): corners match the SVG (rx 96 of 1080) at the 320px card width ── */
 .flip-trigger .art-card,
 .flip-front .flip-light, .flip-back .flip-light,
-.flip-front, .flip-back { border-radius: 28px; }
+.flip-front, .flip-back { border-radius: var(--card-r, 28px); }
 .art-card { filter: drop-shadow(0 18px 28px rgb(17 17 20 / .14)); }
 .flip-back { background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--tint) 60%, var(--surface))); }
 
