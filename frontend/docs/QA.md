@@ -16,7 +16,7 @@ Windows / Playwright / Chrome headless에서 아래 검사를 통과했습니다
 | `node tests/compatibility-browser.cjs` | 이전 기록·초안·모드·테마와 즐겨찾기 보존 |
 | `node tests/record-ui.cjs` | 저장 실패·재시도, 확대 읽기·초점, 월간 기본/선택 유지, 긴 글·PNG |
 | `node tests/card-effects.cjs` | 18개 팔레트, PC/터치 효과, 키보드, 움직임 설정·토글 초점·이전 값 보존 |
-| `node tests/taxonomy-browser.cjs` | 감정 10유형·30슬롯·중립 표식·PNG·반응형 분포 |
+| `node tests/taxonomy-browser.cjs` | 감정 9유형·27슬롯·중립 표식·PNG·반응형 분포 |
 | `node tests/simplification.cjs` | 108개 테마/화면 크기 조합, 카드 공통 비율·기본 3동작·취소 동작 |
 | `node tests/design-preview.cjs` | 디자인 검토 페이지 18개 팔레트·3개 너비·링크·오프라인 |
 | `node tools/build-tokens.mjs --check` | 생성 토큰 일치 |
@@ -137,7 +137,7 @@ Windows / Node v22.16.0 / 로컬 Chrome headless와 기존 Playwright로 실행�
 
 ## 3+10 회귀 검증
 
-`node tests/taxonomy-browser.cjs`로 30슬롯·10종 명칭·중립 4종 표식·키보드 선택·모바일 분포·PNG를 검증합니다. Node 단위 테스트는 30/60/90% 경계, 구형 6/7종 결과, 잘못된 분류 버전, 잘린 결과, 중립 합산과 도감 재잠금을 포함합니다. 실제 모델 성능과 카드 발급 비율 검증은 API 연동 후 수행합니다.
+`node tests/taxonomy-browser.cjs`로 27슬롯·9종 명칭·중립 3종 표식·키보드 선택·모바일 분포·PNG를 검증합니다. Node 단위 테스트는 30/60/90% 경계, 구형 6/7종 결과, 이전 3plus10(10키) 결과 거부, 9키 합계 허용 오차, 잘못된 분류 버전, 잘린 결과, 중립 합산과 도감 재잠금을 포함합니다. 실제 모델 성능과 카드 발급 비율 검증은 API 연동 후 수행합니다.
 
 ## 3+10 구현 검증 결과 (2026-11-10)
 
@@ -193,4 +193,91 @@ LAN HTTP에서는 메인 정적 서버 주소를 MOMENT_LAN_URL로 지정하고 
 
 모바일 도움말과 긴 오류 원인은 안내 대화상자로 표시합니다. 저장 실패 시 기존 주요 버튼이 재시도로 바뀌고 처리 중 중복 클릭을 막습니다. 예시 모드는 작성 상단에서 항상 구분합니다. 데이터·테마 저장 키와 API는 변경하지 않습니다.
 
+카드 공개·공유 검사(2026-11-19): `node frontend/tests/share-reveal.cjs`. 실제 기록의 분석 대기 카드(공유 없음, "감정 직접 선택 없음"), 저장 직후 봉인 카드와 탭 공개, 예시 3단계 카드의 1회 공개 연출(봉인·연출 중 `.flip-scene` 위치·크기 불변, 재렌더 시 재생 안 함, 2026-11-20 탭 방식으로 갱신), 정보 패널 문구·칩, 공유 형식 3종·초점 유지, 한 문장(최대 40자) 넣기·빼기, 미리보기와 PNG에 일기 본문 미포함, PNG 1080×1350, 도감 상세에서 공유 후 도감 복귀, 카드 효과 끔 시 연출 생략, 390·320 폭 가로 넘침 없음을 검증합니다.
+
+카드 획득 연출·등급 이펙트 검사(2026-11-20): `node frontend/tests/card-grade.cjs`.
+- 빈 입력 저장은 기록 화면에 머뭅니다.
+- 저장하면 카드 화면에 봉인 카드가 나오고 초점을 받습니다. 이때 정보 패널과 실제 카드는 숨겨져 있고 `inert`이며, 봉인 카드와 실제 카드의 크기가 같습니다.
+- 누르기 전에 다시 렌더되어도 봉인이 유지됩니다.
+- Enter로 공개하면 pending 이펙트가 나옵니다(입자 6, 플래시 없음). 연출 중과 연출 뒤 `.flip-scene` 위치·크기가 같고, 끝나면 `#card-info-title`이 초점을 받으며 카드 뒷면은 `inert`를 유지합니다.
+- 카드를 뒤집으면 `.grade-pulse`가 붙습니다.
+- (2026-11-21) `.grade-aura`는 `.flip-inner` 안에 있어 카드를 기울여도 후광 상자가 카드 앞면 상자와 함께 움직입니다. 390px에서 상태 칩이 카드와 겹치지 않고, 연출 중에는 "새 카드" 배지가 뜨지 않다가 결과 화면에서 뜹니다.
+- 다시 열면 봉인되지 않고, 다시 저장하면(새 버전) 한 번 더 봉인됩니다.
+- 예시 3단계는 입자 22와 `.grade-flash`, 1단계는 입자 10에 플래시가 없습니다.
+- 도감 슬롯(잠긴 칸 제외), 상세 창, 공유 프레임, 배지, 목록 썸네일, 오늘의 카드에 `data-grade`가 붙습니다.
+- 390폭에서 봉인 중 가로 넘침이 없습니다.
+- 봉인 안내 `.seal-hint`(범례 4칸)는 데스크톱에서 카드 오른쪽, 390폭에서 카드 아래에 있고 공개 후 사라집니다. 실제 기록에만 분석 대기 안내가 붙습니다.
+- 홈 화면에는 `.today-card`("오늘의 카드가 도착했어요")가 없습니다. 저장 성공·실패 표시는 편집기의 "저장 실패 · 원문은 유지돼요"와 "저장 재시도"로 확인합니다(`record-ui`·`benchmark-browser`).
+
+저장 실패(IndexedDB 오류·차단)일 때는 카드 화면으로 가지 않고 기록 화면에서 오류와 재시도를 유지합니다(`record-ui`·`ux`·`benchmark-browser`·`persistence-browser`). 수동 확인 필요: 실기기에서 3단계 플래시의 밝기·눈부심, 저사양 기기의 연출 끊김, 화면 낭독기에서 봉인 → 공개 안내 흐름.
+
+레이아웃 스테이지 검사(2026-11-19): `node frontend/tests/layout-stage.cjs`. 1280×720·1920×1080·2560×1440은 스테이지가 화면을 가득 채우고 1440 기준 배율(1·1.333·1.778), 1440×900·1366×768·1024×768은 폭 100%·배율 1, 2560×1080·3440×1440은 16:9 중앙 정렬과 양쪽 장식 레일, 1700×900은 레일 없음, 320~768 모바일은 가로 넘침 없음·하단 탭바가 화면 안·저장 버튼 표시를 검증합니다.
+
+UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`. 1366×900·320×568에서 "통계" 탭명, 정렬 토글·초점 유지, 오래된 순 정렬, 하루 1편 날짜의 바로 상세, 저장 토스트, 분석 대기 기록이 감정 필터에 걸리지 않는지, 필터 초기화를 검증합니다.
+
 회귀 검사: `node frontend/tests/ux.cjs`(루트 기준). 320×568~390×844에서 버튼 겹침·페이지 넘침, 도움말 표시, 오류 상세·재시도·원문 보존, 예시 표식, 카드 직접 클릭·필터·적용·취소·키보드 초점을 검증합니다.
+
+## 설정 단순화·통계 배치 검증 (2026-11-19)
+
+단위 76개, `build-tokens --check`, `build-design-preview --check`(theme.js 변경으로 검토 페이지 재생성), 브라우저 20종(`browser`·`taxonomy-browser`·`persistence-browser`·`card-effects`·`ux-review`·`themes`·`record-ui`·`simplification`·`home-view`·`benchmark-browser`·`ux`·`ux-p0`·`ux-general`·`ux-retro`·`ux-writing`·`design-preview`·`wireframes`·`compatibility-browser`·`layout-stage`·`share-reveal`)을 통과했습니다.
+
+- 공용 도우미 `tests/browser-runtime.cjs`의 `reveal()`은 CSS로 숨겨진 패널의 같은 `data-action`이 있어도 보이는 버튼을 먼저 고릅니다.
+- `benchmark-browser.cjs`는 백업 가져오기 대신 IndexedDB에 예시 기록을 직접 넣어 검색·즐겨찾기·달력을 검사합니다.
+- 수동 확인 필요: 실기기 모바일에서 통계 버튼 전환과 기록 화면 달력 숨김, OS 움직임 줄이기 사용자의 카드 효과 체감.
+
+## 기록 화면 소프트 UI v1.1 검증 (2026-11-20, P3)
+
+단위 82개(`streakDays`·`weekLabel` 추가), `build-tokens --check`, `build-design-preview --check`(`soft.css` 미니카드 모서리 변경으로 검토 페이지 재생성), 브라우저 24종을 통과했습니다. `mobile-lan.cjs`는 `MOMENT_LAN_URL`이 필요해 실행하지 않았습니다.
+
+- `node frontend/tests/week-calendar.cjs`(1440×900·390×844): 주간 7칸·미래 칸 비활성·오늘 표시, 저장 후 잠긴 미니카드·`1일 연속`, 주 이동 초점, 월간 칸 수·요약 행·미래 달 차단, 카드 모달(분석 대기 공유 없음·기록한 날 이동·Escape 후 초점 복귀·모바일 바텀시트), 예시 모드 공유·도감 이동, 기록 원문 이스케이프.
+- `benchmark-browser.cjs`: 저장 실패 시 "저장했어요" 토스트가 없고 실패 바·안내가 보이는지 확인합니다.
+- 홈 화면의 `.today-card`는 이제 오늘의 카드 패널 안의 미니카드 버튼입니다("오늘의 카드가 도착했어요" 문구는 계속 없음).
+- 수동 확인 필요: 실기기에서 월간 미니카드(약 55px) 가독성, 바텀시트 스크롤과 키보드, 화면 낭독기에서 칸 이름표·모달 이동 안내.
+
+## 주간 스트립·주별/일별 달력 검증 (2026-11-19)
+
+단위 78개(주 시작·월말·연말·윤일·잘못된 날짜·미래 주 차단 추가), `build-tokens --check`, `build-design-preview --check`(`flip.css` 변경으로 검토 페이지 재생성), 브라우저 21종(위 20종 + `week-calendar`)을 통과했습니다. `mobile-lan.cjs`는 `MOMENT_LAN_URL`이 필요해 실행하지 않았습니다.
+
+- `node frontend/tests/week-calendar.cjs`: 스트립 7칸·✓ 개수 변화·미래 칸 비활성·기록한 날 열기, 주별 7행·첫 줄 말줄임·HTML 이스케이프·주 이동 초점, 일별 미리보기, 통계에 `#stats-month`·`#stats-date`가 없고 ‹ › 분석일 이동이 되는지 확인합니다.
+- 수동 확인 필요: 실기기 모바일에서 일별 칸 2줄 미리보기 가독성, 긴 영문 한 단어 첫 줄의 말줄임.
+
+## 통계 그래프 우선 배치·화살표 정렬 검증 (2026-11-19)
+
+단위 78개, `build-tokens --check`, `build-design-preview --check`, 브라우저 22종(신규 `stats-layout` 포함, `mobile-lan` 제외)을 확인했습니다.
+
+- `node frontend/tests/stats-layout.cjs`가 검사하는 항목:
+  - 배너와 중복 요약이 없음
+  - 데스크톱 그래프가 첫 화면 안에 있고 추이 폭이 분포의 1.6배 이상
+  - 모바일 기본 탭이 추이이고 그래프 높이 180px 이상
+  - x축이 오늘에서 끝남
+  - 강조 토글(`aria-pressed`, 흐림, 해제, 초점 유지)
+  - 모든 `.nav-arrow` 꺾쇠가 중앙에서 ±1.5px 이내
+- `ux.cjs`는 전체 일괄 실행 때 테마 적용 단계(`blossom`/`forest`)에서 가끔 실패했습니다. 단독으로는 10회 연속 통과했고, 이번 변경은 테마 코드를 건드리지 않았습니다(타이밍 불안정으로 기록).
+
+## 소프트 UI v1.1 P4~P8 검증 (2026-11-20)
+
+단계마다 빌드 후 단위·브라우저 전체를 실행했습니다. 최종: 단위 94개, `build-tokens --check`·`build-design-preview --check` OK, 브라우저 스크립트 26종 통과(`mobile-lan.cjs`는 `MOMENT_LAN_URL`이 필요해 제외). 이전 기록의 PNG 1080×1620·2:3 프레임·공유 본문 미포함·봉인 카드 탭 공개는 이 단계들에서 바뀌었습니다(카드 5:7 1080×1512, 첫 문장 인용, 자동 연출).
+
+- P4 카드 획득: `card-grade.cjs`(분석 대기 패널, 단계 순서 charge → rise → burst, 탭 무시, 건너뛰기 없음, 입자 수·3단계 플래시), `share-reveal.cjs`·`record-ui.cjs`·`ux-p0.cjs`·`ux-review.cjs` 갱신. 도우미 `unseal()`은 탭하지 않고 최대 9초 기다립니다.
+- P5 도감: 신규 `collection.cjs`(첫 실행 27칸 잠김, 탭 개수·필터, 6열, 번호, 상세 성장 칸·바텀시트, 320폭 넘침 없음).
+- P6 통계: `stats-layout.cjs` 재작성(빈 달, pill, 비율 합 100%, 단일 계열·평균선·오늘 말풍선, 점 수, 분포 정렬, 달력, 요일 순서, 데스크톱 배치), `statistics.test.cjs`에 경계값 4개.
+- P7 프로필: 신규 `profile.cjs`, `profile.test.cjs`(닉네임 코드 포인트·막힌 저장소·연말·윤일). 2026-11-20 후속: 기록 내보내기 제거, 아바타 사람 아이콘(`profile.cjs`에서 확인).
+- P8 공유: `share-reveal.cjs`(첫 문장만, 옵션 4개, PNG 1080×1350, 스토리 1080×1920, 링크 복사 성공·실패), `share-core.test.cjs`.
+- 수동 확인 필요: 실기기 모바일(바텀시트 스크롤·키보드), Safari·Firefox, Web Share 파일 공유로 인스타그램 스토리 올리기, 클립보드 권한 거부 흐름, 화면 낭독기에서 자동 연출·카드 모달 안내, 테마 10종 대비.
+
+## Figma v1.1 2차 반영 검증 (2026-11-21, F1~F8)
+
+화면 규칙은 [UI_SPEC](UI_SPEC.md)의 "Figma v1.1 2차 반영" 절에 있습니다. 단계마다 `node tools/build.mjs`로 빌드한 뒤, 단위 테스트(94개)와 그 단계에 관련된 브라우저 스크립트를 하나씩 실행했습니다. 전체 스크립트를 한 번에 돌리는 일괄 실행은 이번에 하지 않았습니다. 데스크톱(1440×900)·모바일(390×844) 스크린샷을 Figma 프레임과 비교했습니다.
+
+- F1~F2 셸·기록 화면: `layout-stage`·`week-calendar`·`ux-review`·`browser`·`persistence-browser`(저장 실패 바)·`home-view`.
+- F3 카드 공개: `card-grade`(대기 문구는 무대 아래, 진행 칩은 모서리, 범례 `aria-label`, `.draw-caption` 퍼센트)·`share-reveal`·`record-ui`·`simplification`(card-info 동작 `card-catalog`·`share`·`card-more`)·`moment-card`·`card-effects`·`benchmark-browser`.
+- F4 도감: `collection`(첫 실행 `inert` 그리드, 캡션 없음, 확률 기준 문구, 모바일 전체 페이지 상세)·`taxonomy-browser`.
+- F5 통계: `stats-layout`(정수 비율 합 ±1.5, 대표 카드 단계, 세로 요일 막대, 한 패널), `ux-retro`.
+- F6 공유: `share-reveal`(확률 기본 숨김 → 끄면 "최고 확률 95%"), `card-grade`·`browser`·`simplification`·`themes`·`ux-p0`.
+- F7 프로필: `profile`(설정 패널 1개, 카드 240px, 선택 메뉴 1개, 모바일 한 줄 카드·가로 테마)·`themes`·`home-view`·`ux`·`persistence-browser`·`layout-stage`.
+- F8 테마: `themes`(모눈 라벨·형광펜, 티룸 점선 테두리, 상단 바 링 없음)·`home-view`·`week-calendar`·`ux-writing`·`design-preview`·`wireframes`, `build-tokens --check`·`build-design-preview --check` OK. 디자인 검토 페이지는 F1 이후 오래된 상태였어서 F8에서 다시 생성했습니다.
+- F9 마무리: `ux-review`·`collection`·`stats-layout` 재실행 통과.
+- 실행하지 않음: `mobile-lan.cjs`(`MOMENT_LAN_URL` 필요).
+- 수동 확인 필요: 실기기 모바일(바텀시트, 가로 테마 스크롤, 키보드), Safari·Firefox(점선 `outline`이 둥근 모서리를 따라가는지, `backdrop-filter`), 화면 낭독기(도감 슬롯 `aria-label`, 프로필 메뉴 `aria-current`, 공유 뒤로 링크), 티룸·나이트 대비.
+
+카드 획득 팝업 검사(2026-11-21): `node frontend/tests/celebrate-popup.cjs`. `simplification.cjs`·`record-ui.cjs`·`taxonomy-browser.cjs`는 시연 모드 스위치가 `details` 밖(프로필 화면)으로 옮겨진 뒤 `closest('details').open` 단계에서 실패하던 것을 `reveal(page,'preview')`로 바꿔 고쳤습니다(2026-11-21).

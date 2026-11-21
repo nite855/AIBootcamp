@@ -91,5 +91,102 @@
       return { d, points: r, start: r[0], end: r[r.length - 1] };
     });
   }
-  return { monthSummary, insight, dayEmotion, shiftMonth, smoothSegments, INSIGHT_MINIMUM };
+  // Calendar weeks run Sunday to Saturday (same as the month grid). Dates are local YYYY-MM-DD
+  // strings, so arithmetic happens in UTC to stay clear of daylight-saving shifts.
+  const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+  function parseDate(date) {
+    const m = DATE.exec(date);
+    if (!m) return null;
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] ? d : null;
+  }
+  const formatDate = d => d.toISOString().slice(0, 10);
+  function addDays(date, days) {
+    const d = parseDate(date);
+    if (!d || !Number.isSafeInteger(days)) return date;
+    d.setUTCDate(d.getUTCDate() + days);
+    return formatDate(d);
+  }
+  function weekStart(date) {
+    const d = parseDate(date);
+    return d ? addDays(date, -d.getUTCDay()) : null;
+  }
+  // The seven dates of the week that contains `date`, or [] for an invalid date.
+  function weekDates(date) {
+    const start = weekStart(date);
+    return start ? Array.from({ length: 7 }, (_, i) => addDays(start, i)) : [];
+  }
+  // Week navigation never goes past the week of `today`.
+  function shiftWeek(start, step, today) {
+    const from = weekStart(start), limit = weekStart(today);
+    if (!from || !limit || !Number.isSafeInteger(step)) return from || start;
+    const next = addDays(from, step * 7);
+    return next > limit ? limit : next;
+  }
+  // Consecutive written days ending today. A streak stays alive until today is over, so an
+  // unwritten today counts back from yesterday. Invalid or duplicate dates are ignored.
+  function streakDays(dates, today) {
+    if (!parseDate(today)) return 0;
+    const written = new Set((Array.isArray(dates) ? dates : []).filter((d) => typeof d === "string" && parseDate(d)));
+    let day = written.has(today) ? today : addDays(today, -1), count = 0;
+    while (written.has(day)) { count++; day = addDays(day, -1); }
+    return count;
+  }
+  // Week name for the record calendar ("11월 3주"): the month of the week's Sunday and the row
+  // that week takes in that month's Sunday-first grid. Null for an invalid date.
+  function weekLabel(date) {
+    const start = parseDate(weekStart(date) || "");
+    if (!start) return null;
+    const firstDay = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)).getUTCDay();
+    return { month: start.getUTCMonth() + 1, week: Math.floor((start.getUTCDate() - 1 + firstDay) / 7) + 1 };
+  }
+  // Trailing moving average for the trend line. `series` holds numbers or null (no analysis);
+  // a null stays null, otherwise the value is the mean of the non-null values in the window.
+  function movingAverage(series, size = 3) {
+    const list = Array.isArray(series) ? series : [];
+    const n = Number.isSafeInteger(size) && size > 0 ? size : 1;
+    return list.map((v, i) => {
+      if (!Number.isFinite(v)) return null;
+      const win = list.slice(Math.max(0, i - n + 1), i + 1).filter(Number.isFinite);
+      return win.reduce((a, b) => a + b, 0) / win.length;
+    });
+  }
+  // Records this month against the previous month (January compares with last December).
+  function monthDelta(records, month) {
+    const list = Array.isArray(records) ? records : [];
+    if (!/^\d{4}-\d{2}$/.test(month || "")) return { current: 0, previous: 0, delta: 0 };
+    const prev = shiftMonth(month, -1);
+    const count = (m) => list.filter((r) => r?.recordDate?.slice(0, 7) === m).length;
+    const current = count(month), previous = count(prev);
+    return { current, previous, delta: current - previous };
+  }
+  // Weekday (Sunday = 0) totals for a month: records, analyzed records and averaged parent shares.
+  // Only analyses of the current record version count, as in monthSummary.
+  function weekdaySummary(records, month) {
+    const days = monthSummary(Array.isArray(records) ? records : [], month).days;
+    const buckets = Array.from({ length: 7 }, (_, weekday) => ({ weekday, count: 0, rows: [] }));
+    for (const d of days) {
+      const b = buckets[parseDate(d.date).getUTCDay()];
+      b.count += d.count;
+      b.rows.push(...d.rows);
+    }
+    return buckets.map(({ weekday, count, rows }) => {
+      const s = C.aggregate(rows);
+      return { weekday, count, valid: s.validCount, parents: s.parents };
+    });
+  }
+  // "금요일엔 긍정이, 목요일엔 부정이 많았어요": the weekday with the highest positive share and the one
+  // with the highest negative share. Withheld below `minimum` analyzed records; a tied lead drops its half.
+  function weekdayInsight(summary, minimum = INSIGHT_MINIMUM) {
+    const rows = (Array.isArray(summary) ? summary : []).filter((d) => d?.valid > 0);
+    if (rows.reduce((n, d) => n + d.valid, 0) < minimum) return null;
+    const lead = (key) => {
+      const top = Math.max(...rows.map((d) => d.parents[key]));
+      const best = rows.filter((d) => Math.abs(d.parents[key] - top) < 1e-9);
+      return top > 0 && best.length === 1 ? best[0].weekday : null;
+    };
+    const positive = lead("positive"), negative = lead("negative");
+    return positive === null && negative === null ? null : { positive, negative };
+  }
+  return { monthSummary, insight, dayEmotion, shiftMonth, smoothSegments, weekStart, weekDates, shiftWeek, addDays, streakDays, weekLabel, movingAverage, monthDelta, weekdaySummary, weekdayInsight, INSIGHT_MINIMUM };
 });

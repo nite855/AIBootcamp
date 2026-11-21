@@ -30,7 +30,7 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
   }
   try {
     const p = await page();
-    assert.equal(await p.getAttribute('html', 'data-appearance'), 'blossom');
+    assert.equal(await p.getAttribute('html', 'data-appearance'), 'clean');
     assert.equal(await p.getAttribute('html', 'data-theme'), 'light');
     await p.locator('#diary-text').fill('자동 저장 초안'); await waitSaved(p);
     await p.reload(); await ready(p);
@@ -48,7 +48,7 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     await click(p, 'read-full');
     assert.equal(await p.locator('dialog .full-text').textContent(), '수정한 실제 기록');
     await p.keyboard.press('Escape');
-    assert.equal(await p.evaluate(() => document.activeElement.getAttribute('data-action')), 'read-full');
+    assert.equal(await p.evaluate(() => document.activeElement.getAttribute('popovertarget')), 'card-more', 'focus returns to the 자세히 보기 menu');
     await click(p, 'delete-example'); await p.locator('[data-confirm=accept]').click();
     await p.waitForFunction(() => DiaryReview.getState().sessions.length === 0);
     assert.equal((await stored(p)).currentEntryId, null);
@@ -71,18 +71,22 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     await p.locator('#diary-text').fill('첫 번째 변경');
     await p.locator('#diary-text').fill('가장 최근 변경'); await waitSaved(p);
     assert.equal((await stored(p)).text, '가장 최근 변경');
-    await click(p, 'settings'); await p.locator('details').filter({has:p.locator('[name=policy]')}).evaluate(el=>el.open=true); await p.locator('[name=policy][value=multi]').check();
-    await click(p, 'write'); await p.locator('#diary-text').fill('여러 편 첫 기록');
-    await click(p, 'save'); await waitSaved(p); await click(p, 'write'); await click(p, 'new-entry'); await waitSaved(p);
-    await p.locator('#diary-text').fill('여러 편 두 번째 기록'); await click(p, 'save'); await waitSaved(p);
+    // One record per day: a second save the same day updates the first record (version 2).
+    await click(p, 'settings'); assert.equal(await p.locator('[name=policy]').count(), 0);
+    await click(p, 'write'); await p.locator('#diary-text').fill('하루 한 편 첫 저장');
+    await click(p, 'save'); await waitSaved(p); await click(p, 'write');
+    await p.locator('#diary-text').fill('하루 한 편 다시 저장'); await click(p, 'save'); await waitSaved(p);
     await p.reload(); await ready(p);
-    assert.equal(await p.evaluate(() => DiaryReview.getState().policy), 'multi');
-    assert.equal((await stored(p)).sessions.length, 2);
+    assert.equal(await p.evaluate(() => DiaryReview.getState().policy), 'single');
+    assert.equal((await stored(p)).policy, 'single');
+    assert.equal((await stored(p)).sessions.length, 1);
+    assert.equal((await stored(p)).sessions[0].text, '하루 한 편 다시 저장');
+    assert.equal((await stored(p)).sessions[0].version, 2);
     await click(p, 'clear-draft'); await p.locator('[data-confirm=accept]').click(); await waitSaved(p);
     assert.equal((await stored(p)).text, '');
-    assert.equal((await stored(p)).sessions.length, 2);
+    assert.equal((await stored(p)).sessions.length, 1);
     await click(p, 'settings'); await click(p, 'delete-all');
-    assert.equal((await stored(p)).sessions.length, 2);
+    assert.equal((await stored(p)).sessions.length, 1);
     await p.locator('[data-confirm=accept]').click();
     await p.waitForFunction(() => DiaryReview.getState().sessions.length === 0);
     assert.equal((await stored(p)).sessions.length, 0);
@@ -119,7 +123,8 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     const touch = await page({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
     const content = '<img src=x onerror=alert(1)>\n' + '긴 기록을 읽습니다.\n'.repeat(300);
     await touch.locator('#diary-text').fill(content); await click(touch, 'save');
-    await touch.locator('.recent-list [data-open]').first().click();
+    // Phones show no recent tiles (Figma); "카드 보기" in the saved bar opens the record.
+    await touch.locator('.done-actions [data-open]').click();
     await click(touch, 'read-full');
     assert.equal(await touch.locator('.full-text').textContent(), content.trim());
     assert.equal(await touch.locator('.full-text img').count(), 0);
@@ -167,13 +172,16 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     await touch.locator('.flip-text').dispatchEvent('click', { detail: 1, bubbles: true });
     assert.equal(await scene.evaluate(e => e.classList.contains('flipped')), true);
     await touch.emulateMedia({ reducedMotion: 'reduce' });
+    // Card effects are always on, even with the OS reduced-motion setting; the old off switch is a no-op.
     await touch.evaluate(() => CardexTheme.setMotion('off'));
-    assert.equal(await touch.locator('.flip-light').first().evaluate(e => getComputedStyle(e).display), 'none');
+    assert.equal(await touch.evaluate(() => document.documentElement.dataset.motion), 'on');
+    assert.notEqual(await touch.locator('.flip-light').first().evaluate(e => getComputedStyle(e).display), 'none');
 
     // Every main taxonomy ID resolves to the intended bundled 3D image and retains stage/probability.
     await click(touch, 'settings'); await click(touch, 'preview');
     const names = { neg_1: '불안', neg_2: '슬픔', neg_3: '분노' };
-    for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 21]) {
+    // 9 types: samples 1-9 are stage 1, 10-18 stage 2, 19-27 stage 3.
+    for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19]) {
       if (index > 1) await click(touch, 'archive-records');
       const targetPage = Math.floor(index / 6);
       while (await touch.evaluate(() => DiaryReview.getState().page) < targetPage) await click(touch, 'next');
@@ -184,12 +192,12 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
       const expected = fs.readFileSync(path.resolve(__dirname, `../assets/characters/${type.startsWith('neu_') ? 'neutral' : type}.png`)).toString('base64');
       assert.equal(await touch.locator('.art-card image').getAttribute('href'), 'data:image/png;base64,' + expected);
       const text = await touch.locator('.art-card').textContent();
-      assert.ok(text.includes(index === 21 ? '3단계' : index === 11 ? '2단계' : '1단계')); assert.ok(text.includes(index === 21 ? '95%' : index === 11 ? '75%' : '45%'));
+      assert.ok(text.includes(index === 19 ? '3단계' : index === 10 ? '2단계' : '1단계')); assert.ok(text.includes(index === 19 ? '95%' : index === 10 ? '75%' : '45%'));
       assert.equal(await touch.locator('[data-emotion-mark]').count(), type.startsWith('neu_') ? 1 : 0);
       if (names[type]) assert.ok(text.includes(names[type]));
     }
     await touch.screenshot({ path: path.join(os.tmpdir(), 'moment-lemon-mobile.png') });
     assert.deepEqual(errors, []);
-    console.log('PASS: persistence, retry, deletion, conflict, corruption, blocked storage, dialog, touch/hold/scroll, 10 emotion artworks and three stages');
+    console.log('PASS: persistence, retry, deletion, conflict, corruption, blocked storage, dialog, touch/hold/scroll, 9 emotion artworks and three stages');
   } finally { for (const context of contexts) await context.close(); await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

@@ -171,6 +171,8 @@ html[data-theme=dark] .app-scenery { opacity:.2; }
 .theme-preview[data-appearance=retro] .sample-paper { border:2px solid var(--ink); border-radius:5px; box-shadow:2px 2px 0 var(--ink); }
 .theme-preview[data-appearance=editorial] :is(.sample-paper,.sample-action) { border-radius:2px; }
 .theme-preview[data-appearance=paper] .sample-body { background-image:repeating-linear-gradient(transparent,transparent 23px,var(--line) 24px); }
+.theme-preview[data-appearance=doodle] :is(.sample-paper,.sample-action) { border:2px solid var(--line); border-radius:12px; box-shadow:2px 2px 0 var(--line); font-family:"Gaegu",var(--font-ui); }
+.theme-preview[data-appearance=doodle] .sample-paper strong { font-family:"Gaegu",var(--font-ui); font-size:13px; }
 .theme-preview[data-appearance=aurora] .sample-banner { background-image:radial-gradient(ellipse at top right,#948cff55,transparent 80%); }
 .theme-dialog { width:min(460px,calc(100% - 24px)); max-height:92dvh; margin:auto; padding:0; border:1px solid var(--line); border-radius:22px; background:var(--surface); color:var(--ink); overflow:auto; }
 .theme-dialog::backdrop { background:#15132288; backdrop-filter:blur(4px); }

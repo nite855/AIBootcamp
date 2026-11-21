@@ -5,7 +5,7 @@ const observer = new ResizeObserver(entries => entries.forEach(({target}) => {
   if (!scene) return;
   const width = Math.max(0, Math.min(320, target.clientWidth - 32));
   scene.style.width = width + 'px';
-  scene.style.height = width * 1.5 + 'px';
+  scene.style.height = width * 1.4 + 'px'; // 5:7 moment card (soft UI v1.1)
 }));
 window.DiaryFlipObserver = observer;
 app.querySelectorAll('.card-box').forEach(el => observer.observe(el));
@@ -17,12 +17,14 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       const tilt=scene.querySelector(".tilt-layer"), front=scene.querySelector(".flip-front"), rear=scene.querySelector(".flip-back");
       const frontButton=front.querySelector("button"), text=rear.querySelector(".flip-text");
       const hover=matchMedia("(hover: hover) and (pointer: fine)");
-      const effectsOff=()=>document.documentElement.dataset.motion==="off";
+      const effectsOff=()=>false; // card effects always run the same way (2026-11-20)
       let frame=0, point=null, active=null, timer=0, suppressTap=false;
       function reset(){if(frame)cancelAnimationFrame(frame);frame=0;point=null;tilt.style.setProperty("--tilt-x","0deg");tilt.style.setProperty("--tilt-y","0deg");tilt.style.setProperty("--shine","0");}
       resets.push(reset);
+      // Grade pulse (grade-effects.css): restart a one-shot burst around the card on every turn.
+      function pulse(){const box=scene.closest(".card-box[data-grade]");if(!box||effectsOff())return;box.classList.remove("grade-pulse");void box.offsetWidth;box.classList.add("grade-pulse");}
       function clearHold(){if(timer)clearTimeout(timer);timer=0;}
-      function flip(back){clearHold();reset();scene.classList.toggle("flipped",back);front.setAttribute("aria-hidden",String(back));rear.setAttribute("aria-hidden",String(!back));rear.inert=!back;front.inert=back;frontButton.tabIndex=back?-1:0;rear.tabIndex=back?0:-1;text.tabIndex=back?0:-1;(back?rear:frontButton).focus({preventScroll:true});}
+      function flip(back){clearHold();reset();pulse();scene.classList.toggle("flipped",back);front.setAttribute("aria-hidden",String(back));rear.setAttribute("aria-hidden",String(!back));rear.inert=!back;front.inert=back;frontButton.tabIndex=back?-1:0;rear.tabIndex=back?0:-1;text.tabIndex=back?0:-1;(back?rear:frontButton).focus({preventScroll:true});}
       function selectedText(){const s=window.getSelection();return Boolean(s && !s.isCollapsed && (rear.contains(s.anchorNode)||rear.contains(s.focusNode)));}
       frontButton.addEventListener("click",e=>{if(e.detail!==0 && suppressTap){suppressTap=false;return;}flip(true);});
       rear.addEventListener("click",e=>{if(e.target.closest("button"))return;if((e.detail!==0 && suppressTap)||selectedText()){suppressTap=false;return;}flip(false);});

@@ -35,17 +35,32 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
 
       // Single record on a date opens the detail directly from the statistics screen.
       if (count === 1) {
-        await reveal(page, 'review-month');
+        // Record tab: the card calendar; statistics: the emotion calendar (soft UI v1.1, every width).
         const today = await page.evaluate(() => DiaryReview.localDate());
-        await page.locator(`[data-month-date="${today}"]`).click();
+        await reveal(page, 'write');
+        await page.locator('.write-calendar').scrollIntoViewIfNeeded();
+        assert.equal(await page.locator('.write-calendar').isVisible(), true);
+        await reveal(page, 'review-month');
+        assert.equal(await page.locator('#stats-kind, [data-stats]').count(), 0, 'no stats selector or panel switch');
+        if (width >= 960) {
+          const [trend, dist] = await Promise.all(['.stats-trend', '.stats-dist'].map(s => page.locator(s).boundingBox()));
+          assert.ok(trend.x + trend.width <= dist.x + 1, 'trend left, distribution right');
+        }
+        // Today's emotion-calendar cell opens the card modal; "기록 자세히" goes to the record page.
+        const cell = page.locator(`.stats-calendar [data-card-day="${today}"]`);
+        await cell.scrollIntoViewIfNeeded();
+        await cell.click();
+        await page.locator('#card-modal[open] [data-modal=open]').click();
         await page.locator('.flip-scene').waitFor();
         assert.equal(await page.locator('.entry-list').count(), 0, 'no one-item list');
       }
       // Toast appears after a save; emotion filter with pending-only records yields an empty list.
       await reveal(page, 'write');
       await page.locator('#diary-text').fill('토스트 검증');
-      await reveal(page, 'save');
+      await reveal(page, 'save', { stay: true });
       await page.locator('#moment-toast.show').waitFor({ state: 'attached' });
+      // The toast shows just before the card page renders; wait for that switch before navigating.
+      await page.waitForFunction(() => DiaryReview.getState().view === 'entry');
       await reveal(page, 'archive-records');
       await page.locator('.record-filters summary').click();
       await page.selectOption('#emotion-filter', 'neg_1');

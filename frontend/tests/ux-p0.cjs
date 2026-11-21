@@ -1,7 +1,7 @@
 // P0 UX regressions: character counter, oversized draft message, example→real save confirmation, help-write semantics.
 const assert = require('node:assert/strict'), path = require('node:path'), { pathToFileURL } = require('node:url');
 const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(require('node:os').tmpdir(), 'aibootcamp-frontend-review/node_modules/playwright'));
-const { executablePath, reveal } = require('./browser-runtime.cjs');
+const { executablePath, reveal, unseal } = require('./browser-runtime.cjs');
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath });
   try {
@@ -59,6 +59,9 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
     await reveal(page, 'save');
     await dialog.locator('[data-confirm=accept]').click();
     await page.waitForFunction(() => DiaryReview.getState().mode === 'real' && DiaryReview.getState().sessions.length === 1);
+    // A confirmed save opens the card page with the "분석 대기" panel; go back home.
+    await page.locator('.wait-panel').waitFor();
+    await reveal(page, 'history');
 
     // Delete confirmation keeps its own title and label after the dialog was reused.
     await page.locator('.recent-list [data-open]').first().click();

@@ -18,14 +18,18 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     },legacy);
     await page.reload(); await page.waitForFunction(() => window.DiaryReview?.isReady());
     const state = await page.evaluate(() => DiaryReview.getState());
-    assert.equal(state.text,legacy.text); assert.equal(state.policy,'multi');
+    assert.equal(state.text,legacy.text); assert.equal(state.policy,'single','legacy multi snapshots load as one record per day');
     assert.equal(state.sessions[0].id,'legacy'); assert.equal(state.sessions[0].version,2);
     assert.equal(state.sessions[0].favorite,false);
     assert.equal(await page.getAttribute('html','data-appearance'),'sage');
-    assert.equal(await page.getAttribute('html','data-theme'),'dark');
+    // Soft UI v1.1: the scheme follows the theme; the old light/dark key is ignored and removed.
+    assert.equal(await page.getAttribute('html','data-theme'),'light');
+    assert.equal(await page.evaluate(()=>localStorage.getItem('moment-card:diary-simple-v3:color-scheme')),null);
     await page.locator('[data-action=archive-records]').click();
     await page.locator('[data-open=legacy]').click();
     await require('./browser-runtime.cjs').reveal(page,'favorite');
+    // The favorite re-renders only after the IndexedDB write settles; reloading earlier races it.
+    await page.waitForFunction(() => document.querySelector('[data-action=favorite]')?.getAttribute('aria-pressed') === 'true');
     await page.reload(); await page.waitForFunction(() => window.DiaryReview?.isReady());
     assert.equal(await page.evaluate(() => DiaryReview.getState().sessions[0].favorite),true);
     assert.equal(await page.locator('#diary-text').inputValue(),'이전 초안');

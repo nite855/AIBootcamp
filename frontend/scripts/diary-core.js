@@ -24,7 +24,7 @@ function validate(records){
  return {records:records.map((r,i)=>({id:'record-'+(i+1),order:i+1,text:normalize(r.text),date:r.date||null})),characters:total,dated:records.filter(r=>r.date).length};
 }
 function fixture(mode='single'){
- const vectors=[[.18,.15,.12,.17,.14,.09,.06,.03,.03,.03],[.1,.1,.1,.18,.17,.1,.1,.05,.05,.05],[.2,.2,.15,.1,.1,.1,.06,.03,.03,.03],[.3,.15,.1,.15,.1,.05,.06,.03,.03,.03]];
+ const vectors=[[.18,.15,.12,.17,.14,.09,.06,.03,.06],[.1,.1,.1,.18,.17,.1,.1,.05,.1],[.2,.2,.15,.1,.1,.1,.06,.03,.06],[.3,.15,.1,.15,.1,.05,.06,.03,.06]];
  const count=mode==='single'?1:4;
  const target=Array.from({length:count},(_,i)=>({id:'fixture-record-'+i,order:i+1,speaker:'예시 기록',timestamp:mode==='no-date'||mode==='single'?null:`2026-10-${22+i*2}T12:00:00+09:00`,text:i%2?'오늘도 나의 기록을 남겼다.':'오늘도 기록을 남겼다.'}));
  const rows=target.map((u,i)=>({anchor:u.id,order:u.order,timestamp:u.timestamp,taxonomy_version:C.TAXONOMY,probabilities:Object.fromEntries(C.IDS.map((id,j)=>[id,vectors[i][j]])),status:'valid',truncated:false}));

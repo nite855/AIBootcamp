@@ -3,7 +3,8 @@ const root = new URL("../", import.meta.url),
   out = new URL("docs/wireframes/", root);
 const fonts = (await readFile(new URL("styles/base.css", root), "utf8"))
   .split("\n")
-  .filter((x) => x.startsWith("@font-face"))
+  // Wireframes use only the UI font; the Gaegu subset belongs to the doodle theme.
+  .filter((x) => x.startsWith("@font-face") && !x.includes('"Gaegu"'))
   .join("\n");
 const license = await readFile(
   new URL("docs/licenses/ibm-plex-sans-kr.txt", root),
@@ -87,7 +88,7 @@ function svg(screen, device) {
       210,
       pending
         ? ["기록을 보관했어요", "감정 분석 준비 중"]
-        : ["감정별 표현 10종", "날짜 · 감정명", "2:3 카드 비율"],
+        : ["감정별 표현 9종", "날짜 · 감정명", "2:3 카드 비율"],
       18,
     );
     text(
@@ -203,7 +204,7 @@ function svg(screen, device) {
         const groups = [
           ["긍정", ["기쁨·활력", "만족·감사", "안정·자신감"]],
           ["부정", ["불안", "슬픔", "분노"]],
-          ["중립", ["객관적 서술", "의문", "놀람", "당황"]],
+          ["중립", ["객관적 서술", "의문", "놀람·당황"]],
         ];
         let yy = gy - 20;
         for (const [parent, labels] of groups) {
@@ -274,7 +275,7 @@ function svg(screen, device) {
         text(x + 20, h - 84, "날짜 선택 · 터치 / 키보드로 탐색", 12);
       }
     } else if (screen.type === "catalog") {
-      text(x + 20, 174, "캐릭터 도감 · 현재 기록 기준 3 / 30", 16);
+      text(x + 20, 174, "캐릭터 도감 · 현재 기록 기준 3 / 27", 16);
       text(x + 20, 210, "긍정 · 기쁨·활력 ▾", 16);
       const cw = Math.min(130, (pw - 64) / 3);
       for (let i = 0; i < 3; i++) {

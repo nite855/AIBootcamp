@@ -1,4 +1,4 @@
-const {reveal} = require('./browser-runtime.cjs');
+const {reveal, unseal} = require('./browser-runtime.cjs');
 const assert = require("node:assert/strict"),
   path = require("node:path"),
   os = require("node:os"),
@@ -38,8 +38,12 @@ const { chromium } = require(
       }
     }
     await click('write');
-    assert.equal(await p.locator('.latest-panel').isVisible(),true);
-    assert.equal(await p.locator('button:visible').count(),8);
+    // First run (Figma "기록 · 첫 실행"): the side column explains how cards are collected instead of the calendar.
+    assert.equal(await p.locator('.how-panel').isVisible(),true);
+    assert.equal(await p.locator('.write-calendar').count(),0);
+    // Record home actions (soft UI v1.1): brand, 3 tabs, avatar, options, save, favorites, all records.
+    assert.deepEqual(await p.locator('button:visible:not(.day-card)').evaluateAll(bs=>bs.map(b=>b.dataset.action||b.getAttribute('popovertarget')||(b.dataset.writeCalendar?'view-'+b.dataset.writeCalendar:b.dataset.weekStep?'week'+b.dataset.weekStep:'month'+b.dataset.homeMonth))),
+      ['write','write','review-month','catalog','settings','draft-more','save','favorite-records','archive-records']);
     await p.locator('#diary-text').fill('입력 중 초점 유지');
     assert.equal(await p.evaluate(()=>document.activeElement.id),'diary-text');
     await p.locator('#diary-text').fill('');
@@ -61,11 +65,11 @@ const { chromium } = require(
       await p.waitForFunction(() => parseInt(document.documentElement.style.getPropertyValue("--app-height")) === innerHeight);
       await fits();
       const navigation = await p.locator("header nav button:visible").evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return {x:r.x,width:r.width,height:r.height}}));
-      assert.equal(navigation.length,5);
+      assert.equal(navigation.length,3); // soft UI v1.1: 기록 · 통계 · 도감 (settings via the avatar)
       for(const box of navigation) { assert.ok(box.height>=44); assert.ok(box.x>=0 && box.x+box.width<=size.width); }
       const box = await p.locator('#diary-text').boundingBox();
       assert.ok(box.height >= 48, 'writing area remains usable');
-      const editor = await p.locator('.editor').boundingBox(), save = await p.locator('[data-action=save]').boundingBox();
+      const editor = await p.locator('.write-editor').boundingBox(), save = await p.locator('[data-action=save]').boundingBox();
       assert.ok(save.y + save.height <= editor.y + editor.height, 'save button remains inside the editor');
       if ([1440,320].includes(size.width)) await p.screenshot({path:path.join(os.tmpdir(), `moment-write-${size.width}.png`)});
     }
@@ -85,11 +89,12 @@ const { chromium } = require(
     );
     await click('catalog');
     assert.ok(
-      (await p.locator(".catalog-grid").innerText()).includes("미발견"),
+      // Locked slots carry no caption (Figma); "미발견" stays in their accessible name.
+      (await p.locator(".catalog-grid .slot.is-locked").first().getAttribute("aria-label")).includes("미발견"),
     );
     await click('review-month');
     assert.ok(
-      (await p.locator(".month-summary").innerText()).includes("1편의 기록"),
+      (await p.locator(".stats-head").innerText()).includes("기록 1편"),
     );
     await click("settings");
     await click("preview");
@@ -111,16 +116,23 @@ const { chromium } = require(
       await click("archive-records");
       await click('catalog');
       await fits();
-      await p.locator('[data-stage="1"]').click();
+      // Collected slot opens the card detail sheet; it must fit and close with Escape.
+      await p.locator('.slot[data-stage="1"]').first().click();
+      await p.locator('#card-detail[open]').waitFor();
       await fits();
+      await p.keyboard.press('Escape');
       await click('review-month');
+      // Phones switch stats panels with buttons (no select); desktop shows trend + distribution together.
+      assert.equal(await p.locator('#stats-kind').count(), 0);
       for (const tab of ["trend", "count", "distribution"]) {
-        await p.locator('#stats-kind').selectOption(tab);
+        const b = p.locator(`[data-stats="${tab}"]`);
+        if (await b.isVisible()) { await b.click(); assert.equal(await p.locator(`[data-stats="${tab}"]`).getAttribute('aria-pressed'), 'true'); }
         await fits();
       }
       await click('archive-records');
       await fits();
       await p.locator('[data-open="sample-1"]').click();
+      await unseal(p);
       await fits();
       await p.locator(".flip-trigger").click();
       await p.keyboard.press("Enter");
@@ -131,11 +143,14 @@ const { chromium } = require(
     const file = await d;
     const bytes = fs.readFileSync(await file.path());
     assert.equal(bytes.readUInt32BE(16), 1080);
-    assert.equal(bytes.readUInt32BE(20), 1620);
+    assert.equal(bytes.readUInt32BE(20), 1512); // 5:7 moment card
     await click("card-catalog");
-    assert.equal(await p.locator("[data-stage]").count(), 3);
-    await p.locator('[data-stage="1"]').click();
-    await p.locator("[data-open]").first().click();
+    assert.equal(await p.locator(".slot[data-stage]").count(), 3);
+    // 도감에 넣기: toast + the card's catalog detail (Figma second pass).
+    await p.locator("#card-detail[open]").waitFor();
+    assert.match(await p.locator("#moment-toast").textContent(), /도감에 담겼어요/);
+    await p.locator("#card-detail[open] [data-open]").first().click();
+    await unseal(p);
     await click("edit-example");
     await p.locator("#sample-text").fill("원문 수정");
     await click("save-example");
@@ -150,7 +165,7 @@ const { chromium } = require(
     );
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
-    console.log({ checks, PNG: "1080x1620", errors, requests });
+    console.log({ checks, PNG: "1080x1512", errors, requests });
   } finally {
     await b.close();
   }

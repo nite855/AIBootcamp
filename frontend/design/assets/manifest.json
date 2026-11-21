@@ -97,6 +97,21 @@
       "path": "assets/themes/starlight.svg",
       "status": "bundled",
       "notes": "프로젝트용 원본 SVG. 외부 이미지와 폰트를 사용하지 않음."
+    },
+    {
+      "id": "theme-doodle",
+      "kind": "svg",
+      "path": "assets/themes/doodle.svg",
+      "status": "bundled",
+      "notes": "펫 두들 테마용 원본 손그림 SVG(고양이·강아지·뼈다귀·별·집·말풍선). 외부 이미지와 폰트를 사용하지 않음."
+    },
+    {
+      "id": "font-gaegu-subset",
+      "kind": "font",
+      "path": "styles/base.css",
+      "license": "docs/licenses/gaegu-ofl.txt",
+      "status": "bundled",
+      "notes": "Gaegu(SIL OFL 1.1, Reserved Font Name 없음) 400·700 WOFF2 서브셋을 base64로 내장. 재생성: tools/subset-display-font.py, 라이선스: docs/licenses/gaegu-ofl.txt."
     }
   ],
   "characterSlots": [
@@ -305,7 +320,7 @@
       "path": "assets/characters/neutral.png",
       "status": "bundled",
       "license": null,
-      "notes": "놀람: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
+      "notes": "놀람·당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
     },
     {
       "id": "neu_3-stage-2",
@@ -314,7 +329,7 @@
       "path": "assets/characters/neutral.png",
       "status": "bundled",
       "license": null,
-      "notes": "놀람: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
+      "notes": "놀람·당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
     },
     {
       "id": "neu_3-stage-3",
@@ -323,35 +338,8 @@
       "path": "assets/characters/neutral.png",
       "status": "bundled",
       "license": null,
-      "notes": "놀람: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
-    },
-    {
-      "id": "neu_4-stage-1",
-      "emotionId": "neu_4",
-      "stage": 1,
-      "path": "assets/characters/neutral.png",
-      "status": "bundled",
-      "license": null,
-      "notes": "당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
-    },
-    {
-      "id": "neu_4-stage-2",
-      "emotionId": "neu_4",
-      "stage": 2,
-      "path": "assets/characters/neutral.png",
-      "status": "bundled",
-      "license": null,
-      "notes": "당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
-    },
-    {
-      "id": "neu_4-stage-3",
-      "emotionId": "neu_4",
-      "stage": 3,
-      "path": "assets/characters/neutral.png",
-      "status": "bundled",
-      "license": null,
-      "notes": "당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
+      "notes": "놀람·당황: 기존 중립 PNG와 공통 SVG 표식, 단계 배지 조합"
     }
   ],
-  "taxonomy_version": "emotion-cardex-3plus10-v1"
+  "taxonomy_version": "emotion-cardex-3plus9-v1"
 }

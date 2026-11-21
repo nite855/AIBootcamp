@@ -5,11 +5,11 @@
   else root.CardexCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const TAXONOMY = 'emotion-cardex-3plus10-v1';
+  const TAXONOMY = 'emotion-cardex-3plus9-v1';
   const PARENTS = Object.freeze([
     {id:'positive',name:'긍정',mark:'+',color:'#278E81',children:['pos_1','pos_2','pos_3']},
     {id:'negative',name:'부정',mark:'−',color:'#D25B35',children:['neg_1','neg_2','neg_3']},
-    {id:'neutral',name:'중립',mark:'=',color:'#78899B',children:['neu_1','neu_2','neu_3','neu_4']}
+    {id:'neutral',name:'중립',mark:'=',color:'#78899B',children:['neu_1','neu_2','neu_3']}
   ]);
   const TYPES = Object.freeze([
     {id:'pos_1',number:'001',name:'기쁨·활력',parent:'positive',color:'#278E81',pattern:'circle'},
@@ -20,8 +20,7 @@
     {id:'neg_3',number:'006',name:'분노',parent:'negative',color:'#C34B52',pattern:'cross'},
     {id:'neu_1',number:'007',name:'객관적 서술',parent:'neutral',color:'#78899B',pattern:'document',asset:'neutral'},
     {id:'neu_2',number:'008',name:'의문',parent:'neutral',color:'#78899B',pattern:'question',asset:'neutral'},
-    {id:'neu_3',number:'009',name:'놀람',parent:'neutral',color:'#78899B',pattern:'exclamation',asset:'neutral'},
-    {id:'neu_4',number:'010',name:'당황',parent:'neutral',color:'#78899B',pattern:'mixed',asset:'neutral'}
+    {id:'neu_3',number:'009',name:'놀람·당황',parent:'neutral',color:'#78899B',pattern:'exclamation',asset:'neutral'}
   ]);
   const IDS = TYPES.map(t=>t.id);
   const type = id=>TYPES.find(t=>t.id===id);
@@ -31,7 +30,7 @@
   const percent = n=>Number.isFinite(n)?(n*100).toFixed(1)+'%':'—';
   const escapeHTML = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function validateProbabilities(p) {
-    if (!p || Object.keys(p).length!==IDS.length || !IDS.every(id=>Object.hasOwn(p,id))) throw new Error('10소분류 ID 계약과 일치하지 않습니다.');
+    if (!p || Object.keys(p).length!==IDS.length || !IDS.every(id=>Object.hasOwn(p,id))) throw new Error('9소분류 ID 계약과 일치하지 않습니다.');
     if (!IDS.every(id=>Number.isFinite(p[id])&&p[id]>=0&&p[id]<=1)) throw new Error('확률은 0~1의 유한한 숫자여야 합니다.');
     if (Math.abs(sum(IDS.map(id=>p[id]))-1)>1e-6) throw new Error('전체 확률 합계가 1이 아닙니다.');
     return p;
@@ -162,8 +161,8 @@
     const target=[],rows=[];
     const dates=[];for(let d=22;d<=28;d++)for(let j=0;j<(d===28?7:6);j++)dates.push(`2026-10-${d}`);
     for(let i=0;i<43;i++){
-      let probs={pos_1:.18,pos_2:.15,pos_3:.12,neg_1:.17,neg_2:.14,neg_3:.09,neu_1:.06,neu_2:.03,neu_3:.03,neu_4:.03};
-      if(mode==='neutral')probs={pos_1:0,pos_2:0,pos_3:0,neg_1:0,neg_2:0,neg_3:0,neu_1:1,neu_2:0,neu_3:0,neu_4:0};
+      let probs={pos_1:.18,pos_2:.15,pos_3:.12,neg_1:.17,neg_2:.14,neg_3:.09,neu_1:.06,neu_2:.03,neu_3:.06};
+      if(mode==='neutral')probs={pos_1:0,pos_2:0,pos_3:0,neg_1:0,neg_2:0,neg_3:0,neu_1:1,neu_2:0,neu_3:0};
       const stamp=mode==='no-time'?null:`${dates[i]}T${String(9+i%9).padStart(2,'0')}:00:00+09:00`;
       const text=i%5===0?'진짜 진짜 오늘도 같이 해보자':i%3===0?'같이 해보자 다음에 이야기하자':'오늘 일정 확인했어';
       const u={id:`demo-${i+1}`,speaker:'민서',order:i+1,timestamp:stamp,text};target.push(u);

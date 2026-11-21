@@ -52,5 +52,13 @@
     const seen = new Set(before || []);
     return (after || []).filter((k) => !seen.has(k));
   }
-  return { resolve, collection, unlockedKeys, newlyUnlocked };
+  // Visual grade of a resolved card ("stage-1~3", "blank", "error", "pending"); drives every grade effect.
+  const GRADES = ["pending", "error", "blank", "stage-1", "stage-2", "stage-3"];
+  function grade(card) {
+    if (!card || typeof card !== "object") return "pending";
+    if (card.status === "ready")
+      return [1, 2, 3].includes(card.stage) ? "stage-" + card.stage : "pending";
+    return ["blank", "error"].includes(card.status) ? card.status : "pending";
+  }
+  return { resolve, collection, unlockedKeys, newlyUnlocked, grade, GRADES };
 });

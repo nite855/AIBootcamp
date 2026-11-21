@@ -50,13 +50,12 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
         assert.equal(await note.getAttribute('data-level'), level);
       }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-      // Full: the shortcut opens settings › 데이터 관리 with focus on its summary.
-      await page.locator('[data-action=backup-manage]').click();
-      await page.waitForFunction(() => DiaryReview.getState().view === 'settings');
-      const details = page.locator('.backup-panel').locator('xpath=ancestor::details[1]');
-      assert.equal(await details.evaluate(el => el.open), true);
-      assert.equal(await details.locator('summary').evaluate(el => el === document.activeElement), true);
+      // Full: the shortcut opens the record list for cleanup (record export was removed).
+      assert.equal(await page.locator('[data-action=backup-manage]').count(), 0);
+      await page.locator('#privacy [data-action=archive-records]').click();
+      await page.waitForFunction(() => DiaryReview.getState().view === 'history' && DiaryReview.getState().archiveTab === 'records');
       // Example mode never shows the real-record warning.
+      await reveal(page, 'settings');
       await reveal(page, 'preview');
       await reveal(page, 'write');
       assert.equal(await page.locator('#privacy').getAttribute('data-level'), null);
@@ -64,6 +63,6 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
       assert.deepEqual(errors, []);
       await page.close();
     }
-    console.log('PASS: writing prompt rotation without editing draft, 25/29/30 limit guidance, backup shortcut, desktop/mobile');
+    console.log('PASS: writing prompt rotation without editing draft, 25/29/30 limit guidance, cleanup shortcut, desktop/mobile');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

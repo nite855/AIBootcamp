@@ -29,6 +29,27 @@
 
 ## 메인 기능 통합 (2026-11-11)
 
-메인 빌드는 기존 도메인에 record-id.js·backup.js를 더하고 persistence.js 뒤에 benchmark.js를 앱 클로저로 내장합니다. benchmark.css가 마지막 스타일로 적용됩니다. 빌드 전 backup-generated.mjs가 기존 HTML·생성 토큰을 루트 .backups에 버전 백업하고 일치를 검증합니다.
+메인 빌드는 기존 도메인에 record-id.js를 더하고(backup.js는 2026-11-19 기록 내보내기 제거로 배포하지 않음, 파일·단위 테스트만 유지) persistence.js 뒤에 benchmark.js를 앱 클로저로 내장합니다. 스타일은 benchmark.css 다음에 layout.css(16:9 데스크톱 스테이지·유동 모바일), moment.css, scrapbook.css(Figma v0.3 스크랩북 구조를 모든 테마에 공통 적용, 찢긴 가장자리·화살표 SVG는 빌드가 data URI 마스크로 내장), 마지막에 screens.css(기록·통계·도감·설정·카드·공유 화면 구성) 순서로 적용됩니다. 뷰 스크립트는 home-view → theme-view → statistics-view → catalog-view → celebrate-view → share-view(카드 정보 패널·1회 공개 연출·공유 시트와 1080×1350 PNG) 순서로 앱 클로저에 들어갑니다. 빌드 전 backup-generated.mjs가 기존 HTML·생성 토큰을 루트 .backups에 버전 백업하고 일치를 검증합니다.
 
 저장소와 설정 키는 유지하며 favorite만 선택 필드로 확장합니다(누락=false). JSON 병합은 진행 중인 자동 저장을 정리하고 revision 검사를 거친 단일 트랜잭션 성공 후 화면에 반영합니다. 시안 저장소를 조회하지 않습니다. 외부 API 변경은 없습니다.
+
+## 소프트 UI v1.1 (2026-11-20)
+
+Figma "Prototype · 데스크톱 v1.1"로 전면 개편했습니다. 화면별 규칙은 [UI_SPEC](UI_SPEC.md)의 2026-11-20 절(P3~P8)에 있습니다.
+
+- 도메인: `record-id.js` → `core.js` → `profile.js`(`MomentProfile`: 닉네임·아바타 색·알림 설정, 함께한 일수) → `share-core.js`(`MomentShare`: 공유 인용 첫 문장) → `diary-core.js` → `statistics.js`(`streakDays`·`weekLabel`·`movingAverage`·`monthDelta`·`weekdaySummary`·`weekdayInsight` 추가) → `cards.js` → `storage.js` → `flip.js`. 모두 UMD이며 단위 테스트가 `require`로 불러옵니다.
+- 뷰(앱 클로저): `home-view.js`(기록 화면, 카드 달력, 카드 모달) → `statistics-view.js` → `catalog-view.js` → `celebrate-view.js` → `share-view.js`(분석 대기 패널·자동 연출·공유 시트·스토리) → `profile-view.js`. `theme-view.js`는 배포하지 않습니다.
+- 스타일: `screens.css` 다음에 `soft.css` → `write.css` → `collection.css` → `stats.css` → `profile.css` → `share.css` → `theme-decor.css` → `grade-effects.css`. `scrapbook.css`는 배포하지 않습니다. 화면 CSS는 예전 `.panel` 규칙(760px 중앙 정렬·전체 열 차지)과 `.slot`·`.entry`·`.stats-summary-card` 같은 예전 선택자를 화면 범위 선택자로 덮어씁니다.
+- 카드: `cardSVG(record, { snippet, name })`가 5:7(1080×1512) 카드를 그리고, HTML `miniCard()`가 같은 프레임을 컨테이너 단위로 축소해 기록 목록·달력·도감·통계에 씁니다(프레임 자체의 모서리는 % 단위, 내부는 `cqw`).
+- 데이터 경계: 일기 IndexedDB 스냅샷 구조는 바꾸지 않았습니다. 테마는 `CardexTheme` localStorage 키, 프로필·알림은 `moment-card:profile-v1`을 따로 씁니다. 알림은 설정만 저장하고 보내지 않습니다. 기록 내보내기는 2026-11-20에 제거했습니다. 공유 이미지는 본문 첫 문장(최대 40자)만 인용할 수 있습니다.
+- 움직임: 카드 획득 연출은 항상 같은 순서·시간으로 진행하며 앱 전체에서 `prefers-reduced-motion`·`data-motion="off"` 분기를 없앴습니다.
+
+## Figma v1.1 2차 반영 (2026-11-21)
+
+파일 구조와 데이터 경계는 그대로 두고, 뷰 마크업과 화면 CSS만 Figma 프레임 값에 맞췄습니다. 상세는 [UI_SPEC](UI_SPEC.md)의 "Figma v1.1 2차 반영" 절에 있습니다.
+
+- 카드 화면(`app.js` `panel()`·`cardArea()`, `share-view.js` `cardInfo`·`sealHint`): `.card-stage` 무대가 카드와 연출을 감싸는 1열 구조입니다. 스타일은 `grade-effects.css`에 있습니다.
+- 도감 상세(`catalog-view.js`)의 "도감에 넣기"는 `card-catalog` 동작으로, 토스트를 띄운 뒤 상세를 엽니다.
+- 공유(`share-view.js`): `shareDefaults()`의 `hideProb`가 `true`입니다. 모바일 뒤로 링크(`data-share-back`)는 `share-close` 처리 경로를 그대로 씁니다.
+- 프로필(`profile-view.js`): 설정 묶음(`#settings-notice`·`records`·`data`·`about`)은 `.prefs-panel` 하나 안에 있습니다. 각 묶음에는 메뉴 이동 시 포커스를 받는 sr-only 제목이 있습니다. 선택한 메뉴는 모듈 변수 `profileSection`에 기억합니다.
+- 테마 장식(`theme-decor.css`): 캔디 별과 첫눈 눈송이는 1440×900 SVG 한 장(`assets/themes/candy-stars.svg`·`mist-snow.svg`)으로 바뀌었습니다. 모눈 페이지 라벨(`.diary-page`)은 `home-view.js`가 날짜 줄에 넣고, CSS가 모눈 테마에서만 보여 줍니다.

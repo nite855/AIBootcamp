@@ -2,49 +2,45 @@
 (() => {
   "use strict";
   const themes = Object.freeze(window.CardexDesignThemes.map(Object.freeze));
-  const prefix="moment-card:diary-simple-v3:", modeKey=prefix+"color-scheme", themeKey=prefix+"appearance", motionKey=prefix+"card-motion";
-  const validMode=v=>["light","dark"].includes(v), validTheme=v=>themes.some(t=>t.id===v), validMotion=v=>["on","off"].includes(v);
+  const prefix="moment-card:diary-simple-v3:", modeKey=prefix+"color-scheme", themeKey=prefix+"appearance";
+  // Soft UI v1.1 (2026-11-20): one picker, each theme carries its own light/dark scheme.
+  // Saved IDs from the previous 11-theme set move to the closest new theme.
+  const LEGACY = Object.freeze({paper:"warm",retro:"warm",sunset:"warm",editorial:"clean",aurora:"glass",lemon:"candy",forest:"sage",starlight:"night",doodle:"grid"});
+  const DEFAULT = "clean";
+  const validTheme=v=>themes.some(t=>t.id===v);
+  const migrate=v=>validTheme(v)?v:(validTheme(LEGACY[v])?LEGACY[v]:DEFAULT);
   const read=k=>{try{return localStorage.getItem(k);}catch{return null;}};
-  // Without an explicit choice, card motion follows the OS reduced-motion setting.
-  const defaultMotion=()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches?"off":"on";}catch{return "on";}};
-  const storedMotion=()=>validMotion(read(motionKey))?read(motionKey):defaultMotion();
-  let preference=validMode(read(modeKey))?read(modeKey):"light", theme=validTheme(read(themeKey))?read(themeKey):"blossom", motion=storedMotion();
+  function persist(k,v){try{localStorage.setItem(k,v);}catch{/* Selection still works for this session. */}}
+  // Card effects are always on (product decision 2026-11-19); the old card-motion key is ignored.
+  const motion="on";
+  const stored=read(themeKey);
+  let theme=migrate(stored);
+  if (stored && stored!==theme) persist(themeKey,theme);
+  const scheme=()=>themes.find(t=>t.id===theme).scheme;
   function sync(){
     document.querySelectorAll('[name="appearance"]').forEach(c=>c.checked=c.value===theme);
-    document.querySelectorAll('[name="color-mode"]').forEach(c=>c.checked=c.value===preference);
-    document.querySelectorAll('[data-card-motion-toggle]').forEach(c=>{
-      c.setAttribute("aria-pressed",String(motion==="on"));
-      c.textContent=motion==="on"?"카드 효과 켜짐":"카드 효과 꺼짐";
-    });
-    const control=document.getElementById("theme-preference");if(control)control.value=preference;
   }
   function apply(){
-    const resolved=preference;
-    document.documentElement.dataset.appearance=theme;
-    document.documentElement.dataset.theme=resolved;
-    document.documentElement.dataset.motion=motion;
-    document.documentElement.style.colorScheme=resolved;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content",themes.find(t=>t.id===theme)[resolved][0]);
+    const resolved=scheme(), root=document.documentElement;
+    root.dataset.appearance=theme;
+    root.dataset.theme=resolved;
+    root.dataset.motion=motion;
+    root.style.colorScheme=resolved;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content",themes.find(t=>t.id===theme).colors[0]);
     sync();window.dispatchEvent(new Event("cardex-theme-change"));
   }
-  function persist(k,v){try{localStorage.setItem(k,v);}catch{/* Selection still works for this session. */}}
-  function set(v){if(validMode(v)){preference=v;persist(modeKey,v);apply();}}
   function setTheme(v){if(validTheme(v)){theme=v;persist(themeKey,v);apply();}}
-  function setMotion(v){if(validMotion(v)){motion=v;persist(motionKey,v);apply();}}
-  window.CardexTheme=Object.freeze({themes,sync,set,setTheme,setMotion,getMotion:()=>motion,getTheme:()=>theme,getPreference:()=>preference,getResolvedMode:()=>document.documentElement.dataset.theme});
-  if (read(modeKey) === "system") persist(modeKey,"light");
+  // Kept for callers of the old API: the scheme now follows the theme, and card effects stay on.
+  function set(){}
+  function setMotion(){}
+  window.CardexTheme=Object.freeze({themes,legacy:LEGACY,defaultTheme:DEFAULT,migrate,sync,set,setTheme,setMotion,getMotion:()=>motion,getTheme:()=>theme,getPreference:scheme,getResolvedMode:()=>document.documentElement.dataset.theme});
+  // The old light/dark preference is no longer read.
+  try{localStorage.removeItem(modeKey);}catch{/* Nothing to clean up. */}
   window.addEventListener("storage",e=>{
-    if(e.key===modeKey||e.key===null)preference=validMode(read(modeKey))?read(modeKey):"light";
-    if(e.key===themeKey||e.key===null)theme=validTheme(read(themeKey))?read(themeKey):"blossom";
-    if(e.key===motionKey||e.key===null)motion=storedMotion();
-    if([modeKey,themeKey,motionKey,null].includes(e.key))apply();
+    if(e.key===themeKey||e.key===null){theme=migrate(read(themeKey));apply();}
   });
   document.addEventListener("change",e=>{
     if(e.target.name==="appearance")setTheme(e.target.value);
-    if(e.target.name==="color-mode"||e.target.id==="theme-preference")set(e.target.value);
-  });
-  document.addEventListener("click",e=>{
-    if(e.target.closest("[data-card-motion-toggle]"))setMotion(motion==="on"?"off":"on");
   });
   apply();
 })();

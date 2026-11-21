@@ -17,27 +17,30 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     await page.waitForFunction(() => DiaryReview.isReady());
     const click = action => require('./browser-runtime.cjs').reveal(page, action);
     await click('settings');
-    await page.locator('[data-action=preview]').evaluate(el => el.closest('details').open = true);
     await click('preview');
     await click('catalog');
-    assert.match(await page.locator('.archive-panel').innerText(), /30 \/ 30/);
-    assert.equal(await page.locator('#catalog-type option').count(), 10);
-    assert.deepEqual(await page.locator('#catalog-type optgroup').evaluateAll(xs => xs.map(x => x.label)), ['긍정','부정','중립']);
+    assert.match((await page.locator('.archive-panel').innerText()).replace(/\s+/g, ' '), /27 \/ 27/);
+    // Filter chips: 전체 + 9 emotions grouped by parent; the full grid shows 27 slots.
+    assert.equal(await page.locator('[data-catalog-filter]').count(), 10);
+    assert.equal(await page.locator('[data-catalog-filter="neu_4"]').count(), 0);
+    assert.deepEqual(await page.locator('.catalog-filters .filter-group').evaluateAll(xs => xs.map(x => x.getAttribute('aria-label'))), ['긍정','부정','중립']);
+    assert.equal(await page.locator('.slot[data-stage]').count(), 27);
     const types = await page.evaluate(() => CardexCore.TYPES);
     for (const type of types) {
-      await page.locator('#catalog-type').selectOption(type.id);
-      assert.equal(await page.locator('[data-stage]').count(), 3);
-      assert.equal(await page.locator('[data-stage] .catalog-character').count(), 3);
+      await page.locator(`[data-catalog-filter="${type.id}"]`).click();
+      assert.equal(await page.locator('.slot[data-stage]').count(), 3);
+      assert.equal(await page.locator('.slot[data-stage] .catalog-character').count(), 3);
       assert.equal(await page.locator('[data-emotion-mark]').count(), type.parent === 'neutral' ? 3 : 0);
-      assert.equal(await page.evaluate(() => document.activeElement.id), 'catalog-type');
+      assert.equal(await page.evaluate(() => document.activeElement.dataset.catalogFilter), type.id, 'focus stays on the chip');
+      assert.equal(await page.locator(`[data-catalog-filter="${type.id}"]`).getAttribute('aria-pressed'), 'true');
     }
-    await page.locator('#catalog-type').selectOption('neu_1');
-    await page.keyboard.press('ArrowDown');
+    // Keyboard: Tab moves between chips, Enter applies the filter.
+    await page.locator('[data-catalog-filter="neu_1"]').focus();
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
-    assert.equal(await page.locator('#catalog-type').inputValue(), 'neu_2');
-    await page.keyboard.press('Escape');
-    for (const theme of await page.evaluate(()=>CardexTheme.themes.map(t=>t.id))) for (const mode of ['light','dark']) {
-      await page.evaluate(({theme,mode}) => { CardexTheme.setTheme(theme); CardexTheme.set(mode); }, {theme,mode});
+    assert.equal(await page.locator('[data-catalog-filter="neu_2"]').getAttribute('aria-pressed'), 'true');
+    for (const [theme,mode] of await page.evaluate(()=>CardexTheme.themes.map(t=>[t.id,t.scheme]))) {
+      await page.evaluate(theme => CardexTheme.setTheme(theme), theme);
       const colors = await page.locator('[data-emotion-mark] > circle').first().evaluate(el => ({
         stroke:el.getAttribute('stroke'), fill:el.getAttribute('fill'),
         ink:getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
@@ -46,41 +49,41 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       assert.equal(colors.stroke, colors.ink, theme+'/'+mode);
       assert.equal(colors.fill, colors.surface, theme+'/'+mode);
     }
-    await page.evaluate(() => { CardexTheme.setTheme('lemon'); CardexTheme.set('light'); });
+    await page.evaluate(() => CardexTheme.setTheme('candy'));
     await page.screenshot({path:path.join(output,'catalog-desktop.png')});
 
-    for (const id of ['neu_1','neu_2','neu_3','neu_4']) {
-      await page.locator('#catalog-type').selectOption(id);
-      await page.locator('[data-stage="1"]').click();
-      await page.locator('[data-open]').first().click();
+    for (const id of ['neu_1','neu_2','neu_3']) {
+      await page.locator(`[data-catalog-filter="${id}"]`).click();
+      await page.locator('.slot[data-stage="1"]').click();
+      await page.locator('#card-detail[open] [data-open]').first().click();
       const type = types.find(t => t.id === id);
       assert.match(await page.locator('.art-card').textContent(), /중립/);
       assert.ok((await page.locator('.art-card').textContent()).includes(type.name));
       assert.equal(await page.locator(`[data-emotion-mark="${id}"]`).count(), 1);
       const svg = await page.locator('.art-card').evaluate(el => el.outerHTML);
-      assert.ok(!svg.includes('퇴근길'));
+      assert.ok(!svg.includes('별일 없는 하루에도'), 'only a truncated first line reaches the card');
       const download = page.waitForEvent('download');
       await click('download');
       const file = await download;
       await file.saveAs(path.join(output, id+'.png'));
       const bytes = fs.readFileSync(await file.path());
       assert.equal(bytes.readUInt32BE(16),1080);
-      assert.equal(bytes.readUInt32BE(20),1620);
+      assert.equal(bytes.readUInt32BE(20),1512);
       await page.screenshot({path:path.join(output,id+'-card.png')});
       await click('archive-records');
       await click('catalog');
     }
     await click('review-month');
-    await page.locator('#stats-kind').selectOption('distribution');
     for (const [width,height] of [[1440,900],[390,844],[320,568]]) {
       await page.setViewportSize({width,height});
       await page.waitForTimeout(200);
-      assert.equal(await page.locator('.distribution-group').count(),3);
-      assert.equal(await page.locator('.distribution-row').count(),10);
+      // Soft UI v1.1: 9 rows of card counts; phones list the top three.
+      assert.equal(await page.locator('.dist-row').count(),9);
+      assert.equal(await page.locator('.dist-row:visible').count(), width >= 960 ? 9 : 3);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),false);
-      const labelsFit = await page.locator('.distribution-row > span').evaluateAll(xs => xs.every(el => el.scrollWidth <= el.clientWidth + 1));
+      const labelsFit = await page.locator('.dist-row:visible .dist-name').evaluateAll(xs => xs.every(el => el.scrollWidth <= el.clientWidth + 1));
       assert.ok(labelsFit, 'long leaf labels fit at '+width);
-      const last = page.locator('.distribution-row').last();
+      const last = page.locator('.dist-row:visible').last();
       await last.scrollIntoViewIfNeeded();
       const bounds = await last.boundingBox();
       assert.ok(bounds.y >= 0 && bounds.y + bounds.height <= height, 'last leaf can be read at '+width);
@@ -88,6 +91,6 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     }
     assert.deepEqual(errors,[]);
     assert.deepEqual(requests,[]);
-    console.log('PASS: 10 labels, 30 slots, neutral symbols/PNGs, keyboard and responsive distribution. Evidence: '+output);
+    console.log('PASS: 9 labels, 27 slots, neutral symbols/PNGs, keyboard and responsive distribution. Evidence: '+output);
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

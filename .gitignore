@@ -2,8 +2,6 @@
 .env
 .env.*
 !.env.example
-!.env.sample
-!.env.template
 moment-backup-*.json
 
 # Python 가상환경·캐시·패키징 결과

@@ -11,10 +11,11 @@ const {chromium}=require(process.env.CARDEX_PLAYWRIGHT||path.join(os.tmpdir(),'a
     page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
     await page.goto(pathToFileURL(path.resolve(__dirname,'../docs/design/preview/index.html')).href);
     assert.equal(await page.locator('#review-theme option').count(),10);
+    assert.equal(await page.locator('#theme-preference').count(),0);
     assert.equal(await page.locator('[data-state]').count(),5);
     const evidence=path.join(os.tmpdir(),'aibootcamp-design-setup');fs.mkdirSync(evidence,{recursive:true});
-    for(const id of await page.evaluate(()=>CardexTheme.themes.map(t=>t.id)))for(const mode of ['light','dark']){
-      await page.locator('#review-theme').selectOption(id);await page.locator('#theme-preference').selectOption(mode);
+    for(const [id,mode] of await page.evaluate(()=>CardexTheme.themes.map(t=>[t.id,t.scheme]))){
+      await page.locator('#review-theme').selectOption(id);
       assert.equal(await page.getAttribute('html','data-appearance'),id);assert.equal(await page.getAttribute('html','data-theme'),mode);
       for(const width of [1366,390,320]){
         await page.setViewportSize({width,height:844});
@@ -26,6 +27,6 @@ const {chromium}=require(process.env.CARDEX_PLAYWRIGHT||path.join(os.tmpdir(),'a
     }
     for(const href of await page.locator('a').evaluateAll(as=>as.map(a=>a.href))) assert.ok(fs.existsSync(require('node:url').fileURLToPath(href)),href);
     assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
-    console.log('Design preview: 18 palettes × 3 widths, offline, links OK. Evidence: '+evidence);
+    console.log('Design preview: 10 themes × 3 widths, offline, links OK. Evidence: '+evidence);
   }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

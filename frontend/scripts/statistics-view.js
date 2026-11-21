@@ -15,7 +15,9 @@ function archivePanel() {
         .join("") || `<p>${state.dateFilter ? "이 날짜에는 기록이 없어요." : state.cardFilter ? "이 캐릭터와 연결된 기록이 없어요." : (state.search || state.favoritesOnly ? "조건에 맞는 기록이 없어요. 필터를 바꿔 보세요." : "아직 기록이 없어요. 오늘의 첫 문장을 남겨 보세요.")}</p>`
     }</div><div class="pagination" ${pages === 1 && !state.dateFilter && !state.cardFilter ? "hidden" : ""}>${pages > 1 ? btn("prev", "이전", "quiet", state.page === 0 ? "disabled" : "") + `<span>${state.page + 1} / ${pages}</span>` + btn("next", "다음", "quiet", state.page === pages - 1 ? "disabled" : "") : ""}${state.dateFilter ? btn("back-stats", "통계로") : ""}</div>`;
   }
-  return `<section class="panel archive-panel"><div class="row"><h2>${state.archiveTab === "stats" ? "감정 통계" : state.archiveTab === "catalog" ? "캐릭터 도감" : "지난 기록"}</h2></div>${body}</section>`;
+  // Statistics and catalog are compositions of their own panels (Figma v0.3); the archive list stays one panel.
+  if (state.archiveTab !== "records") return `<section class="archive-panel ${state.archiveTab}-page"><h2 class="sr-only">${state.archiveTab === "stats" ? "감정 통계" : "캐릭터 도감"}</h2>${body}</section>`;
+  return `<section class="panel archive-panel records-page"><div class="row"><h2>지난 기록</h2>${btn("write", "← 기록으로")}</div>${body}</section>`;
 }
 // One-line monthly takeaway (How We Feel-style review), shown only with enough analyzed records.
 function insightLine(stats) {
@@ -29,90 +31,163 @@ function insightLine(stats) {
     : `분석된 ${s.valid}편에서 가장 큰 비중은 <strong>${E(names)}</strong>${s.leafTies.length > 1 ? "(같은 비중)" : ""}이에요.`;
   return `<p class="month-insight" data-ready="true">${lead} <span class="muted">${parents} · 감정의 강도가 아닌 분류 확률이에요.</span></p>`;
 }
+// Most frequent analyzed card of the month (latest record versions only), or null.
+function monthTopCard(month) {
+  const counts = {}, stages = {};
+  for (const r of repository.query({ month })) {
+    const c = DiaryCards.resolve(r);
+    if (c.status !== "ready") continue;
+    counts[c.type] = (counts[c.type] || 0) + 1;
+    (stages[c.type] ||= []).push(c.stage);
+  }
+  const best = CardexCore.IDS.filter(id => counts[id]).sort((a, b) => counts[b] - counts[a])[0];
+  if (!best) return null;
+  const lo = Math.min(...stages[best]), hi = Math.max(...stages[best]);
+  return { type: best, count: counts[best], stages: lo === hi ? `${lo}단계` : `${lo}~${hi}단계` };
+}
+// ── Soft UI v1.1 monthly statistics (Figma "통계", "통계 · 기록 없음", "M · 통계", 2026-11-20 P6) ──
+// One scrolling column of sections on every width: summary cards, positive-share trend (3-day moving
+// average) with per-day card dots, distribution, emotion calendar and weekday mood. Day dots and
+// calendar cells open the card modal (home-view.js openCardModal). Only current-version analyses count.
+const narrowStats = () => typeof matchMedia === "function" && matchMedia("(max-width: 959px)").matches;
+const monthShort = month => `${Number(month.slice(5, 7))}월`;
+// Days drawn on the x-axis: the current month stops at today instead of leaving an empty tail.
+function trendDays(stats) {
+  const today = localDate();
+  if (state.month !== today.slice(0, 7)) return stats.days;
+  const end = stats.days.findIndex(d => d.date === today);
+  return end < 0 ? stats.days : stats.days.slice(0, end + 1);
+}
+// Card palette of a day's latest record (ready cards only), for dots and calendar cells.
+function dayCardStyle(date) {
+  const record = dayRecord(date), card = record ? DiaryCards.resolve(record) : null;
+  if (!card || card.status !== "ready") return { record, card, style: "" };
+  const key = card.type.replace("_", "-");
+  return { record, card, style: `--day-base:var(--card-base-${key});--day-mix:var(--card-mix-${key});--day-deep:var(--card-deep-${key})` };
+}
+function trendChart(stats) {
+  const days = trendDays(stats), narrow = narrowStats();
+  const W = narrow ? 360 : 756, H = narrow ? 200 : 250, left = 8, right = W - (narrow ? 40 : 44), top = 14, base = H - 32;
+  const span = Math.max(1, days.length - 1);
+  const x = i => left + (right - left) * (days.length === 1 ? 0.5 : i / span), y = v => base - v * (base - top);
+  const raw = days.map(d => d.summary.validCount ? d.summary.parents.positive : null);
+  const smooth = DiaryStatistics.movingAverage(raw, 3);
+  const values = raw.filter(Number.isFinite), mean = values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
+  let marks = "";
+  // Figma: solid grid lines with the 100/50/0% labels on the right edge.
+  for (const value of [0, 0.5, 1])
+    marks += `<path class="${value ? "chart-guide" : "chart-base"}" d="M${left} ${y(value)}H${right}"/><text class="chart-axis" x="${right + 8}" y="${y(value) + 4}" text-anchor="start">${value * 100}%</text>`;
+  const points = smooth.map((v, i) => v === null ? null : [x(i), y(v)]);
+  for (const run of DiaryStatistics.smoothSegments(points)) {
+    if (run.points.length > 1) marks += `<path class="chart-area" d="${run.d}L${run.end[0]} ${base}L${run.start[0]} ${base}Z"/>`;
+    marks += run.points.length > 1 ? `<path class="chart-line" data-series="positive" d="${run.d}"/>` : `<circle class="chart-dot" cx="${run.start[0]}" cy="${run.start[1]}" r="4"/>`;
+  }
+  if (mean !== null) marks += `<path class="chart-mean" d="M${left} ${y(mean)}H${right}"/><text class="chart-mean-label" x="${left + 2}" y="${y(mean) - 8}" text-anchor="start">평균 ${CardexCore.percent(mean)}</text>`;
+  // Today's tooltip, when today is drawn and analyzed.
+  const ti = days.findIndex(d => d.date === localDate());
+  if (ti >= 0 && smooth[ti] !== null) {
+    const tx = x(ti), ty = y(smooth[ti]), label = `오늘 긍정 ${CardexCore.percent(raw[ti])}`, bw = 104;
+    const bx = Math.min(right - bw, Math.max(left, tx - bw + 12)), by = Math.max(0, ty - 38);
+    marks += `<g class="chart-today"><circle cx="${tx}" cy="${ty}" r="7"/><rect x="${bx}" y="${by}" width="${bw}" height="26" rx="13"/><text x="${bx + bw / 2}" y="${by + 17}" text-anchor="middle">${label}</text></g>`;
+  }
+  const last = days.length - 1, step = narrow && days.length > 20 ? 10 : 5;
+  days.forEach((d, i) => {
+    if (i === 0 || i === last || ((i + 1) % step === 0 && last - i >= 2))
+      marks += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="chart-day">${i + 1}일</text>`;
+  });
+  return `<svg class="stats-chart" viewBox="0 0 ${W} ${H}" data-days="${days.length}" role="img" aria-label="긍정 비율 3일 이동 평균${mean !== null ? ", 이번 달 평균 " + CardexCore.percent(mean) : ""}, 분석 없는 날은 공백"><defs><linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--card-deep-pos-1, #e8789a)" stop-opacity=".22"/><stop offset="1" stop-color="var(--card-deep-pos-1, #e8789a)" stop-opacity="0"/></linearGradient></defs>${marks}</svg>`;
+}
+// Card-colored dots under the chart, one per drawn day; recorded days open the card modal.
+function trendDots(stats) {
+  const today = localDate();
+  return `<ol class="trend-dots" style="--days:${trendDays(stats).length}" aria-label="날짜별 카드">${trendDays(stats).map((d, i) => {
+    const { record, card, style } = dayCardStyle(d.date), isToday = d.date === today;
+    const cls = `trend-dot${record ? " has-record" : ""}${card?.status === "ready" ? " is-ready" : ""}${isToday ? " is-today" : ""}`;
+    return `<li>${record ? `<button type="button" class="${cls}" data-card-day="${d.date}" style="${style}" aria-label="${E(longDate(d.date))}${isToday ? ", 오늘" : ""}, ${E(cardLabel(record))}"></button>` : `<span class="${cls}" aria-hidden="true"></span>`}</li>`;
+  }).join("")}</ol>`;
+}
+// 9 rows: how many cards of each emotion this month (deep card color), most first.
+function distributionRows(month) {
+  const counts = Object.fromEntries(CardexCore.IDS.map(id => [id, 0]));
+  for (const r of repository.query({ month })) { const c = DiaryCards.resolve(r); if (c.status === "ready") counts[c.type]++; }
+  const max = Math.max(1, ...Object.values(counts));
+  const order = CardexCore.IDS.slice().sort((a, b) => counts[b] - counts[a] || CardexCore.IDS.indexOf(a) - CardexCore.IDS.indexOf(b));
+  return `<ol class="dist-rows">${order.map(id => `<li class="dist-row" data-type="${id}"><span class="dist-name"><i style="background:var(--card-deep-${id.replace("_", "-")})" aria-hidden="true"></i>${E(CardexCore.type(id).name)}</span><span class="dist-bar" aria-hidden="true"><b style="width:${(counts[id] / max) * 100}%;background:var(--card-deep-${id.replace("_", "-")})"></b></span><strong>${counts[id]}</strong></li>`).join("")}</ol>`;
+}
+// Month grid: a recorded day takes its card's gradient and shows its stage as dots.
+function emotionCalendar(month) {
+  const today = localDate(), first = new Date(month + "-01T12:00:00").getDay();
+  const total = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+  const cells = Array.from({ length: total }, (_, i) => {
+    const date = `${month}-${String(i + 1).padStart(2, "0")}`, { record, card, style } = dayCardStyle(date);
+    const isToday = date === today, future = date > today, ready = card?.status === "ready";
+    const cls = `emo-day${record ? " has-record" : ""}${ready ? " is-ready" : ""}${isToday ? " is-today" : ""}${future ? " is-future" : ""}`;
+    const dots = ready ? `<i class="emo-stage" aria-hidden="true">${"<b></b>".repeat(card.stage)}</i>` : "";
+    const label = `${longDate(date)}${isToday ? ", 오늘" : ""}, ${record ? cardLabel(record) : future ? "아직 오지 않은 날" : "기록 없음"}`;
+    const current = isToday ? ' aria-current="date"' : "";
+    return record
+      ? `<button type="button" class="${cls}" data-card-day="${date}" style="${style}" aria-label="${E(label)}"${current}><span>${i + 1}</span>${dots}</button>`
+      : `<span class="${cls}" role="img" aria-label="${E(label)}"${current}><span>${i + 1}</span></span>`;
+  });
+  return `<div class="emo-calendar">${WEEKDAYS.map(d => `<span class="weekday" aria-hidden="true">${d}</span>`).join("")}${'<span class="emo-pad" aria-hidden="true"></span>'.repeat(first)}${cells.join("")}</div>`;
+}
+// Stacked positive/neutral/negative bars per weekday with the record count, plus one insight line.
+function weekdayMood(month) {
+  const summary = DiaryStatistics.weekdaySummary(repository.query({ month }), month);
+  const insight = DiaryStatistics.weekdayInsight(summary);
+  // Figma: vertical stacked bars (positive at the bottom) with the positive share above and the
+  // weekday and count below; phones turn the same markup into horizontal rows (flex-basis = share).
+  const top = insight && insight.positive !== null ? insight.positive : -1;
+  const rows = summary.map(d => {
+    const p = d.parents, seg = (key, cls) => p && p[key] > 0 ? `<b class="${cls}" style="--p:${p[key]}"></b>` : "";
+    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : "분석 없음";
+    return `<li class="weekday-row${d.weekday === top ? " is-top" : ""}"><span class="weekday-pct" aria-hidden="true">${p ? Math.round(p.positive * 100) + "%" : "—"}</span><span class="weekday-bar" role="img" aria-label="${WEEKDAYS[d.weekday]}요일, ${text}, ${d.count}편">${seg("positive", "seg-pos")}${seg("neutral", "seg-neu")}${seg("negative", "seg-neg")}</span><span class="weekday-name">${WEEKDAYS[d.weekday]}</span><small>${d.count}편</small></li>`;
+  }).join("");
+  const parts = insight ? [insight.positive !== null ? `${WEEKDAYS[insight.positive]}요일엔 긍정이` : "", insight.negative !== null ? `${WEEKDAYS[insight.negative]}요일엔 부정이` : ""].filter(Boolean) : [];
+  const line = parts.length ? `<p class="weekday-insight"><i aria-hidden="true">✦</i>${parts.join(", ")} 많았어요</p>` : `<p class="weekday-insight muted">분석된 기록이 ${DiaryStatistics.INSIGHT_MINIMUM}편 이상이면 요일별 흐름을 알려 드려요.</p>`;
+  return `<ol class="weekday-rows">${rows}</ol>${line}`;
+}
 function statisticsPanel() {
-  const stats = DiaryStatistics.monthSummary(
-    repository.query({ month: state.month }),
-    state.month,
-  );
-  const available =
-    state.statsTab === "trend"
-      ? stats.days.filter((x) => x.summary.validCount)
-      : stats.days;
-  if (!available.some((x) => x.date === state.statsDate))
-    state.statsDate = available.at(-1)?.date || "";
-  const selected = stats.days.find((x) => x.date === state.statsDate);
-  const thisMonth = localDate().slice(0, 7);
-  const nav = `<div class="month-nav"><button type="button" class="quiet" data-month-step="-1" aria-label="이전 달">‹ 이전 달</button><button type="button" class="quiet" data-month-step="1" aria-label="다음 달" ${state.month >= thisMonth ? "disabled" : ""}>다음 달 ›</button></div>`;
-  const controls = `${nav}${insightLine(stats)}<div class="month-controls"><label>월 <input id="stats-month" type="month" value="${state.month}" max="${thisMonth}"></label><label>통계 <select id="stats-kind">${[["trend","감정 추이"],["count","월간 기록"],["distribution","감정 분포"]].map(([id,label])=>`<option value="${id}" ${state.statsTab === id ? "selected" : ""}>${label}</option>`).join("")}</select></label></div>`;
-  if (state.statsTab === "count") {
-    const first = new Date(state.month + '-01T12:00:00').getDay();
-    const days = stats.days;
-    const totalDays = new Date(Number(state.month.slice(0,4)),Number(state.month.slice(5,7)),0).getDate();
-    const cells = Array.from({length:totalDays},(_,i)=> {
-      const date = `${state.month}-${String(i+1).padStart(2,'0')}`;
-      const day = days.find(d=>d.date===date), count = day?.count || 0, emotion = DiaryStatistics.dayEmotion(day), today = date === localDate();
-      // The analyzed emotion is a small dot under the number, so the date stays readable.
-      const dot = emotion ? `<i class="day-emotion" style="background:var(--${emotion})" aria-hidden="true"></i>` : '';
-      const label = `${date}${today ? ', 오늘' : ''}, 기록 ${count}편${emotion ? ', 대표 감정 ' + CardexCore.type(emotion).name : ''}`;
-      return `<button class="calendar-day ${count ? 'has-records' : ''} ${today ? 'is-today' : ''}" data-month-date="${date}" aria-label="${label}" ${today ? 'aria-current="date"' : ''}><strong>${i+1}</strong><span>${count ? count+'편' : '·'}</span>${dot}</button>`;
-    });
-    return `${controls}<div class="month-summary"><strong>${stats.total}편의 기록</strong><span>${days.filter(d=>d.count).length}일의 순간</span></div><p class="muted">날짜를 누르면 그날의 글을 읽을 수 있어요. 점은 그날 분석된 대표 감정이에요. 미분석 기록에는 감정 색을 붙이지 않아요.</p><div class="calendar-grid">${['일','월','화','수','목','금','토'].map(d=>`<span class="weekday">${d}</span>`).join('')}${'<span aria-hidden="true"></span>'.repeat(first)}${cells.join('')}</div>`;
-  }
-  let graph = "";
+  const stats = DiaryStatistics.monthSummary(repository.query({ month: state.month }), state.month);
+  const thisMonth = localDate().slice(0, 7), next = DiaryStatistics.shiftMonth(state.month, 1), prev = DiaryStatistics.shiftMonth(state.month, -1);
+  const delta = DiaryStatistics.monthDelta(activeRecords(), state.month);
+  const top = monthTopCard(state.month), topRecord = top ? repository.query({ month: state.month }).find(r => { const c = DiaryCards.resolve(r); return c.status === "ready" && c.type === top.type; }) : null;
+  const example = state.mode === "example";
+  // Month pill: ‹ previous | current | next › (never past this month).
+  const nav = `<div class="month-pill" role="group" aria-label="달 이동"><button type="button" data-month-step="-1" aria-label="이전 달 (${monthShort(prev)})">‹ ${monthShort(prev)}</button><strong aria-current="true">${monthShort(state.month)}</strong><button type="button" data-month-step="1" aria-label="다음 달 (${monthShort(next)})" ${state.month >= thisMonth ? "disabled" : ""}>${monthShort(next)} ›</button></div>`;
+  const head = `<div class="stats-head page-heading"><div><h2 class="stats-title">${monthShort(state.month)}의 마음</h2><p class="muted"><strong class="month-title">${monthTitle(state.month)}</strong> · 기록 ${stats.total}편${example ? " · 시연용 합성 데이터" : ""}</p></div>${nav}</div>`;
+  const deltaText = !stats.total && !delta.previous ? "첫 기록을 남겨 보세요" : delta.delta > 0 ? `지난달보다 ${delta.delta}편 더 남겼어요` : delta.delta < 0 ? `지난달보다 ${-delta.delta}편 적어요` : "지난달과 같아요";
+  const parents = stats.valid ? stats.distribution.parents : null;
+  // Ratio tile (Figma): whole-number shares with a small "%", a colored dot per parent and a
+  // segmented bar with gaps.
+  const pct = v => Math.round(v * 100);
+  const ratio = parents
+    ? `<p class="ratio-values">${CardexCore.PARENTS.map(p => `<span><b>${pct(parents[p.id])}</b><em>%</em><small><i class="seg-${p.id.slice(0, 3)}" aria-hidden="true"></i>${p.name}</small></span>`).join("")}</p><span class="ratio-bar" aria-hidden="true">${CardexCore.PARENTS.filter(p => parents[p.id] > 0).map(p => `<b class="seg-${p.id.slice(0, 3)}" style="flex-grow:${parents[p.id]}"></b>`).join("")}</span>`
+    : `<p class="ratio-values is-empty"><b>—</b></p>`;
+  const summary = `<div class="stats-cards"><section class="panel stats-card stats-count${stats.total ? "" : " is-empty"}"><p class="stats-label">이번 달 기록</p><p class="stats-big"><b class="moment-number">${stats.total}</b>편</p><small class="stats-delta"><span class="wide-only">${deltaText}</span><span class="narrow-only">${delta.delta && (stats.total || delta.previous) ? `지난달보다 ${delta.delta > 0 ? "+" : ""}${delta.delta}` : deltaText}</span></small></section>
+    <section class="panel stats-card stats-ratio" aria-label="감정 비율"><p class="stats-label">감정 비율</p>${ratio}</section>
+    <section class="panel stats-card stats-summary-card" aria-label="가장 많이 받은 카드"><p class="stats-label">가장 많이 받은 카드</p>${top ? `<div class="top-card"><div><strong>${E(CardexCore.type(top.type).name)}</strong><small>${top.count}편 · ${top.stages}</small></div>${miniCard(topRecord)}</div>` : `<p class="ratio-values is-empty"><b>—</b></p>`}</section></div>`;
   if (!stats.total)
-    graph = `<div class="stats-empty"><p>아직 이 달의 기록이 없어요.</p>${btn("archive-records", "지난 기록 보기")}</div>`;
-  else if (state.statsTab !== "count" && !stats.valid)
-    graph = `<div class="stats-empty"><p>감정 분석은 준비 중이에요. 기록은 보관함에서 읽을 수 있어요.</p>${btn("archive-records", "지난 기록 보기")}</div>`;
-  else if (state.statsTab === "distribution")
-    graph = `<div class="distribution" aria-label="분석된 기록의 평균 분류 확률">${CardexCore.PARENTS.map(p => `<section class="distribution-group" aria-label="${p.name}"><h3>${p.name}<span>${CardexCore.percent(stats.distribution.parents[p.id])}</span></h3>${p.children.map(id => {
-      const t = CardexCore.type(id), value = stats.distribution.leaf[id];
-      return `<div class="distribution-row"><span>${t.name}</span><div><i style="width:${value * 100}%;background:var(--${id})"></i></div><strong>${CardexCore.percent(value)}</strong></div>`;
-    }).join("")}</section>`).join("")}</div><p class="muted">분석된 기록의 평균 분류 확률이에요. 중립에는 객관적 서술·의문·놀람·당황을 포함해요.</p>`;
-  else {
-    const x = (i) => 42 + (i * 640) / (stats.days.length - 1),
-      y = (v) => 185 - v * 150;
-    // Soft guides: only the 50% line and the baseline, drawn faintly and dotted.
-    let marks = "", defs = "";
-    for (const value of [0, 0.5, 1])
-      marks += `${value ? `<path class="chart-guide" d="M42 ${y(value)}H690"/>` : `<path class="chart-base" d="M42 ${y(value)}H690"/>`}<text x="34" y="${y(value) + 4}" text-anchor="end">${state.statsTab === "count" ? Math.round(value * Math.max(1, ...stats.days.map((d) => d.count))) : value * 100 + "%"}</text>`;
-    if (state.statsTab === "count") {
-      const max = Math.max(1, ...stats.days.map((d) => d.count));
-      stats.days.forEach((d, i) => {
-        if (d.count) marks += `<rect class="chart-bar" x="${x(i) - 6}" y="${y(d.count / max)}" width="12" height="${185 - y(d.count / max)}" rx="6"><title>${i + 1}일 · ${d.count}편</title></rect>`;
-      });
-    } else {
-      // One gently curved line per parent emotion; dash patterns stay for colour-blind readers.
-      let lines = "", areas = "", dots = "";
-      CardexCore.PARENTS.forEach((p, index) => {
-        defs += `<linearGradient id="trend-fill-${p.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--${p.id})" stop-opacity=".26"/><stop offset="1" stop-color="var(--${p.id})" stop-opacity="0"/></linearGradient>`;
-        const points = stats.days.map((d, i) => d.summary.validCount ? [x(i), y(d.summary.parents[p.id])] : null);
-        for (const run of DiaryStatistics.smoothSegments(points)) {
-          if (run.points.length > 1) {
-            areas += `<path class="chart-area" d="${run.d}L${run.end[0]} 185L${run.start[0]} 185Z" fill="url(#trend-fill-${p.id})"/>`;
-            lines += `<path class="chart-line" d="${run.d}" stroke="var(--${p.id})" stroke-dasharray="${["0", "9 6", "2 6"][index]}"/>`;
-          }
-        }
-        stats.days.forEach((d, i) => {
-          if (d.summary.validCount)
-            dots += `<circle class="chart-dot" cx="${x(i)}" cy="${y(d.summary.parents[p.id])}" r="4.5" fill="var(--${p.id})"><title>${i + 1}일 · ${p.name} ${CardexCore.percent(d.summary.parents[p.id])}</title></circle>`;
-        });
-      });
-      marks += areas + lines + dots;
-    }
-    stats.days.forEach((d, i) => {
-      if (i === 0 || i === stats.days.length - 1 || (i + 1) % 5 === 0)
-        marks += `<text x="${x(i)}" y="211" text-anchor="middle">${i + 1}일</text>`;
-    });
-    graph = `<svg class="stats-chart" viewBox="0 0 720 225" role="img" aria-label="${state.statsTab === "count" ? "날짜별 기록 편수" : "날짜별 감정 비중, 기록 없는 구간은 공백"}">${defs ? `<defs>${defs}</defs>` : ""}${marks}</svg>${state.statsTab === "trend" ? `<div class="stats-legend">${CardexCore.PARENTS.map((p, i) => `<span class="legend-chip" style="--chip:var(--${p.id})"><svg width="22" height="8" aria-hidden="true"><path d="M1 4H21" stroke="var(--${p.id})" stroke-width="3" stroke-linecap="round" stroke-dasharray="${["0", "6 4", "2 4"][i]}"/></svg>${p.name}</span>`).join("")}<span class="legend-chip legend-gap" style="--chip:var(--muted)"><svg width="22" height="8" aria-hidden="true"><path d="M1 4H7M15 4H21" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/></svg>선 끊김 = 분석 없는 날</span></div>` : ""}`;
-  }
-  const details = selected
-    ? `${selected.count}편${selected.summary.validCount ? " · " + CardexCore.PARENTS.map((p) => p.name + " " + CardexCore.percent(selected.summary.parents[p.id])).join(" · ") : " · 감정 분석 없음"}`
-    : "";
-  return `${controls}<p class="muted">${state.mode === "example" ? "예시 통계 · 실제 사용자 분석 아님" : "내 기록 통계 · 감정 분석은 준비 중"}</p><div class="stats-summary">기록 <strong>${stats.total}</strong>편 · 작성한 날 <strong>${stats.writtenDays}</strong>일<br><small>분석 ${stats.valid}편 · 미분석 ${stats.missing}편${state.statsTab === "trend" && stats.days.filter((x) => x.summary.validCount).length === 1 ? " · 비교할 날짜가 더 필요해요." : ""}</small></div><div class="graph-space${state.statsTab === "distribution" ? " distribution-space" : ""}"${state.statsTab === "distribution" ? ' tabindex="0" role="region" aria-label="감정 분포 상세"' : ""}>${graph}</div>${state.statsTab !== "distribution" && available.length ? `<div class="stats-detail"><label>날짜 <select id="stats-date">${available.map((d) => `<option value="${d.date}" ${d.date === state.statsDate ? "selected" : ""}>${d.date}</option>`).join("")}</select></label>${btn("date-records", "기록 보기")}<p>${E(details)}</p></div>` : '<p class="muted">감정 비중은 감정의 강도나 심리 점수가 아니에요.</p>'}`;
+    return `${head}${summary}<section class="panel stats-empty-panel"><span class="stage-glow" aria-hidden="true"></span><p class="stats-empty-title">기록이 쌓이면 마음의 흐름을 보여드릴게요</p><p class="muted">분석된 기록이 ${DiaryStatistics.INSIGHT_MINIMUM}편 이상이면 감정 추이 그래프가 그려져요</p>${state.month === thisMonth ? btn("write", "오늘 기록하기", "primary") : ""}</section>`;
+  // The explanatory note and the insight (not in Figma) stay as one small caption line.
+  const trendBody = stats.valid
+    ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">아래 점은 그날 받은 카드의 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
+    : `<div class="stats-empty"><p>감정 분석은 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
+  return `${head}${summary}<div class="stats-sections">
+    <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균</small></div>${trendBody}${insightLine(stats)}</section>
+    <section class="panel stats-dist" aria-labelledby="dist-title"><div class="row"><h3 id="dist-title"><span class="wide-only">감정 분포</span><span class="narrow-only">많이 받은 감정</span></h3><small>9종 · 받은 카드 수</small></div>${distributionRows(state.month)}</section>
+    <section class="panel stats-mood"><div class="stats-calendar" aria-labelledby="stats-calendar-title"><div class="row"><div><h3 id="stats-calendar-title">${monthShort(state.month)} 감정 달력</h3><small>칸 색 = 그날 받은 카드 · 점 = 카드 단계 · 회색 = 분석 전</small></div></div>${emotionCalendar(state.month)}</div><div class="stats-weekday" aria-labelledby="weekday-title"><div class="row"><div><h3 id="weekday-title">요일별 마음</h3><small>요일마다 긍정 · 중립 · 부정 비율</small></div><p class="weekday-legend" aria-hidden="true"><span><i class="seg-pos"></i>긍정</span><span><i class="seg-neu"></i>중립</span><span><i class="seg-neg"></i>부정</span></p></div>${weekdayMood(state.month)}</div></section>
+  </div>`;
 }
 function bindStatistics() {
-  app.querySelector('#stats-kind')?.addEventListener('change', e => { state.statsTab = e.target.value; render(); app.querySelector('#stats-kind')?.focus(); });
-  app.querySelector('#stats-month')?.addEventListener('change', e => { if (!e.target.validity.valid || !/^\d{4}-\d{2}$/.test(e.target.value) || e.target.value > localDate().slice(0,7)) { e.target.value = state.month; return; } state.month = e.target.value; state.statsDate = ''; render(); app.querySelector('#stats-month')?.focus(); });
+  app.querySelectorAll("[data-home-month]").forEach(b => b.addEventListener("click", () => {
+    const step = Number(b.dataset.homeMonth);
+    state.homeMonth = DiaryStatistics.shiftMonth(state.homeMonth, step, localDate().slice(0, 7));
+    syncCalendarWeek(state.homeMonth);
+    render();
+    const same = app.querySelector(`[data-home-month="${step}"]`);
+    (same && !same.disabled ? same : app.querySelector(`[data-home-month="${-step}"]`))?.focus();
+  }));
   app.querySelectorAll("[data-archive]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -122,51 +197,22 @@ function bindStatistics() {
         render();
       }),
   );
-  app.querySelectorAll("[data-stats]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        state.statsTab = b.dataset.stats;
-        render();
-      }),
-  );
-  app.querySelector("#stats-date")?.addEventListener("change", (e) => {
-    state.statsDate = e.target.value;
+  app.querySelectorAll("[data-week-step]").forEach(b => b.addEventListener("click", () => {
+    const step = Number(b.dataset.weekStep);
+    state.calendarWeek = DiaryStatistics.shiftWeek(state.calendarWeek, step, localDate());
     render();
-    app.querySelector("#stats-date")?.focus();
-  });
+    const same = app.querySelector(`[data-week-step="${step}"]`);
+    (same && !same.disabled ? same : app.querySelector(`[data-week-step="${-step}"]`))?.focus();
+  }));
   app.querySelectorAll("[data-month-step]").forEach(b => b.addEventListener("click", () => {
     const step = Number(b.dataset.monthStep);
     state.month = DiaryStatistics.shiftMonth(state.month, step, localDate().slice(0, 7));
-    state.statsDate = "";
+    syncCalendarWeek(state.month);
     render();
     // Keep focus on the pressed control; fall back to the other one when it becomes disabled.
     const same = app.querySelector(`[data-month-step="${step}"]`);
     (same && !same.disabled ? same : app.querySelector(`[data-month-step="${-step}"]`))?.focus();
   }));
-  app
-    .querySelector('[data-action="date-records"]')
-    ?.addEventListener("click", () => {
-      const sameDay = repository.query({ date: state.statsDate });
-      if (sameDay.length === 1) {
-        // One record that day: skip the one-item list and open it directly.
-        state.entryFrom = "history";
-        state.selected = sameDay[0].id;
-        state.recordTab = "card";
-        state.view = "entry";
-        state.editing = false;
-        state.deleteConfirm = false;
-        state.dateFilter = state.statsDate;
-        state.archiveTab = "records";
-        state.returnToStats = true;
-        render(true);
-        return;
-      }
-      state.dateFilter = state.statsDate;
-      state.page = 0;
-      state.archiveTab = "records";
-      state.returnToStats = true;
-      render();
-    });
   app
     .querySelector('[data-action="clear-date"]')
     ?.addEventListener("click", () => {
@@ -186,30 +232,4 @@ function bindStatistics() {
   if (emotion) emotion.onchange = () => { state.emotionFilter = emotion.value; state.page = 0; render(); const d = app.querySelector(".record-filters"); if (d) d.open = true; app.querySelector("#emotion-filter")?.focus(); };
   const sort = app.querySelector("[data-sort]");
   if (sort) sort.onclick = () => { state.sortOldest = !state.sortOldest; state.page = 0; render(); app.querySelector("[data-sort]")?.focus(); };
-  const chart = app.querySelector(".stats-chart");
-  if (chart)
-    chart.onclick = (e) => {
-      const bounds = chart.getBoundingClientRect();
-      const fraction = Math.max(
-        0,
-        Math.min(
-          1,
-          (((e.clientX - bounds.left) / bounds.width) * 720 - 42) / 640,
-        ),
-      );
-      const count = new Date(
-        Number(state.month.slice(0, 4)),
-        Number(state.month.slice(5)),
-        0,
-      ).getDate();
-      const date =
-        state.month +
-        "-" +
-        String(Math.round(fraction * (count - 1)) + 1).padStart(2, "0");
-      const select = app.querySelector("#stats-date");
-      if (select && [...select.options].some((o) => o.value === date)) {
-        state.statsDate = date;
-        render();
-      }
-    };
 }

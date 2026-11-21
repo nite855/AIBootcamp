@@ -1,0 +1,392 @@
+/* Grade effects (2026-11-19): every card surface carries data-grade from DiaryCards.grade().
+   Analyzed cards glow in their emotion color (data-emotion, 2026-11-20); the grade picks the effect.
+   Fallback colors: pending = silver, blank/error = pale grey, stage-1 = mint, stage-2 = violet, stage-3 = gold + holo.
+   Only transform/opacity/filter animate; overlays never take pointer events except the sealed "?" button.
+   Loaded last in the bundle (tools/build.mjs), after screens.css. */
+
+@property --holo-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+[data-grade] { --grade: #b9c2d6; --grade-2: #eef2fa; --grade-strength: .45; }
+[data-grade="error"], [data-grade="blank"] { --grade: #c4c4c4; --grade-2: #f1f1f1; --grade-strength: .4; }
+[data-grade="stage-1"] { --grade: #4fd1b0; --grade-2: #c9f4e8; --grade-strength: .6; }
+[data-grade="stage-2"] { --grade: #9b74ff; --grade-2: #e2d6ff; --grade-strength: .75; }
+[data-grade="stage-3"] { --grade: #f6b73c; --grade-2: #fff0b8; --grade-strength: .9; }
+/* 2026-11-20: analyzed cards glow in their emotion's card color (data-emotion = 9 sub-emotions, the same
+   --card-base/--card-deep tokens as the card art). The grade keeps only the strength and the effect shape:
+   stage-1 still glow, stage-2 breathing glow + orbit ring, stage-3 holographic rim. The colors above stay
+   as the fallback for surfaces without an emotion (pending, blank, error). */
+[data-emotion="pos_1"] { --emo: var(--card-base-pos-1); --emo-deep: var(--card-deep-pos-1); }
+[data-emotion="pos_2"] { --emo: var(--card-base-pos-2); --emo-deep: var(--card-deep-pos-2); }
+[data-emotion="pos_3"] { --emo: var(--card-base-pos-3); --emo-deep: var(--card-deep-pos-3); }
+[data-emotion="neg_1"] { --emo: var(--card-base-neg-1); --emo-deep: var(--card-deep-neg-1); }
+[data-emotion="neg_2"] { --emo: var(--card-base-neg-2); --emo-deep: var(--card-deep-neg-2); }
+[data-emotion="neg_3"] { --emo: var(--card-base-neg-3); --emo-deep: var(--card-deep-neg-3); }
+[data-emotion="neu_1"] { --emo: var(--card-base-neu-1); --emo-deep: var(--card-deep-neu-1); }
+[data-emotion="neu_2"] { --emo: var(--card-base-neu-2); --emo-deep: var(--card-deep-neu-2); }
+[data-emotion="neu_3"] { --emo: var(--card-base-neu-3); --emo-deep: var(--card-deep-neu-3); }
+[data-grade^="stage-"][data-emotion] { --grade: var(--emo-deep); --grade-2: var(--emo); }
+[data-grade] {
+  --grade-glow: color-mix(in srgb, var(--grade) calc(var(--grade-strength) * 100%), transparent);
+  --grade-holo: conic-gradient(from var(--holo-angle), #ffd76a, #ff9ec4, #a9a2ff, #7fe3ff, #9dffb8, #ffd76a);
+}
+
+/* ── Card page: halo around the real card ── */
+/* The sealed card, burst and halo are positioned against the card box; the real card stacks above the box. */
+.record-panel .card-box { position: relative; }
+.card-box .flip-scene { position: relative; z-index: 1; }
+.record-panel .card-box[data-grade] { overflow: visible; }
+/* The halo lives inside .flip-inner (2026-11-21), so it tilts, flips and rises with the card itself.
+   In a preserve-3d context z-index does nothing: translateZ(-1px) keeps it just behind both faces. */
+.grade-aura { position: absolute; inset: -4px; border-radius: 18px; transform: translateZ(-1px); pointer-events: none; opacity: .65; box-shadow: 0 0 22px 3px var(--grade-glow), 0 0 0 2px color-mix(in srgb, var(--grade) 40%, transparent); transition: opacity .25s ease, box-shadow .25s ease; }
+.card-box[data-grade]:is(:hover, :focus-within) .grade-aura { opacity: 1; box-shadow: 0 0 38px 8px var(--grade-glow), 0 0 0 2.5px color-mix(in srgb, var(--grade) 65%, transparent); }
+/* A ring only (the card area is masked out), so the halo never paints over either face while the card flips. */
+.card-box[data-grade="stage-3"] .grade-aura::before { content: ""; position: absolute; inset: -14px; padding: 18px; border-radius: 32px; background: var(--grade-holo); filter: blur(9px); opacity: .7; animation: grade-holo-spin 6s linear infinite; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.card-box[data-grade="stage-2"] .grade-aura { animation: grade-breathe 3.2s ease-in-out infinite; }
+.card-box.grade-pulse .grade-aura { animation: grade-pulse .7s var(--soft-ease, ease-out); }
+.card-box.grade-pulse .grade-aura::after { content: ""; position: absolute; inset: -6px; border: 3px solid var(--grade); border-radius: inherit; opacity: 0; animation: grade-ring-out .7s var(--soft-ease, ease-out); }
+
+/* ── Sealed "?" card → tap → flip ── */
+.record-layout.is-sealed :is(.card-info, .card-area > .caption, .card-area > .card-actions) { visibility: hidden; }
+.card-box:is(.is-sealed, .is-flipping) { overflow: visible; }
+/* Hint shares the (hidden) information panel's grid cell so the card never moves on reveal. */
+html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; }
+.seal-hint { align-self: center; display: grid; gap: 12px; padding: clamp(20px, 3vw, 32px); border: 2px dashed color-mix(in srgb, var(--blue) 55%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--tint) 40%, var(--surface)); animation: seal-hint-in .5s .2s var(--soft-ease, ease-out) both; }
+.seal-hint h2 { margin: 0; font-size: clamp(22px, 2.4vw, 30px); }
+.seal-hint p { margin: 0; }
+.seal-hint-label { font-size: 13px; font-weight: 700; }
+.seal-legend { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.seal-legend li { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1.5px solid var(--sb-soft-line, var(--line)); border-radius: 999px; background: var(--surface); font-size: 13px; }
+/* Legend icons show the effect shape in a neutral color (the color itself depends on the emotion). */
+.seal-legend i { position: relative; width: 16px; height: 16px; flex: none; border-radius: 50%; background: color-mix(in srgb, var(--blue) 45%, var(--surface)); box-shadow: 0 0 8px 1px color-mix(in srgb, var(--blue) 35%, transparent); }
+.seal-legend li[data-effect="blank"] i { background: radial-gradient(circle, var(--muted) 0 1.5px, transparent 2px) 0 0 / 6px 6px; box-shadow: none; opacity: .7; }
+.seal-legend li[data-effect="stage-2"] i { background: transparent; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--blue) 60%, var(--surface)), 0 0 0 3px var(--surface), 0 0 0 4.5px color-mix(in srgb, var(--blue) 45%, var(--surface)); }
+.seal-legend li[data-effect="stage-3"] i { --holo-angle: 0deg; background: conic-gradient(#ffd76a, #ff9ec4, #a9a2ff, #7fe3ff, #9dffb8, #ffd76a); box-shadow: 0 0 10px 1px #a9a2ff88; }
+.seal-legend span { color: var(--muted); font-size: 12px; margin-left: auto; }
+.card-info.just-revealed { animation: seal-hint-in .45s var(--soft-ease, ease-out) both; }
+@keyframes seal-hint-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.card-box.is-sealed .flip-scene { opacity: 0; }
+.card-box.is-sealed .grade-aura { display: none; }
+.card-box.is-flipping .flip-scene { animation: grade-reveal-in 1.7s both; }
+.mystery-card {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  width: var(--seal-w, min(80%, 300px));
+  height: var(--seal-h, auto);
+  aspect-ratio: 5 / 7;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  perspective: 1100px;
+  transform: translate(-50%, -50%);
+  animation: mystery-arrive .6s var(--spring, ease-out) both, mystery-float 3s .6s ease-in-out infinite;
+}
+.mystery-card:focus-visible { outline: none; }
+.mystery-card:focus-visible .mystery-back { outline: 3px solid var(--blue); outline-offset: 4px; }
+.mystery-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; }
+.mystery-face { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px; border: 2.5px solid var(--sb-line, var(--line)); border-radius: 18px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.mystery-back {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--blue) 55%, #fff), color-mix(in srgb, var(--tint) 85%, #fff) 45%, color-mix(in srgb, #8fd8c8 60%, #fff));
+  box-shadow: 6px 6px 0 var(--sb-drop, var(--line)), 0 0 30px 2px color-mix(in srgb, var(--blue) 30%, transparent);
+}
+.mystery-back::after { content: ""; position: absolute; inset: -40% -80%; background: linear-gradient(105deg, transparent 42%, #ffffffb3 50%, transparent 58%); transform: translateX(-60%); animation: mystery-shimmer 2.6s 1s ease-in-out infinite; }
+.mystery-q { width: 96px; height: 96px; display: grid; place-items: center; border: 2.5px solid var(--sb-line, var(--line)); border-radius: 50%; background: var(--surface); color: var(--blue); font-size: 56px; font-weight: 700; }
+.mystery-back small { padding: 4px 12px; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 11px; font-weight: 700; letter-spacing: .2em; }
+.mystery-back em { font-style: normal; font-size: 13px; font-weight: 700; color: var(--ink); padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 80%, transparent); animation: mystery-hint 1.6s ease-in-out infinite; }
+.mystery-front { transform: rotateY(180deg); background: radial-gradient(circle at 50% 45%, #fff 0, var(--grade-2) 30%, var(--grade) 100%); box-shadow: 0 0 40px 10px var(--grade-glow); }
+.card-box[data-reveal="stage-3"] .mystery-front { background: radial-gradient(circle at 50% 45%, #fff 0, transparent 45%), var(--grade-holo); animation: grade-holo-spin 2s linear infinite; }
+.card-box.is-flipping .mystery-card { animation: mystery-lift 1.7s var(--soft-ease, ease-out) both; cursor: default; }
+.card-box.is-flipping .mystery-inner { animation: mystery-turn .62s .3s cubic-bezier(.5, 0, .3, 1) both; }
+
+/* Burst behind the card: glow (all), ring (stage 2+), rays (stage 3), particles (count per grade from JS). */
+.grade-burst { position: absolute; z-index: 2; left: 50%; top: 50%; width: min(170%, 680px, 100vw); aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%); }
+.grade-burst > span { position: absolute; inset: 0; display: block; }
+.grade-burst::before { content: ""; position: absolute; inset: 15%; border-radius: 50%; background: radial-gradient(circle, var(--grade-2) 0, var(--grade-glow) 38%, transparent 68%); opacity: 0; }
+.card-box.is-flipping .grade-burst::before { animation: grade-glow 1.3s .62s ease-out both; }
+.grade-burst > .grade-ring { inset: 30%; border: 4px solid var(--grade); border-radius: 50%; opacity: 0; }
+.card-box.is-flipping:is([data-reveal="stage-2"], [data-reveal="stage-3"]) .grade-ring { animation: grade-ring-burst 1s .66s ease-out both; }
+.grade-rays { border-radius: 50%; opacity: 0; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--grade) 55%, transparent) 0 6deg, transparent 6deg 16deg); mask: radial-gradient(circle, #000 18%, transparent 70%); -webkit-mask: radial-gradient(circle, #000 18%, transparent 70%); }
+.card-box.is-flipping[data-reveal="stage-3"] .grade-rays { animation: grade-rays 1.4s .6s ease-out both; }
+.grade-burst > .grade-particles { inset: 50% auto auto 50%; width: 0; height: 0; }
+.grade-particles i { position: absolute; width: var(--s); height: var(--s); margin: calc(var(--s) / -2); border-radius: 50%; background: var(--grade); box-shadow: 0 0 10px var(--grade); opacity: 0; }
+.grade-particles i:nth-child(3n) { border-radius: 2px; background: var(--grade-2); }
+.card-box[data-reveal="stage-3"] .grade-particles i:nth-child(4n) { background: #ff9ec4; }
+.card-box.is-flipping .grade-particles i { animation: grade-particle 1s calc(.66s + var(--delay)) var(--soft-ease, ease-out) both; }
+.grade-flash { position: fixed; z-index: 60; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 45%, #fffbe6 0, rgb(255 214 110 / .55) 35%, transparent 75%); opacity: 0; animation: grade-flash 1.5s .55s ease-out both; }
+
+/* Phones: glow and burst never widen the page. */
+@media (max-width: 959px) {
+  .record-layout .card-area { overflow-x: clip; }
+  html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 2 / 1; }
+  .seal-legend { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ── Catalog: slots and the detail dialog ── */
+.slot[data-grade] .slot-thumb { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--grade) 55%, transparent), 0 0 12px 0 color-mix(in srgb, var(--grade) 35%, transparent); transition: box-shadow .2s ease; }
+.slot[data-grade]:is(:hover, :focus-visible, [aria-pressed="true"]) .slot-thumb { box-shadow: 0 0 0 2px var(--grade), 0 0 22px 4px var(--grade-glow); }
+.slot[data-grade="stage-3"] .slot-thumb { position: relative; overflow: hidden; }
+.slot[data-grade="stage-3"] .slot-thumb::after { content: ""; position: absolute; inset: -40% -80%; background: linear-gradient(105deg, transparent 42%, #ffffffb3 50%, transparent 58%); transform: translateX(-60%); animation: mystery-shimmer 3.4s ease-in-out infinite; pointer-events: none; }
+.detail-card[data-grade] { position: relative; box-shadow: 0 0 0 6px color-mix(in srgb, var(--tone) 35%, var(--surface)), 0 0 34px 6px var(--grade-glow), 6px 8px 0 6px var(--sb-drop, var(--line)); }
+.detail-card[data-grade="stage-3"] { isolation: isolate; box-shadow: 0 0 0 6px var(--grade), 0 0 40px 10px var(--grade-glow), 6px 8px 0 6px var(--sb-drop, var(--line)); }
+.detail-card[data-grade="stage-3"]::before { content: ""; position: absolute; z-index: -1; inset: -9px; border-radius: inherit; background: var(--grade-holo); filter: blur(6px); opacity: .75; animation: grade-holo-spin 6s linear infinite; pointer-events: none; }
+.card-detail[open] .detail-card[data-grade] { animation: grade-detail-in .6s var(--spring, ease-out) both; }
+.grade-sheen { position: absolute; z-index: 2; inset: -40% -80%; pointer-events: none; background: linear-gradient(105deg, transparent 40%, color-mix(in srgb, var(--grade-2) 80%, #fff) 50%, transparent 60%); transform: translateX(-60%); opacity: .8; }
+.card-detail[open] .grade-sheen { animation: grade-sheen 1.1s .35s ease-out both; }
+.detail-card[data-grade="stage-3"] .grade-sheen { background: linear-gradient(105deg, transparent 38%, #ffd76a99 45%, #ff9ec499 50%, #7fe3ff99 55%, transparent 62%); }
+
+/* ── New-card popup, share preview, record thumbnails ── */
+.moment-celebrate[data-grade] .celebrate-sparkles i { background: var(--grade); box-shadow: 0 0 8px var(--grade); }
+.moment-celebrate[data-grade] .celebrate-sparkles i:nth-child(3n) { background: var(--grade-2); }
+.moment-celebrate[data-grade] .celebrate-card { box-shadow: 0 0 0 2px color-mix(in srgb, var(--grade) 70%, transparent), 0 0 34px 6px var(--grade-glow); }
+.moment-celebrate[data-grade="stage-3"] .celebrate-panel { box-shadow: inset 0 1px 0 #ffffff80, 0 0 0 2px var(--grade), 0 0 40px 8px var(--grade-glow), 0 30px 70px -24px color-mix(in srgb, var(--tone) 60%, #000); }
+.share-art-frame[data-grade] { filter: drop-shadow(0 0 14px var(--grade-glow)); }
+.share-art-frame[data-grade="stage-3"] { animation: grade-share-glow 2.8s ease-in-out infinite; }
+.mini-art[data-grade], .mystery-mini[data-grade] { position: relative; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--grade) 70%, transparent), 0 0 8px 0 color-mix(in srgb, var(--grade) 40%, transparent); }
+.mini-art[data-grade]::after, .mystery-mini[data-grade]::after { content: ""; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border: 1.5px solid var(--surface); border-radius: 50%; background: var(--grade); }
+.mini-art[data-grade="stage-3"]::after { background: var(--grade-holo); }
+/* Grade pips: one dot (stage 1), two dots (stage 2), holographic dot (stage 3) — all in the emotion color. */
+.mini-art[data-grade="stage-2"]::after { width: 15px; border-radius: 999px; background: radial-gradient(circle at 4px 50%, var(--grade) 0 2.6px, transparent 3px), radial-gradient(circle at 10px 50%, var(--grade) 0 2.6px, transparent 3px), var(--surface); }
+
+@keyframes grade-holo-spin { to { --holo-angle: 360deg; } }
+@keyframes grade-breathe { 50% { opacity: 1; box-shadow: 0 0 34px 6px var(--grade-glow), 0 0 0 2px color-mix(in srgb, var(--grade) 55%, transparent); } }
+/* `scale` (not transform) so the halo keeps its translateZ while pulsing. */
+@keyframes grade-pulse { 0% { opacity: 1; scale: 1; } 40% { opacity: 1; scale: 1.05; box-shadow: 0 0 48px 12px var(--grade-glow); } 100% { scale: 1; } }
+@keyframes grade-ring-out { 0% { opacity: .9; scale: 1; } 100% { opacity: 0; scale: 1.12; } }
+@keyframes mystery-arrive { 0% { opacity: 0; transform: translate(-50%, -38%) scale(.85) rotate(-4deg); } 100% { opacity: 1; transform: translate(-50%, -50%); } }
+@keyframes mystery-float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -52%) rotate(.6deg); } }
+@keyframes mystery-shimmer { 0%, 30% { transform: translateX(-60%); } 70%, 100% { transform: translateX(60%); } }
+@keyframes mystery-hint { 50% { transform: scale(1.06); } }
+@keyframes mystery-lift {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  8% { transform: translate(-50%, -50%) scale(.95); }
+  18% { transform: translate(-50%, -54%) scale(1.05); }
+  55% { opacity: 1; transform: translate(-50%, -54%) scale(1.08); }
+  72% { opacity: 1; transform: translate(-50%, -52%) scale(1.04); }
+  88%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); }
+}
+@keyframes mystery-turn { from { transform: rotateY(0deg); } to { transform: rotateY(180deg); } }
+/* Opacity/filter only: the real card keeps its geometry so tilt/flip hits stay correct. */
+@keyframes grade-reveal-in { 0%, 70% { opacity: 0; filter: brightness(1.7); } 86% { opacity: 1; filter: brightness(1.3); } 100% { opacity: 1; filter: none; } }
+@keyframes grade-glow { 0% { opacity: 0; transform: scale(.5); } 30% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(1.25); } }
+@keyframes grade-ring-burst { 0% { opacity: 1; transform: scale(.4); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes grade-rays { 0% { opacity: 0; transform: scale(.5) rotate(0deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.15) rotate(40deg); } }
+@keyframes grade-particle { 0% { opacity: 0; transform: rotate(var(--a)) translateX(0) scale(.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scale(1); } }
+@keyframes grade-flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes grade-detail-in { 0% { opacity: 0; transform: rotate(-10deg) scale(.82); } 100% { opacity: 1; transform: rotate(-3deg) scale(1); } }
+@keyframes grade-sheen { to { transform: translateX(60%); } }
+@keyframes grade-share-glow { 50% { filter: drop-shadow(0 0 26px var(--grade-glow)); } }
+
+
+/* ── Soft UI v1.1 draw sequence (2026-11-20): ① charge (breathing glow) → ② rise (shake, rays)
+   → ③ burst (is-flipping above) → ④ result. Always the same: no reduced-motion or skip variant. ── */
+.card-box.is-sealed .mystery-card { cursor: default; }
+.card-box.is-sealed[data-phase="charge"] .mystery-card { animation: mystery-arrive .6s var(--spring, ease-out) both, draw-breathe 1.1s .6s ease-in-out infinite; }
+.card-box.is-sealed[data-phase="charge"] .mystery-back { animation: draw-glow 1.1s ease-in-out infinite; }
+.card-box.is-sealed[data-phase="rise"] .mystery-card { animation: draw-shake .16s linear infinite; }
+.card-box.is-sealed[data-phase="rise"] .mystery-back { box-shadow: 0 0 48px 12px var(--grade-glow); }
+.card-box.is-sealed[data-phase="rise"] .grade-rays { opacity: .55; animation: draw-rays 1.2s linear infinite; }
+.draw-progress { height: 6px; overflow: hidden; border-radius: 999px; background: var(--tint); }
+.draw-progress i { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--ink); animation: draw-fill 2.7s linear forwards; }
+@keyframes draw-breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.035); } }
+@keyframes draw-glow { 50% { box-shadow: 0 0 36px 8px var(--grade-glow); } }
+@keyframes draw-shake { 0%, 100% { transform: translate(-50%, -50%); } 25% { transform: translate(calc(-50% - 3px), -50%) rotate(-1.5deg); } 75% { transform: translate(calc(-50% + 3px), -50%) rotate(1.5deg); } }
+@keyframes draw-rays { from { transform: rotate(0deg); } to { transform: rotate(30deg); } }
+@keyframes draw-fill { to { width: 100%; } }
+
+/* ── "분석 대기" panel after saving a real record (no draw until the model is connected) ── */
+.record-layout.is-waiting > .card-info { visibility: hidden; }
+html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2; }
+.wait-panel { align-self: center; display: grid; gap: 14px; padding: clamp(22px, 3vw, 34px); border-radius: var(--soft-radius, 32px); background: var(--surface); box-shadow: var(--soft-shadow); animation: seal-hint-in .45s var(--soft-ease, ease-out) both; }
+.wait-panel h2 { margin: 0; font-size: clamp(22px, 2.4vw, 30px); }
+.wait-panel p { margin: 0; }
+.wait-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.wait-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 13px; font-weight: 600; }
+.wait-steps li.is-done { background: color-mix(in srgb, #2fb67c 16%, var(--surface)); color: #1d7a52; }
+.wait-steps li.is-current { background: var(--ink); color: var(--surface); }
+.wait-steps li.is-current i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: draw-dot 1s ease-in-out infinite; }
+@keyframes draw-dot { 50% { opacity: .25; } }
+@media (max-width: 959px) {
+  html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 2 / 1; }
+}
+
+/* ── Grade-specific reveal (2026-11-20 request) ──
+   Preview (① charge, ② rise) stays in a neutral blue-white light so the emotion color is never spoiled,
+   but grows with the grade (--draw-power, heartbeat speed, shake). The burst (③) uses the emotion color
+   and a different effect per grade. Each grade always plays the same way; total time is unchanged. */
+.card-box[data-reveal] { --draw-power: .5; --draw-beat: 1.1s; --draw-shake: 1px; --draw-tilt: .5deg; --draw-light: color-mix(in srgb, var(--blue) 45%, #fff); }
+.card-box[data-reveal="blank"] { --draw-power: .3; --draw-beat: 1.3s; --draw-shake: 0px; --draw-tilt: 0deg; }
+.card-box[data-reveal="stage-2"] { --draw-power: .8; --draw-beat: .9s; --draw-shake: 3px; --draw-tilt: 1.5deg; }
+.card-box[data-reveal="stage-3"] { --draw-power: 1; --draw-beat: .7s; --draw-shake: 5px; --draw-tilt: 2.5deg; }
+.card-box.is-sealed[data-phase="charge"] .mystery-card { animation: mystery-arrive .6s var(--spring, ease-out) both, draw-breathe var(--draw-beat) .6s ease-in-out infinite; }
+.card-box.is-sealed[data-phase="charge"] .mystery-back { animation: draw-glow var(--draw-beat) ease-in-out infinite; }
+.card-box.is-sealed[data-phase="rise"] .mystery-card { animation: draw-shake .16s linear infinite; }
+.card-box.is-sealed[data-reveal="blank"][data-phase="rise"] .mystery-card { animation: draw-float 1.2s ease-in-out infinite; }
+.card-box.is-sealed[data-phase="rise"] .mystery-back { box-shadow: 0 0 calc(60px * var(--draw-power)) calc(16px * var(--draw-power)) var(--draw-light); }
+.card-box.is-sealed[data-phase="rise"] .grade-rays { opacity: 0; animation: none; }
+.card-box.is-sealed:is([data-reveal="stage-2"], [data-reveal="stage-3"])[data-phase="rise"] .grade-rays { opacity: calc((var(--draw-power) - .5) * 1.3); background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--draw-light) 70%, transparent) 0 6deg, transparent 6deg 16deg); animation: draw-rays 1.2s linear infinite; }
+.card-box.is-sealed[data-reveal="stage-3"][data-phase="rise"] .mystery-card::after { content: ""; position: absolute; z-index: -1; inset: -6px; border-radius: 22px; background: conic-gradient(#ffd76a, #ff9ec4, #a9a2ff, #7fe3ff, #9dffb8, #ffd76a); filter: blur(8px); animation: draw-flicker .3s steps(2) infinite; }
+@keyframes draw-breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(calc(1 + .06 * var(--draw-power))); } }
+@keyframes draw-glow { 50% { box-shadow: 0 0 calc(48px * var(--draw-power)) calc(12px * var(--draw-power)) var(--draw-light); } }
+@keyframes draw-shake { 0%, 100% { transform: translate(-50%, -50%); } 25% { transform: translate(calc(-50% - var(--draw-shake)), -50%) rotate(calc(var(--draw-tilt) * -1)); } 75% { transform: translate(calc(-50% + var(--draw-shake)), -50%) rotate(var(--draw-tilt)); } }
+@keyframes draw-float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -51.5%); } }
+@keyframes draw-flicker { 50% { opacity: .45; } }
+
+/* ③ Burst, per grade, in the emotion color. */
+/* Blank: a short grey dust puff; no glow, no ring; the card fades in quietly. */
+.card-box.is-flipping[data-reveal="blank"] .grade-burst::before { animation: none; }
+.card-box[data-reveal="blank"] .grade-particles i { width: calc(var(--s) * .6); height: calc(var(--s) * .6); background: var(--muted); box-shadow: none; }
+.card-box.is-flipping[data-reveal="blank"] .flip-scene { animation: blank-reveal-in 1.7s both; }
+/* Stage 1: soft bloom and one sheen across the card. */
+.card-box.is-flipping[data-reveal="stage-1"]::after { content: ""; position: absolute; z-index: 4; left: 50%; top: 50%; width: var(--seal-w, 80%); height: var(--seal-h, auto); aspect-ratio: 5 / 7; border-radius: 18px; pointer-events: none; transform: translate(-50%, -50%); background: linear-gradient(105deg, transparent 38%, color-mix(in srgb, var(--grade-2) 70%, #fff) 50%, transparent 62%) 160% 0 / 250% 100% no-repeat; animation: grade-card-sheen 1s 1.05s ease-out both; }
+/* Stage 2: a second ring after the first and a bigger lift (bounce) of the sealed card. */
+.card-box.is-flipping[data-reveal="stage-2"] .grade-ring.grade-ring-2 { animation: grade-ring-burst 1s .95s ease-out both; }
+.card-box.is-flipping[data-reveal="stage-2"] .mystery-card { animation: mystery-bounce 1.7s var(--soft-ease, ease-out) both; }
+/* Stage 3: rays (above), a holographic ring, a tinted flash and confetti. */
+.card-box.is-flipping[data-reveal="stage-3"] .mystery-card { animation: mystery-bounce 1.7s var(--soft-ease, ease-out) both; }
+.card-box.is-flipping[data-reveal="stage-3"] .grade-ring.grade-ring-2 { inset: 22%; border: 0; background: var(--grade-holo); mask: radial-gradient(circle, transparent 62%, #000 64%, #000 69%, transparent 71%); -webkit-mask: radial-gradient(circle, transparent 62%, #000 64%, #000 69%, transparent 71%); animation: grade-ring-burst 1.2s .75s ease-out both, grade-holo-spin 1.2s linear infinite; }
+.card-box[data-reveal="stage-3"] .grade-particles i:nth-child(2n) { width: calc(var(--s) * .6); height: calc(var(--s) * 1.6); border-radius: 2px; }
+.card-box[data-reveal="stage-3"] .grade-particles i:nth-child(5n) { background: #ffd76a; box-shadow: 0 0 8px #ffd76a; }
+.card-box[data-reveal="stage-3"] .grade-particles i:nth-child(7n) { background: #7fe3ff; box-shadow: 0 0 8px #7fe3ff; }
+.grade-ring-2 { opacity: 0; }
+.grade-flash { background: radial-gradient(circle at 50% 45%, #fffdf5 0, color-mix(in srgb, var(--flash, #ffd66e) 55%, transparent) 35%, transparent 75%); }
+@keyframes blank-reveal-in { 0%, 60% { opacity: 0; filter: grayscale(.6); } 100% { opacity: 1; filter: none; } }
+@keyframes grade-card-sheen { 0% { opacity: 0; background-position: 160% 0; } 20% { opacity: 1; } 100% { opacity: 0; background-position: -60% 0; } }
+@keyframes mystery-bounce {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  10% { transform: translate(-50%, -50%) scale(.9); }
+  24% { transform: translate(-50%, -57%) scale(1.14); }
+  40% { transform: translate(-50%, -52%) scale(1.04); }
+  55% { opacity: 1; transform: translate(-50%, -54%) scale(1.09); }
+  72% { opacity: 1; transform: translate(-50%, -52%) scale(1.04); }
+  88%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); }
+}
+
+/* Card page halo: stage 2 gets an outer orbit ring (stage 1 stays still, stage 3 keeps the holo rim). */
+.card-box[data-grade="stage-2"] .grade-aura::before { content: ""; position: absolute; inset: -9px; border: 1.5px dashed color-mix(in srgb, var(--grade) 65%, transparent); border-radius: 27px; }
+.card-box.is-sealed .grade-aura::before { display: none; }
+
+/* ── Card screen, second pass (Figma 06 "카드 공개", "카드 등장 · 분석 대기", 07 "카드 뽑기 연출") ──
+   One centered column: a small back link, the white stage (chip, glow, card, hint), then the copy and
+   actions. The draw hint and the wait panel take the information slot under the stage. */
+html[data-appearance] .record-panel { max-width: 1280px; margin-inline: auto; padding: 0; border: 0; box-shadow: none; background: transparent; display: grid; gap: 18px; }
+html[data-appearance] .record-panel > .record-top { display: flex; align-items: center; gap: 12px; min-height: 0; }
+html[data-appearance] .record-panel > .record-top button[data-action="history"] { height: auto; min-height: 44px; padding: 8px 4px; border: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 14px; font-weight: 500; }
+html[data-appearance] .record-panel > .record-top button[data-action="history"]:hover { color: var(--ink); }
+.record-top .record-date { text-align: left; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+html .record-layout.show-record-card:not(.is-editing) { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 28px; align-items: start; }
+.card-stage { position: relative; isolation: isolate; width: 100%; height: clamp(460px, calc(100vh - 330px), 620px); display: grid; place-items: center; border-radius: 40px; background: var(--surface); box-shadow: var(--soft-shadow); overflow: clip; }
+.card-stage > .stage-glow { position: absolute; z-index: -1; left: 50%; top: 46%; width: 440px; height: 440px; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--blue) 18%, transparent) 0, transparent 68%); pointer-events: none; }
+.card-stage > .card-area { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; justify-items: center; gap: 14px; width: 100%; height: auto; overflow: visible; }
+.card-stage .card-box { width: min(344px, 100%); height: auto; padding: 16px; overflow: visible; }
+.card-stage .card-area > .caption { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+.stage-chip { position: absolute; z-index: 2; top: 28px; left: 28px; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-size: 13px; font-weight: 500; }
+.stage-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+.stage-chip:not([data-status="ready"]) i { background: var(--muted); }
+/* Information under the stage: centered copy and a row of actions (no panel). */
+html .record-layout.show-record-card > :is(.card-info, .seal-hint, .wait-panel) { grid-area: auto; width: min(100%, 720px); margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; display: grid; justify-items: center; gap: 10px; text-align: center; }
+:is(.card-info, .seal-hint, .wait-panel) h2 { margin: 0; font-size: 26px; font-weight: 500; letter-spacing: -.02em; line-height: 1.3; }
+.card-info .card-info-copy, .seal-hint .seal-sub, .wait-panel > .muted { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
+html .record-layout .card-info-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; }
+html .record-layout .card-info-actions button { min-height: 48px; }
+html .record-layout .card-info-actions [popovertarget="card-more"] { border: 0; background: transparent; box-shadow: none; color: var(--muted); text-decoration: underline; text-underline-offset: 4px; padding-inline: 10px; }
+/* Sealed: the stage keeps its place; the hint replaces the copy in the same slot. */
+html .record-layout:is(.is-sealed, .is-waiting) > .card-info { display: none; }
+.record-layout.is-sealed .card-stage { background: transparent; box-shadow: none; overflow: visible; }
+.record-layout:is(.is-sealed, .is-waiting) .card-stage > .stage-chip { visibility: hidden; }
+.seal-hint .draw-progress { width: 280px; max-width: 100%; height: 6px; margin-top: 10px; border-radius: 999px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); overflow: hidden; }
+.seal-hint .draw-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--blue) 55%, #fff), var(--blue)); }
+.draw-caption { margin: 0; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+html .seal-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin-top: 6px; }
+html .seal-legend li { padding: 0; border: 0; background: transparent; font-size: 12px; gap: 6px; color: var(--muted); }
+html .seal-legend li i { width: 10px; height: 10px; }
+html .seal-legend span { margin-left: 0; }
+html .seal-legend b { font-weight: 500; color: var(--ink); }
+/* Locked Moment Card (Figma 07 ①): pastel gradient, glass window with "?", a band at the bottom. */
+.card-box:is(.is-sealed, .is-flipping) .mystery-card { rotate: 3deg; }
+html .mystery-face.mystery-back { display: grid; grid-template-rows: 1fr auto; place-items: stretch; gap: 0; padding: 0; border: 0; border-radius: 28px; background: linear-gradient(160deg, #e8e4ff 0, #fde7ef 48%, #e2f4ef 100%); }
+.mystery-window { display: grid; place-items: center; margin: 22px 22px 0; border-radius: 20px; background: rgb(255 255 255 / .45); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .7); }
+html .mystery-window .mystery-q { width: auto; height: auto; border: 0; background: transparent; color: rgb(38 38 51 / .45); font: 300 96px/1 "Bricolage Grotesque", sans-serif; }
+.mystery-band { display: grid; gap: 2px; padding: 16px 22px 20px; text-align: left; color: #262633; }
+html .mystery-band small { padding: 0; background: none; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6b6b7b; font-weight: 600; }
+.mystery-band b { font-size: 20px; font-weight: 500; }
+.mystery-band span { font-size: 13px; color: #6b6b7b; }
+.mystery-band i { justify-self: end; margin-top: -18px; font: 500 12px "Bricolage Grotesque", sans-serif; color: #6b6b7b; }
+html .mystery-back em { position: absolute; top: 16px; right: 16px; padding: 4px 10px; font-size: 11px; color: #262633; background: rgb(255 255 255 / .75); }
+/* ② rise: two neutral ghost cards fan out behind the sealed card (strength follows the grade). */
+.draw-ghost { position: absolute; z-index: 1; left: 50%; top: 50%; width: var(--seal-w, 300px); height: var(--seal-h, 420px); border-radius: 28px; background: linear-gradient(160deg, rgb(255 255 255 / .9), color-mix(in srgb, var(--blue) 14%, #fff)); box-shadow: var(--soft-shadow); opacity: 0; transform: translate(-50%, -50%); pointer-events: none; transition: opacity .5s, transform .6s var(--spring, ease-out); }
+.card-box.is-sealed[data-phase="rise"] .draw-ghost { opacity: calc(.35 + .2 * var(--draw-power, 1)); }
+.card-box.is-sealed[data-phase="rise"] .draw-ghost-1 { transform: translate(-82%, -48%) rotate(-12deg); }
+.card-box.is-sealed[data-phase="rise"] .draw-ghost-2 { transform: translate(-18%, -48%) rotate(12deg); }
+.card-box.is-flipping .draw-ghost { opacity: 0; transform: translate(-50%, -50%) scale(.9); }
+/* ③ burst: stage-sized rays, rings and confetti (grade rules and emotion color unchanged). */
+.card-stage .grade-burst { width: min(1100px, 150vw); }
+.new-badge { position: absolute; z-index: 4; top: 4px; right: 4px; padding: 6px 12px; border-radius: 999px; background: var(--ink); color: var(--surface); font: 700 12px "Bricolage Grotesque", sans-serif; letter-spacing: .06em; rotate: 8deg; animation: new-badge-in .5s var(--spring, ease-out) both; }
+@keyframes new-badge-in { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+/* ④ result: a few static confetti stay in the stage. */
+.card-stage.has-confetti::before { content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none; opacity: .8; background:
+  radial-gradient(circle, var(--blue) 0 3px, transparent 3.5px) 18% 22% / 9px 9px no-repeat,
+  radial-gradient(circle, #ff9ec4 0 4px, transparent 4.5px) 80% 18% / 11px 11px no-repeat,
+  radial-gradient(circle, #ffd76a 0 3px, transparent 3.5px) 72% 74% / 9px 9px no-repeat,
+  radial-gradient(circle, #8fd8c8 0 4px, transparent 4.5px) 26% 70% / 11px 11px no-repeat,
+  radial-gradient(circle, #a9a2ff 0 3px, transparent 3.5px) 88% 46% / 9px 9px no-repeat,
+  radial-gradient(circle, #ff9ec4 0 3px, transparent 3.5px) 12% 48% / 9px 9px no-repeat; }
+/* Wait (Figma "분석 대기"): the step chips sit in the stage's top-left corner. */
+.record-layout.is-waiting { position: relative; }
+html .record-layout.show-record-card > .wait-panel { position: static; transform: none; animation: none; }
+html .record-layout > .wait-panel > .wait-steps { position: absolute; top: 28px; left: 28px; margin: 0; }
+/* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
+html .flip-back { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; border: 3px solid var(--back-base, var(--line)); background: var(--surface); }
+.flip-back .back-band { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2px 8px; padding: 16px 20px 14px; background: var(--back-mix, color-mix(in srgb, var(--tint) 60%, var(--surface))); }
+.flip-back .back-band small { grid-column: 1 / -1; font-size: 10px; letter-spacing: .16em; color: var(--muted); font-weight: 600; }
+.flip-back .back-band strong { font-size: 20px; font-weight: 500; color: var(--ink); }
+.flip-back .back-band em { font: 500 12px "Bricolage Grotesque", sans-serif; color: var(--muted); }
+.flip-back .back-date { margin: 12px 20px 0; font-size: 12px; color: var(--muted); }
+.flip-back .back-rule { margin: 10px 20px 0; border: 0; border-top: 1px solid var(--line); }
+html .flip-back .flip-text { margin: 10px 20px 0; padding: 0 2px 0 0; font-size: 15.6px; line-height: 1.85; color: var(--ink); }
+.flip-back .back-foot { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 14px; font-size: 11px; color: var(--muted); }
+.flip-back .back-foot b { font: 600 12px "Bricolage Grotesque", sans-serif; color: var(--ink); }
+/* Phones (Figma mobile "카드 공개"): stage 350×470, 20px copy, stacked actions. */
+@media (max-width: 959px) {
+  html[data-appearance] .record-panel { gap: 12px; }
+  .card-stage { height: clamp(420px, calc(100svh - 360px), 470px); border-radius: 32px; }
+  .card-stage > .stage-glow { width: 320px; height: 320px; }
+  .card-stage .card-box { width: min(300px, 100%); }
+  .stage-chip, html .record-layout > .wait-panel > .wait-steps { top: 18px; left: 18px; }
+  :is(.card-info, .seal-hint, .wait-panel) h2 { font-size: 20px; }
+  html .record-layout .card-info-actions { flex-direction: column; align-items: stretch; width: 100%; }
+  html .record-layout .card-info-actions > button { width: 100%; }
+}
+/* The burst and ghost cards never widen the page. The clip sits on the app root (2026-11-21), not the
+   record layout, so the glow fades out at the screen edge instead of ending in a hard line in the gutter. */
+#app { overflow-x: clip; }
+/* The stage grows to hold the whole card (short desktops cut the card top and the NEW badge before). */
+.card-stage { height: auto; min-height: clamp(460px, calc(100vh - 330px), 620px); padding: 64px 0 24px; }
+html .record-layout.show-record-card { overflow: visible; }
+html .record-layout .card-stage > .card-area { overflow: visible; }
+/* Phones (2026-11-21): a top row for the status chip so it never covers the card; the card keeps the same
+   place while sealed, waiting and revealed. Ghost cards fan out a little less, confetti stays off the card. */
+@media (max-width: 959px) {
+  .card-stage { height: auto; min-height: 0; padding: 58px 0 18px; }
+  .record-layout.is-sealed .card-stage { padding-top: 58px; }
+  .card-box.is-sealed[data-phase="rise"] .draw-ghost-1 { transform: translate(-74%, -48%) rotate(-9deg); }
+  .card-box.is-sealed[data-phase="rise"] .draw-ghost-2 { transform: translate(-26%, -48%) rotate(9deg); }
+  .card-stage.has-confetti::before { background:
+    radial-gradient(circle, var(--blue) 0 3px, transparent 3.5px) 52% 4% / 9px 9px no-repeat,
+    radial-gradient(circle, #ff9ec4 0 4px, transparent 4.5px) 86% 5% / 11px 11px no-repeat,
+    radial-gradient(circle, #ffd76a 0 3px, transparent 3.5px) 74% 2% / 9px 9px no-repeat,
+    radial-gradient(circle, #8fd8c8 0 4px, transparent 4.5px) 40% 8% / 11px 11px no-repeat,
+    radial-gradient(circle, #a9a2ff 0 3px, transparent 3.5px) 95% 9% / 9px 9px no-repeat,
+    radial-gradient(circle, #ff9ec4 0 3px, transparent 3.5px) 64% 7% / 9px 9px no-repeat; }
+}
+/* Editing an example record: the text editor takes the whole column in a soft panel; the stage steps aside. */
+html .record-layout.is-editing { display: block; }
+html .record-layout.is-editing > .card-stage { display: none; }
+html .record-layout.is-editing > .record-copy { display: flex; flex-direction: column; gap: 14px; padding: 32px 36px; border-radius: 32px; background: var(--surface); box-shadow: var(--soft-shadow); }
+html .record-layout.is-editing .read-text { min-height: 320px; padding: 0; border: 0; background: transparent; font-size: 17px; line-height: 1.85; color: var(--ink); resize: vertical; }
+html .record-layout.is-editing .record-copy > .row { justify-content: flex-end; gap: 10px; }
+
+/* Catalog detail (Figma second pass): the card stands straight; it only fades and scales in. */
+.card-detail[open] .detail-card[data-grade] { animation-name: grade-detail-in-flat; }
+@keyframes grade-detail-in-flat { 0% { opacity: 0; transform: scale(.88); } 100% { opacity: 1; transform: none; } }

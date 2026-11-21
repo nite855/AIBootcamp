@@ -21,10 +21,13 @@ test('duplicate IDs, invalid destinations and unsupported frame sizes are reject
     const d=read('design/wireframes/screens.json');mutate(d);assert.throws(()=>validateScreens(d));
   }
 });
-test('fixture data is synthetic, assets resolve, and all 30 slots remain explicit',()=>{
+test('fixture data is synthetic, assets resolve, and all 27 slots remain explicit',()=>{
   assert.equal(read('design/fixtures/ui-states.json').synthetic,true);
-  const {assets,characterSlots}=read('design/assets/manifest.json');
-  assert.equal(characterSlots.length,30);assert.equal(new Set(characterSlots.map(s=>s.id)).size,30);
+  assert.equal(read('design/fixtures/ui-states.json').catalogSlots,27);
+  const {assets,characterSlots,taxonomy_version}=read('design/assets/manifest.json');
+  assert.equal(taxonomy_version,'emotion-cardex-3plus9-v1');
+  assert.ok(!characterSlots.some(s=>s.emotionId==='neu_4'));
+  assert.equal(characterSlots.length,27);assert.equal(new Set(characterSlots.map(s=>s.id)).size,27);
   for(const asset of [...assets,...characterSlots]) for(const key of ['path','license']) if(asset[key]) assert.ok(fs.existsSync(path.join(root,asset[key])),asset[key]);
 });
 test('new design document links point to existing local files and Korean text is intact',()=>{

@@ -11,8 +11,6 @@
 @media (pointer:coarse){.flip-trigger,.flip-back > p,.flip-back > h2,.flip-back > small{touch-action:none}}
 .flip-text{white-space:pre-wrap;overflow:auto;overflow-wrap:anywhere;flex:1;line-height:1.8}.flip-back:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
 .workspace.show-card {display:flex;justify-content:center}.workspace.show-card .editor{display:none}.workspace.show-card .card-area{width:100%}.record-layout{display:flex;justify-content:center}.record-layout .card-area{flex:1}.record-layout .record-copy[hidden]{display:none}.record-layout.is-editing .record-copy{display:flex;flex:1}.record-layout.is-editing .card-area{display:none}
-@media (prefers-reduced-motion:reduce){:root:not([data-motion=on]) :is(.flip-inner,.tilt-layer){transition:none}:root:not([data-motion=on]) .tilt-layer{transform:none!important}:root:not([data-motion=on]) .flip-light{display:none}}
-:root[data-motion=off] :is(.flip-inner,.tilt-layer){transition:none}:root[data-motion=off] .tilt-layer{transform:none!important}:root[data-motion=off] .flip-light{display:none}
 
 
 /* Layout additions shared by all appearances. */
@@ -62,7 +60,7 @@ html[data-appearance="lemon"] .catalog-grid button { background:var(--stage); }
 /* Shared geometry: theme decoration must not consume card space. */
 .card-area { grid-template-rows:minmax(0,1fr) auto 46px; gap:10px; }
 .card-box { padding:16px; }
-.flip-scene { flex:none; max-height:none; aspect-ratio:2/3; }
+.flip-scene { flex:none; max-height:none; aspect-ratio:5/7; }
 .flip-trigger { gap:0; }
 .flip-trigger .art-card { width:100%; height:100%; max-height:100%; flex:none; border-radius:14px; }
 .flip-front .flip-light,.flip-back .flip-light { inset:0; border-radius:14px; }
@@ -125,7 +123,7 @@ html[data-appearance="retro"] .editor { box-shadow:inset 0 0 0 1px var(--ink),3p
 .full-text { min-height:0; font-size:17px; line-height:1.9; }
 .stats-empty { display:flex; flex-direction:column; align-items:center; gap:16px; font-size:14px; }
 .stats-summary small { display:block; margin-top:8px; font-size:var(--record-help); color:var(--muted); }
-.archive-tabs button, .pagination button, .stats-detail button, #catalog-type, #stats-date { min-height:44px; }
+.archive-tabs button, .pagination button, .stats-detail button, #catalog-type { min-height:44px; }
 html[data-appearance="lemon"] :is(.panel,.editor) { border-radius:var(--record-panel-radius); }
 html[data-appearance="lemon"] :is(.primary,.quiet,.icon) { border-radius:var(--record-button-radius); }
 @media(max-width:959px) {
