@@ -1,0 +1,94 @@
+/* Quiet writing, readable archives, one calendar. Same structure in every theme. */
+html { scroll-padding: 20px; }
+.shell { max-width:1120px; height:auto; min-height:var(--app-height,100dvh); grid-template-rows:auto 1fr auto; padding:28px; }
+header { flex-wrap:wrap; gap:18px; }
+.brand { background:transparent; color:var(--ink); text-align:left; padding:0; }
+.brand small { display:block; font-weight:400; margin-top:4px; }
+.icons { flex-wrap:wrap; }
+.icons .quiet { font-size:14px; padding:10px 14px; }
+.icons [aria-current=page] { background:var(--tint); border-color:var(--ink); }
+.workspace { min-width:0; align-items:start; }
+.workspace.show-card { display:grid; grid-template-columns:3fr 2fr; }
+.workspace.show-card .editor { display:flex; }
+.workspace.write-only { grid-template-columns:minmax(0,760px); justify-content:center; }
+.workspace.write-only > .card-area { display:none; }
+.editor, .panel { min-width:0; }
+.editor { min-height:560px; }
+.editor-content { min-height:0; flex:1 0 auto; overflow:visible; }
+.editor textarea { width:100%; min-height:240px; font-size:16px; }
+.editor { overflow:visible; }
+.settings-panel .panel-body { overflow:visible; }
+.writing-help { display:grid; gap:8px; }
+.writing-help button { justify-self:start; font-size:13px; }
+.writing-help p { padding:12px; background:var(--tint); border-radius:12px; }
+.archive-panel, .settings-panel, .record-panel { max-height:none; overflow:visible; width:100%; max-width:none; }
+.workspace:has(> .panel) { grid-template-columns:minmax(0,1fr); }
+.panel-body, .entry-list, .stats-space { overflow:visible; }
+.entry-list { flex:none; display:grid; grid-template-columns:minmax(0,1fr); gap:10px; }
+.entry { min-width:0; min-height:92px; }
+.entry-meta, .entry-preview { min-width:0; overflow-wrap:anywhere; }
+.search-controls { display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; }
+.search-controls > label:first-child { grid-column:1/-1; font-size:13px; }
+.search-controls input[type=search] { min-width:0; width:100%; min-height:46px; border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--paper); color:var(--ink); font-size:16px; }
+.favorite-filter { display:flex; gap:6px; align-items:center; min-height:44px; font-size:14px; }
+input[type=checkbox] { width:20px; height:20px; accent-color:var(--blue); }
+.month-summary { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-radius:14px; background:var(--tint); }
+.month-controls { flex-wrap:wrap; }
+.month-controls input, .month-controls select { min-height:44px; max-width:100%; font:inherit; color:var(--ink); background:var(--paper); }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
+.weekday { text-align:center; color:var(--muted); padding:8px 0; font-size:13px; }
+.calendar-day { min-width:0; min-height:76px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:12px; }
+.calendar-day span { font-size:12px; color:var(--muted); }
+.calendar-day.has-records { background:var(--tint); border-color:var(--blue); }
+.backup-panel { display:grid; gap:14px; }
+.backup-panel .row { justify-content:flex-start; flex-wrap:wrap; }
+.backup-panel p, #feedback { overflow-wrap:anywhere; }
+.file-label { display:flex; flex-wrap:wrap; align-items:center; gap:8px; max-width:100%; cursor:pointer; }
+.file-label input { max-width:100%; width:230px; font-size:13px; }
+#backup-preview { display:grid; gap:10px; }
+.card-area { min-width:0; }
+.card-box { flex:none; min-height:0; width:100%; height:auto; display:flex; justify-content:center; }
+.card-area { display:flex; flex-direction:column; align-items:center; }
+.flip-scene { width:min(100%,320px); }
+.card-actions { flex-wrap:wrap; }
+.card-actions button { min-height:44px; }
+.record-layout.is-editing .record-copy { display:flex; min-height:320px; }
+.read-text { min-height:240px; width:100%; font-size:16px; color:var(--ink); background:var(--paper); }
+.read-dialog { max-height:85dvh; overflow:auto; }
+.full-text { overflow-wrap:anywhere; }
+@media (max-width:959px) {
+  .shell { padding:20px; gap:20px; }
+  .workspace.show-card { grid-template-columns:minmax(0,1fr); }
+  .workspace.show-card > .card-area { display:flex; align-items:center; }
+  .workspace.show-card .editor { display:none; }
+  .record-layout.is-editing .card-area { display:none; }
+  .editor { min-height:500px; }
+}
+@media (max-width:540px) {
+  .shell { padding:16px; gap:16px; }
+  header { gap:14px; }
+  header .brand { font-size:19px; }
+  .icons { width:100%; display:grid; grid-template-columns:1fr 1fr 1fr 44px; gap:4px; }
+  .icons .quiet { padding:8px 3px; font-size:13px; }
+  .editor,.panel { padding:18px; border-radius:20px; }
+  h1 { font-size:28px; letter-spacing:-1px; }
+  .editor { min-height:480px; }
+  .editor textarea { min-height:200px; }
+  .search-controls { grid-template-columns:1fr auto; }
+  .search-controls input[type=search] { grid-column:1/-1; }
+  .calendar-grid { gap:4px; }
+  .calendar-day { min-height:58px; border-radius:8px; }
+  .calendar-day span { font-size:10px; }
+  .archive-tabs { flex-wrap:wrap; }
+  .archive-tabs button { min-height:44px; padding:8px; }
+  fieldset { min-width:0; }
+  .file-label { padding:10px; }
+  .month-controls { align-items:stretch; }
+  .month-controls label { min-width:0; }
+  footer { font-size:10px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .flip-inner,.tilt-layer,.flip-light { transition:none !important; animation:none !important; }
+  .tilt-layer { transform:none !important; }
+  .flip-light { display:none !important; }
+}

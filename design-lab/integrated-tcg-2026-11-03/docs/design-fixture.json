@@ -1,0 +1,2152 @@
+{
+  "id": "demo-cardex-001",
+  "taxonomy_version": "emotion-cardex-ui-demo-3plus7-v1",
+  "demo": true,
+  "speaker": "민서",
+  "recentCount": 100,
+  "totalTextCount": 142,
+  "target": [
+    {
+      "id": "demo-1",
+      "speaker": "민서",
+      "order": 1,
+      "timestamp": "2026-10-22T09:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-2",
+      "speaker": "민서",
+      "order": 2,
+      "timestamp": "2026-10-22T10:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-3",
+      "speaker": "민서",
+      "order": 3,
+      "timestamp": "2026-10-22T11:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-4",
+      "speaker": "민서",
+      "order": 4,
+      "timestamp": "2026-10-22T12:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-5",
+      "speaker": "민서",
+      "order": 5,
+      "timestamp": "2026-10-22T13:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-6",
+      "speaker": "민서",
+      "order": 6,
+      "timestamp": "2026-10-22T14:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-7",
+      "speaker": "민서",
+      "order": 7,
+      "timestamp": "2026-10-23T15:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-8",
+      "speaker": "민서",
+      "order": 8,
+      "timestamp": "2026-10-23T16:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-9",
+      "speaker": "민서",
+      "order": 9,
+      "timestamp": "2026-10-23T17:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-10",
+      "speaker": "민서",
+      "order": 10,
+      "timestamp": "2026-10-23T09:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-11",
+      "speaker": "민서",
+      "order": 11,
+      "timestamp": "2026-10-23T10:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-12",
+      "speaker": "민서",
+      "order": 12,
+      "timestamp": "2026-10-23T11:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-13",
+      "speaker": "민서",
+      "order": 13,
+      "timestamp": "2026-10-24T12:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-14",
+      "speaker": "민서",
+      "order": 14,
+      "timestamp": "2026-10-24T13:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-15",
+      "speaker": "민서",
+      "order": 15,
+      "timestamp": "2026-10-24T14:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-16",
+      "speaker": "민서",
+      "order": 16,
+      "timestamp": "2026-10-24T15:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-17",
+      "speaker": "민서",
+      "order": 17,
+      "timestamp": "2026-10-24T16:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-18",
+      "speaker": "민서",
+      "order": 18,
+      "timestamp": "2026-10-24T17:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-19",
+      "speaker": "민서",
+      "order": 19,
+      "timestamp": "2026-10-25T09:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-20",
+      "speaker": "민서",
+      "order": 20,
+      "timestamp": "2026-10-25T10:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-21",
+      "speaker": "민서",
+      "order": 21,
+      "timestamp": "2026-10-25T11:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-22",
+      "speaker": "민서",
+      "order": 22,
+      "timestamp": "2026-10-25T12:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-23",
+      "speaker": "민서",
+      "order": 23,
+      "timestamp": "2026-10-25T13:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-24",
+      "speaker": "민서",
+      "order": 24,
+      "timestamp": "2026-10-25T14:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-25",
+      "speaker": "민서",
+      "order": 25,
+      "timestamp": "2026-10-26T15:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-26",
+      "speaker": "민서",
+      "order": 26,
+      "timestamp": "2026-10-26T16:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-27",
+      "speaker": "민서",
+      "order": 27,
+      "timestamp": "2026-10-26T17:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-28",
+      "speaker": "민서",
+      "order": 28,
+      "timestamp": "2026-10-26T09:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-29",
+      "speaker": "민서",
+      "order": 29,
+      "timestamp": "2026-10-26T10:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-30",
+      "speaker": "민서",
+      "order": 30,
+      "timestamp": "2026-10-26T11:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-31",
+      "speaker": "민서",
+      "order": 31,
+      "timestamp": "2026-10-27T12:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-32",
+      "speaker": "민서",
+      "order": 32,
+      "timestamp": "2026-10-27T13:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-33",
+      "speaker": "민서",
+      "order": 33,
+      "timestamp": "2026-10-27T14:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-34",
+      "speaker": "민서",
+      "order": 34,
+      "timestamp": "2026-10-27T15:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-35",
+      "speaker": "민서",
+      "order": 35,
+      "timestamp": "2026-10-27T16:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-36",
+      "speaker": "민서",
+      "order": 36,
+      "timestamp": "2026-10-27T17:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-37",
+      "speaker": "민서",
+      "order": 37,
+      "timestamp": "2026-10-28T09:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-38",
+      "speaker": "민서",
+      "order": 38,
+      "timestamp": "2026-10-28T10:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-39",
+      "speaker": "민서",
+      "order": 39,
+      "timestamp": "2026-10-28T11:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-40",
+      "speaker": "민서",
+      "order": 40,
+      "timestamp": "2026-10-28T12:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    },
+    {
+      "id": "demo-41",
+      "speaker": "민서",
+      "order": 41,
+      "timestamp": "2026-10-28T13:00:00+09:00",
+      "text": "진짜 진짜 오늘도 같이 해보자"
+    },
+    {
+      "id": "demo-42",
+      "speaker": "민서",
+      "order": 42,
+      "timestamp": "2026-10-28T14:00:00+09:00",
+      "text": "오늘 일정 확인했어"
+    },
+    {
+      "id": "demo-43",
+      "speaker": "민서",
+      "order": 43,
+      "timestamp": "2026-10-28T15:00:00+09:00",
+      "text": "같이 해보자 다음에 이야기하자"
+    }
+  ],
+  "rows": [
+    {
+      "anchor": "demo-1",
+      "order": 1,
+      "timestamp": "2026-10-22T09:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-2",
+      "order": 2,
+      "timestamp": "2026-10-22T10:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-3",
+      "order": 3,
+      "timestamp": "2026-10-22T11:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-4",
+      "order": 4,
+      "timestamp": "2026-10-22T12:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-5",
+      "order": 5,
+      "timestamp": "2026-10-22T13:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-6",
+      "order": 6,
+      "timestamp": "2026-10-22T14:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-7",
+      "order": 7,
+      "timestamp": "2026-10-23T15:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-8",
+      "order": 8,
+      "timestamp": "2026-10-23T16:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-9",
+      "order": 9,
+      "timestamp": "2026-10-23T17:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-10",
+      "order": 10,
+      "timestamp": "2026-10-23T09:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-11",
+      "order": 11,
+      "timestamp": "2026-10-23T10:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-12",
+      "order": 12,
+      "timestamp": "2026-10-23T11:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-13",
+      "order": 13,
+      "timestamp": "2026-10-24T12:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-14",
+      "order": 14,
+      "timestamp": "2026-10-24T13:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-15",
+      "order": 15,
+      "timestamp": "2026-10-24T14:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-16",
+      "order": 16,
+      "timestamp": "2026-10-24T15:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-17",
+      "order": 17,
+      "timestamp": "2026-10-24T16:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-18",
+      "order": 18,
+      "timestamp": "2026-10-24T17:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-19",
+      "order": 19,
+      "timestamp": "2026-10-25T09:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-20",
+      "order": 20,
+      "timestamp": "2026-10-25T10:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-21",
+      "order": 21,
+      "timestamp": "2026-10-25T11:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-22",
+      "order": 22,
+      "timestamp": "2026-10-25T12:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-23",
+      "order": 23,
+      "timestamp": "2026-10-25T13:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-24",
+      "order": 24,
+      "timestamp": "2026-10-25T14:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-25",
+      "order": 25,
+      "timestamp": "2026-10-26T15:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-26",
+      "order": 26,
+      "timestamp": "2026-10-26T16:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-27",
+      "order": 27,
+      "timestamp": "2026-10-26T17:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-28",
+      "order": 28,
+      "timestamp": "2026-10-26T09:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-29",
+      "order": 29,
+      "timestamp": "2026-10-26T10:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-30",
+      "order": 30,
+      "timestamp": "2026-10-26T11:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-31",
+      "order": 31,
+      "timestamp": "2026-10-27T12:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-32",
+      "order": 32,
+      "timestamp": "2026-10-27T13:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-33",
+      "order": 33,
+      "timestamp": "2026-10-27T14:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-34",
+      "order": 34,
+      "timestamp": "2026-10-27T15:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-35",
+      "order": 35,
+      "timestamp": "2026-10-27T16:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-36",
+      "order": 36,
+      "timestamp": "2026-10-27T17:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-37",
+      "order": 37,
+      "timestamp": "2026-10-28T09:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-38",
+      "order": 38,
+      "timestamp": "2026-10-28T10:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-39",
+      "order": 39,
+      "timestamp": "2026-10-28T11:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-40",
+      "order": 40,
+      "timestamp": "2026-10-28T12:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-41",
+      "order": 41,
+      "timestamp": "2026-10-28T13:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-42",
+      "order": 42,
+      "timestamp": "2026-10-28T14:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    },
+    {
+      "anchor": "demo-43",
+      "order": 43,
+      "timestamp": "2026-10-28T15:00:00+09:00",
+      "probabilities": {
+        "pos_1": 0.18,
+        "pos_2": 0.15,
+        "pos_3": 0.12,
+        "neg_1": 0.17,
+        "neg_2": 0.14,
+        "neg_3": 0.09,
+        "neutral": 0.15
+      },
+      "status": "valid",
+      "truncated": false
+    }
+  ],
+  "summary": {
+    "status": "success",
+    "validCount": 43,
+    "totalCount": 43,
+    "leaf": {
+      "pos_1": 0.1799999999999999,
+      "pos_2": 0.1500000000000001,
+      "pos_3": 0.12000000000000009,
+      "neg_1": 0.16999999999999996,
+      "neg_2": 0.13999999999999996,
+      "neg_3": 0.08999999999999996,
+      "neutral": 0.1500000000000001
+    },
+    "parents": {
+      "positive": 0.4500000000000001,
+      "negative": 0.3999999999999999,
+      "neutral": 0.1500000000000001
+    },
+    "dominantLeaf": "pos_1",
+    "dominantParent": "positive",
+    "leafTies": [
+      "pos_1"
+    ],
+    "parentTies": [
+      "positive"
+    ]
+  },
+  "expressions": [
+    {
+      "label": "오늘",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "오늘 일정",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "오늘 일정 확인했어",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "일정",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "일정 확인했어",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "확인했어",
+      "utteranceFrequency": 22,
+      "totalCount": 22,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 22,
+      "missingCount": 0,
+      "ids": [
+        "demo-2",
+        "demo-3",
+        "demo-5",
+        "demo-8",
+        "demo-9",
+        "demo-12",
+        "demo-14",
+        "demo-15",
+        "demo-17",
+        "demo-18",
+        "demo-20",
+        "demo-23",
+        "demo-24",
+        "demo-27",
+        "demo-29",
+        "demo-30",
+        "demo-32",
+        "demo-33",
+        "demo-35",
+        "demo-38",
+        "demo-39",
+        "demo-42"
+      ],
+      "parentCounts": {
+        "positive": 22,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 22,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999994,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.1400000000000001,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999994
+      }
+    },
+    {
+      "label": "같이",
+      "utteranceFrequency": 21,
+      "totalCount": 21,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 21,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-4",
+        "demo-6",
+        "demo-7",
+        "demo-10",
+        "demo-11",
+        "demo-13",
+        "demo-16",
+        "demo-19",
+        "demo-21",
+        "demo-22",
+        "demo-25",
+        "demo-26",
+        "demo-28",
+        "demo-31",
+        "demo-34",
+        "demo-36",
+        "demo-37",
+        "demo-40",
+        "demo-41",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 21,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 21,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000007,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "같이 해보자",
+      "utteranceFrequency": 21,
+      "totalCount": 21,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 21,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-4",
+        "demo-6",
+        "demo-7",
+        "demo-10",
+        "demo-11",
+        "demo-13",
+        "demo-16",
+        "demo-19",
+        "demo-21",
+        "demo-22",
+        "demo-25",
+        "demo-26",
+        "demo-28",
+        "demo-31",
+        "demo-34",
+        "demo-36",
+        "demo-37",
+        "demo-40",
+        "demo-41",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 21,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 21,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000007,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "해보자",
+      "utteranceFrequency": 21,
+      "totalCount": 21,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 21,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-4",
+        "demo-6",
+        "demo-7",
+        "demo-10",
+        "demo-11",
+        "demo-13",
+        "demo-16",
+        "demo-19",
+        "demo-21",
+        "demo-22",
+        "demo-25",
+        "demo-26",
+        "demo-28",
+        "demo-31",
+        "demo-34",
+        "demo-36",
+        "demo-37",
+        "demo-40",
+        "demo-41",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 21,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 21,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.18000000000000005,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000006,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000007,
+        "neg_3": 0.09000000000000002,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "같이 해보자 다음에",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "다음에",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "다음에 이야기하자",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "이야기하자",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "해보자 다음에",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "해보자 다음에 이야기하자",
+      "utteranceFrequency": 12,
+      "totalCount": 12,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 12,
+      "missingCount": 0,
+      "ids": [
+        "demo-4",
+        "demo-7",
+        "demo-10",
+        "demo-13",
+        "demo-19",
+        "demo-22",
+        "demo-25",
+        "demo-28",
+        "demo-34",
+        "demo-37",
+        "demo-40",
+        "demo-43"
+      ],
+      "parentCounts": {
+        "positive": 12,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 12,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.14999999999999997,
+        "pos_3": 0.12000000000000004,
+        "neg_1": 0.16999999999999996,
+        "neg_2": 0.14000000000000004,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.14999999999999997
+      }
+    },
+    {
+      "label": "진짜",
+      "utteranceFrequency": 9,
+      "totalCount": 18,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "오늘도",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "오늘도 같이",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "오늘도 같이 해보자",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "진짜 오늘도",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "진짜 오늘도 같이",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "진짜 진짜",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    },
+    {
+      "label": "진짜 진짜 오늘도",
+      "utteranceFrequency": 9,
+      "totalCount": 9,
+      "denominator": 43,
+      "threshold": 2,
+      "linkedCount": 9,
+      "missingCount": 0,
+      "ids": [
+        "demo-1",
+        "demo-6",
+        "demo-11",
+        "demo-16",
+        "demo-21",
+        "demo-26",
+        "demo-31",
+        "demo-36",
+        "demo-41"
+      ],
+      "parentCounts": {
+        "positive": 9,
+        "negative": 0,
+        "neutral": 0
+      },
+      "leafCounts": {
+        "pos_1": 9,
+        "pos_2": 0,
+        "pos_3": 0,
+        "neg_1": 0,
+        "neg_2": 0,
+        "neg_3": 0,
+        "neutral": 0
+      },
+      "average": {
+        "pos_1": 0.17999999999999997,
+        "pos_2": 0.15,
+        "pos_3": 0.12000000000000001,
+        "neg_1": 0.16999999999999998,
+        "neg_2": 0.14,
+        "neg_3": 0.08999999999999998,
+        "neutral": 0.15
+      }
+    }
+  ],
+  "segments": []
+}

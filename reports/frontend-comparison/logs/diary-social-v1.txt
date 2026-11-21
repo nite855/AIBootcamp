@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: empty, whitespace, symbols and binary input rejected independently
+ok 1 - empty, whitespace, symbols and binary input rejected independently
+  ---
+  duration_ms: 3.4167
+  type: 'test'
+  ...
+# Subtest: diary paragraphs stay one record and no date inferred
+ok 2 - diary paragraphs stay one record and no date inferred
+  ---
+  duration_ms: 0.2049
+  type: 'test'
+  ...
+# Subtest: normalization keeps URLs and hashtags
+ok 3 - normalization keeps URLs and hashtags
+  ---
+  duration_ms: 0.1137
+  type: 'test'
+  ...
+# Subtest: length limit rejects instead of truncating
+ok 4 - length limit rejects instead of truncating
+  ---
+  duration_ms: 1.0125
+  type: 'test'
+  ...
+# Subtest: date and record count guards
+ok 5 - date and record count guards
+  ---
+  duration_ms: 1.3655
+  type: 'test'
+  ...
+# Subtest: single, dated multi and undated multi have different scope
+ok 6 - single, dated multi and undated multi have different scope
+  ---
+  duration_ms: 12.7205
+  type: 'test'
+  ...
+# Subtest: same leaf originals produce parents, distribution and periods
+ok 7 - same leaf originals produce parents, distribution and periods
+  ---
+  duration_ms: 2.1846
+  type: 'test'
+  ...
+# Subtest: parent and leaf independently chosen, preserving disagreement
+ok 8 - parent and leaf independently chosen, preserving disagreement
+  ---
+  duration_ms: 0.3065
+  type: 'test'
+  ...
+# Subtest: repetition uses record df, not paragraph duplication
+ok 9 - repetition uses record df, not paragraph duplication
+  ---
+  duration_ms: 1.4481
+  type: 'test'
+  ...
+# Subtest: PC selection retains recent 100 across all speakers
+ok 10 - PC selection retains recent 100 across all speakers
+  ---
+  duration_ms: 1.3407
+  type: 'test'
+  ...
+# Subtest: 6 label, invalid sum and truncated data rejected
+ok 11 - 6 label, invalid sum and truncated data rejected
+  ---
+  duration_ms: 0.305
+  type: 'test'
+  ...
+# Subtest: proposed request has explicit diary kind and no speaker
+ok 12 - proposed request has explicit diary kind and no speaker
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 139.6296

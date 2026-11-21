@@ -1,0 +1,37 @@
+/* Simple card first, a wider integrated workspace only on detail routes. */
+.studio-nav{display:flex;flex-wrap:wrap;gap:8px}
+.simple-main-tab .studio-nav .btn{width:auto;flex:0 1 auto}
+.integrated-detail .app-shell{max-width:1440px;padding:28px 40px}
+.integrated-detail .content{gap:24px}
+.detail-return{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.detail-nav-tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:16px}
+.detail-nav-tabs a{padding:10px 14px;min-height:44px;border-radius:8px;background:var(--surface);color:var(--ink);text-decoration:none}
+.detail-nav-tabs a[aria-current]{background:var(--primary);color:var(--on-primary,#fff)}
+.analysis-explainer{font-size:14px;color:var(--muted);line-height:1.7}
+.scope-strip,.panel,.simple-extra-info{overflow-wrap:anywhere}
+.simple-extra-info p{margin-top:12px;max-width:560px;text-align:left;line-height:1.7}
+.overview-aside .emotion-card{display:flex!important}
+.table-reveal li{margin-bottom:8px}
+.content>nav,.content>div{min-width:0}
+.line-chart{max-width:100%}
+@media(max-width:767px){
+ .integrated-detail .app-shell{padding:20px 16px 32px}
+ .studio-nav{display:flex!important}
+ .studio-nav .btn{font-size:13px;padding:10px 12px;flex:1;min-width:0}
+ .detail-nav-tabs{gap:6px}
+ .detail-nav-tabs a{padding:9px 10px;font-size:13px}
+ .detail-return .btn{font-size:13px;min-height:44px}
+ .integrated-detail .page-heading h1{font-size:27px}
+ .integrated-detail .header-actions{gap:8px}
+ .integrated-detail .overview-aside>.panel:first-child .emotion-card{max-width:200px;min-height:280px}
+ .overview-aside .art-slot{min-height:100px}
+ .overview-main>.panel:nth-child(1){order:1}
+ .overview-main>.panel:nth-child(2){order:2}
+ .overview-main>.panel:nth-child(3){order:3}
+ .overview-aside>.panel:nth-child(1){order:6}
+ .overview-aside>.panel:nth-child(2){order:4}
+ .overview-aside>.panel:nth-child(3){order:5}
+ .overview-grid .panel-title{flex-wrap:wrap}
+ .overview-grid .btn.ghost{white-space:normal}
+ .simple-main-tab .social-grid{grid-template-columns:minmax(0,1fr)}
+}

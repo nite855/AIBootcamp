@@ -1,0 +1,23 @@
+/* Material treatments preserve the shared layout and readable writing surface. */
+input,select,textarea,button{accent-color:var(--blue)}
+select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+textarea::placeholder{color:var(--muted);opacity:1}
+button{color:var(--ink)}
+.stats-chart text{fill:var(--muted)}
+.settings-panel .panel-body{overflow-y:auto;overscroll-behavior:contain;padding:4px;scrollbar-gutter:stable}
+.settings-panel .panel-body>*{flex-shrink:0}
+.settings-panel fieldset{border:0;padding:0;margin:0;min-width:0}
+.settings-panel legend{font-weight:600;margin-bottom:10px}
+.mode-options{display:flex;gap:12px;flex-wrap:wrap}.mode-options label{min-height:44px;display:flex;align-items:center;gap:6px}
+html:not([data-appearance="paper"]) .shell{background-image:none}
+html[data-appearance="sage"] :is(.panel,.editor){border-radius:30px;box-shadow:0 6px 20px #10251a12}
+html[data-appearance="aurora"] .shell{background-image:radial-gradient(ellipse at top right,#948cff22,transparent 65%)}
+html[data-appearance="aurora"] .icon{background:var(--surface)}
+@supports(backdrop-filter:blur(8px)){html[data-appearance="aurora"] .icon{background:color-mix(in srgb,var(--surface) 85%,transparent);backdrop-filter:blur(8px)}}
+html[data-appearance="editorial"] :is(.panel,.editor,.quiet,.primary,.icon,.entry){border-radius:3px;box-shadow:none}
+html[data-appearance="editorial"] h1{letter-spacing:-1px;font-weight:500}
+html[data-appearance="retro"] .shell{background-image:linear-gradient(#9773aa15 1px,transparent 1px),linear-gradient(90deg,#9773aa15 1px,transparent 1px);background-size:24px 24px}
+html[data-appearance="retro"] :is(.panel,.editor,.primary,.quiet){border:2px solid var(--ink);border-radius:8px;box-shadow:3px 3px 0 var(--ink)}
+
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=on]),:root:not([data-motion=on]) *,:root:not([data-motion=on]) *::before,:root:not([data-motion=on]) *::after,:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light),:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light)::before,:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light)::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.theme-option:has(input:checked){outline:3px solid Highlight}}

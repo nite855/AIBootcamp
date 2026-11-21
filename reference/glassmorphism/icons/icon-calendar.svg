@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">달력</title><defs>
+  <linearGradient id="glass" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".9"/><stop offset=".45" stop-color="#c4b5fd" stop-opacity=".56"/><stop offset=".75" stop-color="#bae6fd" stop-opacity=".55"/><stop offset="1" stop-color="#ffd1bd" stop-opacity=".74"/></linearGradient>
+  <linearGradient id="accent" x2="1" y2="1"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7360cc"/></linearGradient>
+  <linearGradient id="background" x2="1" y2="1"><stop stop-color="#fce5df"/><stop offset=".5" stop-color="#e5ddfc"/><stop offset="1" stop-color="#cce9f7"/></linearGradient>
+  <filter id="shadow" x="-40%" y="-40%" width="180%" height="190%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#7567a1" flood-opacity=".22"/></filter>
+  <style>text{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;fill:#342748}.small{font-size:15px;fill:#655874}.title{font-size:26px;font-weight:700}.label{font-size:17px}</style>
+</defs><g filter="url(#shadow)" fill="url(#glass)" stroke="#7862aa" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="27" y="31" width="74" height="70" rx="11"/><path d="M27 53h74M46 23v18M82 23v18M44 68h4M62 68h4M80 68h4M44 84h4M62 84h4M80 84h4"/></g></svg>

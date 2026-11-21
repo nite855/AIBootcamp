@@ -1,0 +1,3 @@
+const test=require('node:test'),assert=require('node:assert/strict'),C=require('../scripts/core.js');
+test('display labels and stable IDs agree with the latest UI contract',()=>{assert.deepEqual(C.TYPES.map(t=>t.name),['기쁨','만족','평온','불안','슬픔','분노','중립']);assert.equal(C.filterTypes({query:'평온'})[0].id,'pos_3');assert.equal(C.filterTypes({query:'안정'}).length,0);assert.equal(C.type('pos_3').number,'003');});
+test('latest Figma fixture has independent parent and leaf summaries',()=>{const r=C.demoResult();assert.equal(r.summary.dominantParent,'positive');assert.equal(r.summary.dominantLeaf,'pos_1');assert.ok(Math.abs(r.summary.parents.positive-.45)<1e-9);assert.ok(Math.abs(r.summary.leaf.neg_1-.17)<1e-9);});

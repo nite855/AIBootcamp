@@ -1,0 +1,19 @@
+{
+  "url": "http://192.168.219.144:8081",
+  "security": {
+    "secure": false,
+    "nativeUUID": "undefined",
+    "randomValues": "function"
+  },
+  "storedId": "201c24bf-77b0-4c95-9b9c-c89f25f7c76f",
+  "errors": [],
+  "browser": "131.0.6778.33",
+  "passed": [
+    "HTTP insecure context",
+    "UUID fallback",
+    "record save",
+    "favorite persists after reload",
+    "read record",
+    "no horizontal overflow"
+  ]
+}

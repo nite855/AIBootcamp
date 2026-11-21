@@ -1,0 +1,86 @@
+[
+  {
+    "asset": "icons/icon-home.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single home icon: simple house silhouette. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-diary-write.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single diary writing icon: rounded notebook with a diagonal pen. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-emotion-heart.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single emotion icon: rounded heart. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-emotion-card.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single emotion card icon: rounded portrait card with a simple smiling face. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-archive.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single archive icon: storage box with lid and centered handle. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-calendar.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single calendar icon: rounded page with two binding rings and a minimal date grid. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-statistics.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single statistics icon: three rounded vertical bars ascending in height. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "icons/icon-settings.png",
+    "tool": "image_gen",
+    "transparent_background": true,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. A single settings icon: simple rounded eight-tooth gear with central hole. Single isolated icon centered, near frontal shallow 3D, square canvas target 1024x1024, 18 percent empty margin. Truly transparent background, no text, no ground plane."
+  },
+  {
+    "asset": "components/component-diary-input.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Landscape diary writing panel: small TODAY label, title My quiet moment, generous ruled writing area with two short fictional English sample lines, footer character count and lavender Save button. Straight-on UI layout. Landscape canvas target 1536x1024, pastel atmospheric background, whole component visible with generous outer margins. Typography dark plum and legible."
+  },
+  {
+    "asset": "components/component-emotion-card.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Portrait emotion card: small TODAY label, large translucent lavender heart centerpiece, title Feeling peaceful, short line A little room to breathe, small date, three tiny mood dots. Straight-on UI layout. Portrait composition target 1024x1536, pastel atmospheric background, whole card visible with generous outer margins. Typography dark plum and legible."
+  },
+  {
+    "asset": "components/component-record-list.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Landscape past diary records panel: title Your moments, exactly three spacious rows, each with a pastel mood icon, short fictional entry title and date. Straight-on UI layout. Landscape canvas target 1536x1024, pastel atmospheric background, whole component visible with generous outer margins. Typography dark plum and legible."
+  },
+  {
+    "asset": "components/component-weekly-chart.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Landscape weekly emotions panel: title This week, seven rounded pastel bars, weekday labels Mon through Sun, subtle baseline and small Calm legend. Fictional illustrative data. Straight-on UI layout. Landscape canvas target 1536x1024, pastel atmospheric background, whole component visible with generous outer margins. Typography dark plum and legible."
+  },
+  {
+    "asset": "components/component-bottom-nav.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Create ONLY ONE isolated horizontal bottom navigation pill in the center of a plain pale lavender background. Four items: house Home, pen Write, archive box Moments, bars Insights. Home selected lavender tile. NO dashboard, NO other cards, NO calendar, NO headings, NO body content. The single navigation pill fills 85% of image width. Wide landscape canvas. Straight-on orthographic."
+  },
+  {
+    "asset": "components/component-buttons.png",
+    "tool": "image_gen",
+    "transparent_background": false,
+    "prompt": "Design reference for a calm Korean emotion diary app. Premium glassmorphism, translucent frosted lavender and icy blue glass with soft peach reflections, rounded bevels, subtle white rim highlights, light from upper left, restrained soft shadow. Clean polished design, no logos, no watermark. Wide UI specimen with three rounded buttons arranged horizontally: solid lavender Save moment, frosted glass Preview, muted disabled Unavailable. Clear differences in states, straight-on UI layout. Landscape canvas target 1536x1024, pastel atmospheric background, whole component visible with generous outer margins. Typography dark plum and legible."
+  }
+]
