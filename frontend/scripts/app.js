@@ -269,6 +269,8 @@
   function render(focus = false) {
     // The "분석 대기" panel after a save only lives on that card page (share-view.js showWait).
     if (state.view !== "entry") state.pendingReveal = null;
+    // Leaving statistics resets its entry motion, so coming back draws the charts again.
+    if (state.view !== "history" || state.archiveTab !== "stats") statsAnimKey = null;
     const old = document.activeElement?.dataset.action;
     const focusedId = document.activeElement?.id;
     const selection = ["record-search", "diary-text"].includes(focusedId) ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
