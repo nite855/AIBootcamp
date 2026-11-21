@@ -15,7 +15,8 @@ const statisticsView =
   (await read("scripts/celebrate-view.js")) + "\n" +
   (await read("scripts/share-view.js")) + "\n" +
   (await read("scripts/profile-view.js"));
-const assetNames = ["pos_1","pos_2","pos_3","neg_1","neg_2","neg_3","neutral","heart","star"];
+// 2026-11-22: cards draw the Figma blob (scripts/blob-art.js); only the empty-card heart PNG is still embedded.
+const assetNames = ["heart"];
 const assets = Object.fromEntries(await Promise.all(assetNames.map(async name => [name, "data:image/png;base64," + (await readFile(new URL("assets/characters/" + name + ".png", base))).toString("base64")])));
 const persistence = await read("scripts/persistence.js");
 const benchmark = await read("scripts/benchmark.js");
@@ -40,7 +41,7 @@ async function decorStyles() {
   return css;
 }
 const domain =
-  (await read("scripts/record-id.js")) + "\n" + (await read("scripts/core.js")) + "\n" + (await read("scripts/profile.js")) + "\n" + (await read("scripts/share-core.js")) +
+  (await read("scripts/record-id.js")) + "\n" + (await read("scripts/core.js")) + "\n" + (await read("scripts/blob-art.js")) + "\n" + (await read("scripts/profile.js")) + "\n" + (await read("scripts/share-core.js")) +
   "\n" +
   (await read("scripts/diary-core.js")) +
   "\n" +

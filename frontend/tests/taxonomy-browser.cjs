@@ -30,7 +30,10 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       await page.locator(`[data-catalog-filter="${type.id}"]`).click();
       assert.equal(await page.locator('.slot[data-stage]').count(), 3);
       assert.equal(await page.locator('.slot[data-stage] .catalog-character').count(), 3);
-      assert.equal(await page.locator('[data-emotion-mark]').count(), type.parent === 'neutral' ? 3 : 0);
+      // 2026-11-22: blob characters in the emotion's deep color, no neutral corner badge.
+      assert.equal(await page.locator('[data-emotion-mark]').count(), 0);
+      assert.deepEqual(await page.locator('.slot[data-stage] .catalog-character [data-blob-part="body"] path').evaluateAll(xs => [...new Set(xs.map(x => x.getAttribute('fill')))]),
+        [await page.evaluate(id => getComputedStyle(document.documentElement).getPropertyValue('--card-deep-' + id.replace('_', '-')).trim(), type.id)]);
       assert.equal(await page.evaluate(() => document.activeElement.dataset.catalogFilter), type.id, 'focus stays on the chip');
       assert.equal(await page.locator(`[data-catalog-filter="${type.id}"]`).getAttribute('aria-pressed'), 'true');
     }
@@ -41,13 +44,9 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     assert.equal(await page.locator('[data-catalog-filter="neu_2"]').getAttribute('aria-pressed'), 'true');
     for (const [theme,mode] of await page.evaluate(()=>CardexTheme.themes.map(t=>[t.id,t.scheme]))) {
       await page.evaluate(theme => CardexTheme.setTheme(theme), theme);
-      const colors = await page.locator('[data-emotion-mark] > circle').first().evaluate(el => ({
-        stroke:el.getAttribute('stroke'), fill:el.getAttribute('fill'),
-        ink:getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
-        surface:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim(),
-      }));
-      assert.equal(colors.stroke, colors.ink, theme+'/'+mode);
-      assert.equal(colors.fill, colors.surface, theme+'/'+mode);
+      // Card colors are fixed tokens, so the blob looks the same in every theme.
+      const fill = await page.locator('.catalog-character [data-blob-part="body"] path').first().getAttribute('fill');
+      assert.equal(fill, await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--card-deep-neu-2').trim()), theme+'/'+mode);
     }
     await page.evaluate(() => CardexTheme.setTheme('candy'));
     await page.screenshot({path:path.join(output,'catalog-desktop.png')});
@@ -59,7 +58,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       const type = types.find(t => t.id === id);
       assert.match(await page.locator('.art-card').textContent(), /중립/);
       assert.ok((await page.locator('.art-card').textContent()).includes(type.name));
-      assert.equal(await page.locator(`[data-emotion-mark="${id}"]`).count(), 1);
+      assert.equal(await page.locator(`.art-card [data-character="${id}"]`).count(), 1);
       const svg = await page.locator('.art-card').evaluate(el => el.outerHTML);
       assert.ok(!svg.includes('별일 없는 하루에도'), 'only a truncated first line reaches the card');
       const download = page.waitForEvent('download');

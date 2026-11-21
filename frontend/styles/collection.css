@@ -33,7 +33,7 @@
 /* Grid without a panel. */
 .catalog-page .catalog-board { position: relative; display: grid; gap: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .catalog-page .collection-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 192px)); grid-template-rows: none; grid-auto-rows: auto; grid-auto-flow: row; justify-content: space-between; gap: 36px 32px; margin: 0; }
-.catalog-page .slot-thumb .mini-card svg.catalog-character { width: 62%; height: auto; }
+.catalog-page .slot-thumb .mini-card svg.catalog-character { width: 76%; height: auto; max-height: none; }
 .catalog-page .collection-grid.is-type { grid-template-columns: repeat(3, minmax(0, 192px)); justify-content: start; }
 /* Flex column: a grid track would size the 5:7 thumb's row before its width is known. */
 .catalog-page .collection-grid .slot { display: flex; flex-direction: column; grid-column: auto; grid-row: auto; width: auto; height: auto; max-height: none; min-width: 0; min-height: 0; aspect-ratio: auto; overflow: visible; padding: 0; border: 0; border-radius: 19.2px; background: transparent; box-shadow: none; color: var(--ink); text-align: left; transform: none; }

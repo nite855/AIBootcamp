@@ -132,21 +132,13 @@
     const typing = Boolean(String(state.text || "").trim());
     return `<div class="empty-card" data-typing="${typing}" role="img" aria-label="아직 열리지 않은 오늘의 카드"><div class="empty-top"><span class="empty-meta">오늘의 모먼트</span><span class="empty-meta">${E(state.date)}</span></div><div class="empty-art" aria-hidden="true"><span class="empty-spark s1">✦</span><span class="empty-spark s2">✧</span><span class="empty-spark s3">✦</span><img class="empty-silhouette" src="${objectAssets.heart}" alt=""></div><span class="empty-dots" aria-hidden="true">○ ○ ○</span><div class="empty-bottom"><h2>오늘의 기록을<br>기다리고 있어요</h2><p class="empty-hint">${emptyHint(typing)}</p></div></div>`;
   }
-  // Shared artwork for cards, archive thumbnails, catalog and PNG export.
+  // Shared artwork for cards, archive thumbnails, catalog and PNG export (2026-11-22): the Figma
+  // "character · 블롭" (blob-art.js) in the emotion's deep card color. Emotions differ by color only;
+  // the old 3D bunny PNGs and the neutral corner badges are gone.
+  let blobSeq = 0;
   function characterSVG(type, attrs = "") {
     const emotion = CardexCore.type(type);
-    const css = getComputedStyle(document.documentElement);
-    const ink = css.getPropertyValue('--ink').trim();
-    const surface = css.getPropertyValue('--surface').trim();
-    const question = '<path d="M8 8a4 4 0 0 1 8 0c0 3-4 3-4 6"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>';
-    const exclamation = '<path d="M12 4v10"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>';
-    const marks = {
-      neu_1: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
-      neu_2: question,
-      neu_3: exclamation,
-    };
-    const mark = marks[type];
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-character="${emotion.id}" ${attrs} aria-hidden="true" focusable="false"><image href="${objectAssets[emotion.asset || emotion.id]}" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>${mark ? `<g data-emotion-mark="${type}"><circle cx="82" cy="82" r="17" fill="${surface}" stroke="${ink}" stroke-width="1"/><g transform="translate(70 70)" fill="none" stroke="${ink}" color="${ink}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${mark}</g></g>` : ""}</svg>`;
+    return MomentBlob.blobSVG({ color: cardPalette(emotion.id).deep, uid: "cb" + (++blobSeq), attrs, character: emotion.id });
   }
   // Soft UI v1.1 moment card (Figma "Moment Card", 5:7): MOMENT CARD header with stage dots,
   // a glass window holding the character, and an info band (Emotion · name · first line ·
@@ -187,7 +179,8 @@
       : card.status === "pending" ? "분석 대기 · 감정 분석은 준비 중이에요" : card.status === "blank" ? "빈 카드 · 뚜렷한 대표 감정이 없는 기록이에요" : "분석 실패 · 기록은 그대로 읽을 수 있어요";
     const example = state.mode === "example" ? " · 예시 · 실제 입력 분석 아님" : "";
     const art = ready
-      ? '<ellipse cx="540" cy="930" rx="230" ry="26" fill="' + c.deep + '" fill-opacity=".22"/>' + characterSVG(card.type, 'x="250" y="300" width="580" height="580"')
+      // Figma glass-window proportions: floor shadow (.35, blur 3.9 → 13.2 at 1080) and the blob frame at 63% of the window.
+      ? '<ellipse cx="540" cy="927.2" rx="210.7" ry="32.2" fill="' + c.deep + '" opacity=".35" filter="url(#' + uid + '-floor)"/>' + characterSVG(card.type, 'x="180.2" y="236.1" width="719.8" height="719.8"')
       : '<text x="540" y="720" text-anchor="middle" ' + CARD_FONT + ' font-weight="800" font-size="250" fill="#ffffff" fill-opacity=".9">?</text>';
     const band = ready
       ? '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".55">' + (showName ? "Emotion" : "Moment") + '</text>'
@@ -202,6 +195,7 @@
       + '<desc>' + E(summary + example) + '</desc>'
       + '<defs><linearGradient id="' + uid + '-bg" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="' + c.mix + '"/><stop offset=".55" stop-color="' + c.base + '"/><stop offset="1" stop-color="' + c.base + '"/></linearGradient>'
       + '<linearGradient id="' + uid + '-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity=".12"/></linearGradient>'
+      + '<filter id="' + uid + '-floor" x="280" y="860" width="520" height="135" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="13.2"/></filter>'
       + '<clipPath id="' + uid + '-clip"><rect width="' + CARD_W + '" height="' + CARD_H + '" rx="96"/></clipPath></defs>'
       + '<g clip-path="url(#' + uid + '-clip)" font-family="Gothic A1, sans-serif">'
       + '<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="url(#' + uid + '-bg)"/>'

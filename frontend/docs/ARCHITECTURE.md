@@ -7,7 +7,7 @@
 1. tools/build.mjs가 buildTokens를 호출합니다. JSON 참조를 검증하고 CSS·기존 인터페이스용 테마 데이터를 생성합니다.
 2. base.css의 @font-face만 추출합니다. diary.css → themes.css → generated/tokens.css → flip.css를 내장합니다. 높은 구체성의 테마 재질 예외는 유지됩니다.
 3. generated/theme-tokens.js → theme.js를 첫 화면 표시 전에 실행합니다. 설정 저장·OS 모드·meta theme-color 동작을 유지합니다.
-4. 캐릭터 PNG 9종과 persistence.js를 앱에 내장합니다. 뷰·도메인·앱을 템플릿에 넣고 글꼴 라이선스를 내장합니다. 결과는 index.html 하나이며 fetch가 필요 없습니다.
+4. 빈 카드용 하트 PNG(2026-11-22부터 카드 캐릭터는 `blob-art.js` SVG)와 persistence.js를 앱에 내장합니다. 뷰·도메인·앱을 템플릿에 넣고 글꼴 라이선스를 내장합니다. 결과는 index.html 하나이며 fetch가 필요 없습니다.
 
 디자인 검토 페이지와 와이어프레임은 별도 생성 명령으로 갱신합니다. 토큰값만 바꿔도 앱·검토 페이지를 모두 재생성해야 합니다. --check 검사로 오래된 토큰·검토 페이지를 발견할 수 있습니다.
 
@@ -24,7 +24,7 @@
 
 기본 표시 설정은 lemon/light이며 공개 CardexTheme API와 저장 키는 유지합니다. 메인의 neg_1=불안, neg_2=슬픔, neg_3=분노 계약을 캐릭터·카드·도감·통계가 공유합니다. Flip 시안의 도메인 상수나 저장소는 가져오지 않습니다.
 
-감정 계약은 core.js의 3+10 정의를 공유합니다. validateAnalysis는 분류 버전·잘림·확률을 검증하며 카드와 통계에서 함께 사용합니다. characterSVG는 기존 PNG와 중립 표식을 카드·도감·썸네일·PNG에 공통 렌더링합니다. [분석 연동 계약](API_CONTRACT.md)을 참고하세요.
+감정 계약은 core.js의 3+10 정의를 공유합니다. validateAnalysis는 분류 버전·잘림·확률을 검증하며 카드와 통계에서 함께 사용합니다. characterSVG는 Figma 블롭(`blob-art.js`, 감정별 `--card-deep-*` 색, 2026-11-22)을 카드·도감·썸네일·PNG에 공통 렌더링합니다. [분석 연동 계약](API_CONTRACT.md)을 참고하세요.
 
 
 ## 메인 기능 통합 (2026-11-11)

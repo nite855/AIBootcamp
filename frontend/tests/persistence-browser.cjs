@@ -189,11 +189,18 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
       const type = await touch.evaluate(() => {
         const s = DiaryReview.getState(); return CardexCore.IDS[(Number(s.selected.split('-')[1]) - 1) % CardexCore.IDS.length];
       });
-      const expected = fs.readFileSync(path.resolve(__dirname, `../assets/characters/${type.startsWith('neu_') ? 'neutral' : type}.png`)).toString('base64');
-      assert.equal(await touch.locator('.art-card image').getAttribute('href'), 'data:image/png;base64,' + expected);
+      // 2026-11-22: every emotion draws the Figma blob in its own deep card color (no PNG, no badge).
+      const blob = await touch.locator('.art-card').evaluate((el, type) => ({
+        images: el.querySelectorAll('image').length,
+        character: el.querySelector('[data-character]')?.dataset.character,
+        fill: el.querySelector('[data-blob-part="body"] path')?.getAttribute('fill'),
+        eyes: el.querySelectorAll('[data-character] rect').length,
+        deep: getComputedStyle(document.documentElement).getPropertyValue('--card-deep-' + type.replace('_', '-')).trim(),
+      }), type);
+      assert.deepEqual(blob, { images: 0, character: type, fill: blob.deep, eyes: 2, deep: blob.deep }, `${type} blob`);
       const text = await touch.locator('.art-card').textContent();
       assert.ok(text.includes(index === 19 ? '3단계' : index === 10 ? '2단계' : '1단계')); assert.ok(text.includes(index === 19 ? '95%' : index === 10 ? '75%' : '45%'));
-      assert.equal(await touch.locator('[data-emotion-mark]').count(), type.startsWith('neu_') ? 1 : 0);
+      assert.equal(await touch.locator('[data-emotion-mark]').count(), 0);
       if (names[type]) assert.ok(text.includes(names[type]));
     }
     await touch.screenshot({ path: path.join(os.tmpdir(), 'moment-lemon-mobile.png') });
