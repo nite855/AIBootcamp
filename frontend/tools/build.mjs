@@ -59,7 +59,7 @@ for (const [key, value] of Object.entries({
   shell = shell.replace(marker, () => value);
 }
 const license =
-  "== Gothic A1 (subset) ==\n" + (await read("docs/licenses/gothic-a1-ofl.txt")) +
+  "== Moment Sans (Pretendard Variable subset) ==\n" + (await read("docs/licenses/pretendard-ofl.txt")) +
   "\n\n== Bricolage Grotesque (static subset instances) ==\n" + (await read("docs/licenses/bricolage-grotesque-ofl.txt"));
 shell = shell.replace(
   "</body>",

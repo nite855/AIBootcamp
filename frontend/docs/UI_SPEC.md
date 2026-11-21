@@ -251,7 +251,14 @@
 - 편집 창 미리보기: 아이콘 옵션은 고른 색을, 색 옵션은 고른 아이콘을 즉시 보여 줍니다. 취소하면 저장된 값이 유지됩니다.
 - 회귀 검사: `tests/profile.test.cjs`(기본·잘못된 값·예전 저장값·저장 왕복), `tests/profile.cjs`(옵션 6개·이름, 선택 → 상단 바·카드 `data-icon`, 미리보기, 취소, 새로고침 유지, 눈 색 = 배경색).
 
-## 카드 블롭 캐릭터·외곽선 정합 (2026-11-22)
+## 카드 블롭 캐릭터·외곽선 정합·글꼴 교체 (2026-11-22)
+
+- **글꼴**: 한글 UI·본문은 Gothic A1 대신 **Moment Sans**입니다. Pretendard Variable 1.3.9를 서브셋한 글꼴이며, OFL의 예약 글꼴 이름 때문에 서브셋 이름을 바꿨습니다(`docs/licenses/pretendard-ofl.txt`).
+  - 가변 글꼴 하나(`font-weight: 45 930`)로 모든 굵기를 실제 글꼴로 그리고, 한글 11,172자 전부와 호환 자모를 담아 입력한 드문 음절도 시스템 글꼴로 바뀌지 않습니다.
+  - 생성: `tools/subset-ui-fonts.py --pretendard <PretendardVariable.ttf>`.
+  - 토큰: `--font-ui: "Moment Sans", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`, `--font-display: "Bricolage Grotesque", "Moment Sans", …`.
+  - 얇게 보이던 큰 제목(`font-weight: 300`)은 600으로, 12~13px 보조 문구의 400은 500으로 올렸습니다.
+  - `index.html`은 약 4.1MB입니다. 와이어프레임 SVG(52개, 각자 글꼴 내장)는 이 변경으로 다시 만들지 않았습니다.
 
 - 카드 안 그림은 Figma "Moment Card"의 `character · 블롭`(파일 `NaEAXNfEgTB3e3bPZJ0FkX`, 섹션 2028-9110)입니다. 12굽이 물결 블롭, 감정색 광채(r78·blur 14.3·.45), 흰 안쪽 그림자와 그레인, 빛나는 흰 알약 눈 2개로 구성하며 `scripts/blob-art.js`(`MomentBlob.blobSVG`)가 Figma 수치 그대로 그립니다. 감정은 모양이 아니라 색으로만 구분합니다(`--card-deep-*`, 예: 불안 `#8cc55a`). 예전 3D 토끼 PNG 9종과 중립 감정 모서리 표식(`data-emotion-mark`)은 쓰지 않으며 빌드는 빈 카드용 하트 PNG만 내장합니다.
 - 큰 카드(1080×1512)는 Figma glass-window 비율을 따릅니다. 블롭 틀은 창 폭의 63%이고, 광채 여백을 포함한 SVG는 `x 180.2 · y 236.1 · 719.8` 크기입니다. 바닥 그림자는 감정색 .35, blur 13.2입니다. 미니카드·도감 슬롯은 SVG 폭 76%(= 틀 63%)입니다. `characterSVG()`를 거치므로 상세 카드·미니카드·도감·통계·축하 팝업·공유/카드 PNG가 같은 그림을 씁니다. 필터 id는 그림마다 다른 접두사를 붙입니다.

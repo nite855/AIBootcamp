@@ -43,7 +43,7 @@ const KEY='moment-card:diary-simple-v3:appearance';
    });
    for(const [pair,ratio] of ratios) assert.ok(ratio>=4.5,`${id}: ${pair} ${ratio.toFixed(2)}`);
    const body=await page.evaluate(()=>getComputedStyle(document.body).fontFamily);
-   assert.match(body,/^"?Gothic A1"?/);
+   assert.match(body,/^"?Moment Sans"?/);
    for(const size of [{width:1366,height:768},{width:390,height:844},{width:320,height:568}]) {
     await page.setViewportSize(size);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${id} ${size.width}: no horizontal overflow`);
@@ -80,11 +80,21 @@ const KEY='moment-card:diary-simple-v3:appearance';
    await reveal(page,'catalog');assert.equal(await page.locator('.slot[data-stage]').count(),27);
    await reveal(page,'archive-records');await page.locator('[data-open=sample-1]').click();
   }
-  // Embedded fonts: Gothic A1 for Korean text, Bricolage Grotesque for the brand word.
-  assert.equal(await page.evaluate(async()=>{await document.fonts.load('400 16px "Gothic A1"','오늘');return document.fonts.check('400 16px "Gothic A1"','오늘');}),true);
+  // Embedded fonts (2026-11-22): Moment Sans (Pretendard Variable subset) for Korean text, Bricolage Grotesque for the brand word.
+  // One variable face covers every weight, and all 11,172 syllables are inside, so typed rare syllables never fall back.
+  assert.deepEqual(await page.evaluate(async()=>{
+    const out=[];
+    for(const w of [400,500,600,700,800]){await document.fonts.load(`${w} 16px "Moment Sans"`,'오늘똠쀍햏뷁');out.push(document.fonts.check(`${w} 16px "Moment Sans"`,'오늘똠쀍햏뷁'));}
+    const faces=[...document.fonts].filter(f=>f.family.replace(/"/g,'')==='Moment Sans');
+    return {out,faces:faces.length,weight:faces[0]?.weight,loaded:faces.every(f=>f.status==='loaded')};
+  }),{out:[true,true,true,true,true],faces:1,weight:'45 930',loaded:true});
+  assert.equal(await page.evaluate(()=>[...document.fonts].some(f=>/Gothic A1|Pretendard/.test(f.family))),false,'no Gothic A1 face, no reserved name');
+  // Titles are no longer drawn in a light weight.
+  assert.equal(await page.evaluate(()=>{const h=document.querySelector('.write-heading h1');return h?Number(getComputedStyle(h).fontWeight)>=600:true;}),true);
   assert.match(await page.locator('.brand-word').evaluate(el=>getComputedStyle(el).fontFamily),/^"?Bricolage Grotesque"?/);
   const license=await page.locator('#embedded-font-license').textContent();
-  assert.ok(license.includes('HanYang I&C') && license.includes('Bricolage Grotesque Project Authors'));
+  assert.ok(license.includes('Kil Hyung-jin') && license.includes('Reserved Font Name Pretendard') && license.includes('Moment Sans') && license.includes('Bricolage Grotesque Project Authors'));
+  assert.ok(!license.includes('HanYang I&C'),'Gothic A1 is no longer shipped');
   // Saved IDs from the previous theme set migrate; unknown values fall back to clean.
   for(const [stored,expected] of [['doodle','grid'],['starlight','night'],['editorial','clean'],['lemon','candy'],['doodlex','clean'],['','clean']]){
    await page.evaluate(([k,v])=>localStorage.setItem(k,v),[KEY,stored]);

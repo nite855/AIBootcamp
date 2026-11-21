@@ -7,7 +7,7 @@
 .catalog-page > * { min-width: 0; }
 .catalog-page .catalog-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px 24px; margin: 0 0 22px; }
 .catalog-page .catalog-heading { display: grid; gap: 20px; padding: 6px 0 0 28px; }
-.catalog-page .catalog-title { margin: 0; font-size: 44px; font-weight: 300; line-height: 1.18; letter-spacing: -.88px; color: var(--ink-bg, var(--ink)); }
+.catalog-page .catalog-title { margin: 0; font-size: 44px; font-weight: 600; line-height: 1.18; letter-spacing: -.88px; color: var(--ink-bg, var(--ink)); }
 
 /* Text tabs: 22px, the count as a 12px superscript; unselected tabs in ink3. */
 .catalog-page .catalog-tabs { display: flex; gap: 28px; width: auto; max-width: 100%; padding: 0 0 0 4px; overflow-x: auto; border-radius: 0; background: transparent; box-shadow: none; }
@@ -69,10 +69,10 @@ dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; he
 .card-detail .detail-close { position: absolute; top: 24px; right: 24px; width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); font-size: 14px; }
 .card-detail .detail-close::after { content: ""; position: absolute; inset: -2px; }
 .card-detail .detail-no { margin: 0; color: var(--muted); font-family: var(--font-display); font-size: 13px; font-weight: 500; }
-.card-detail #card-detail-title { margin: 6px 0 0; font-size: 34px; font-weight: 300; letter-spacing: -.02em; line-height: 1.2; }
+.card-detail #card-detail-title { margin: 6px 0 0; font-size: 34px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
 .card-detail .detail-meta { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
 .card-detail .detail-info h3 { margin: 26px 0 12px; font-size: 15px; font-weight: 500; color: var(--ink); }
-.card-detail .detail-info h3 small { color: var(--muted); font-size: 13px; font-weight: 400; }
+.card-detail .detail-info h3 small { color: var(--muted); font-size: 13px; font-weight: 500; }
 .card-detail .growth-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 .card-detail .growth-row li { display: grid; gap: 2px; padding: 12px 14px; border-radius: 18px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); font-size: 14px; }
 .card-detail .growth-row li b { font-weight: 500; }
@@ -94,7 +94,7 @@ dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; he
 @media (max-width: 959px) {
   .catalog-page .catalog-head { margin-bottom: 18px; }
   .catalog-page .catalog-heading { gap: 12px; padding-left: 0; }
-  .catalog-page .catalog-title { font-size: 28px; font-weight: 300; letter-spacing: -.5px; }
+  .catalog-page .catalog-title { font-size: 28px; font-weight: 600; letter-spacing: -.5px; }
   .catalog-page .catalog-tabs { gap: 18px; padding: 0; }
   .catalog-page .catalog-tab { font-size: 18px; }
   /* Progress as one line: count on the left, the bar on the right. */

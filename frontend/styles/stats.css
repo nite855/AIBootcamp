@@ -11,7 +11,7 @@
 
 /* ── Head: title, month line and the ‹ prev | month | next › switch ── */
 .stats-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px 24px; padding: 6px 0 0 28px; }
-.stats-title { margin: 0; font-size: 44px; font-weight: 300; line-height: 1.18; letter-spacing: -.88px; color: var(--ink-bg, var(--ink)); }
+.stats-title { margin: 0; font-size: 44px; font-weight: 600; line-height: 1.18; letter-spacing: -.88px; color: var(--ink-bg, var(--ink)); }
 .stats-head p.muted { margin: 10px 0 0; color: var(--muted-bg, var(--muted)); font-size: 14px; }
 .stats-head .month-title { font-size: inherit; font-weight: 400; letter-spacing: 0; color: inherit; }
 .month-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -35,7 +35,7 @@
 .ratio-values em { color: var(--muted); font-family: var(--font-display); font-size: 14px; font-style: normal; font-weight: 500; }
 .ratio-values small { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .ratio-values small i { width: 8px; height: 8px; border-radius: 50%; }
-.ratio-values.is-empty b { margin-top: 6px; font-size: 40px; font-weight: 300; color: var(--subtle, var(--muted)); }
+.ratio-values.is-empty b { margin-top: 6px; font-size: 40px; font-weight: 600; color: var(--subtle, var(--muted)); }
 .ratio-bar { position: absolute; left: 32px; right: 32px; bottom: 38px; display: flex; gap: 4px; height: 10px; overflow: visible; background: transparent; }
 .ratio-bar b { display: block; height: 100%; min-width: 4px; flex-basis: 0; border-radius: 5px; }
 .seg-pos { background: #f4a3bb; }
@@ -144,7 +144,7 @@ button.emo-day:hover { transform: translateY(-2px); }
   .stats-page .wide-only { display: none; }
   .stats-page .narrow-only { display: inline; }
   .stats-head { padding-left: 0; }
-  .stats-title { font-size: 28px; font-weight: 300; letter-spacing: -.5px; }
+  .stats-title { font-size: 28px; font-weight: 600; letter-spacing: -.5px; }
   .month-pill { margin-top: 0; gap: 2px; }
   .month-pill button, .month-pill strong { padding: 6px 12px; }
   /* Two tiles: records | ratio as a list; the top card tile is left out (Figma mobile). */

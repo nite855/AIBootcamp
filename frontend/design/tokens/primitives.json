@@ -265,7 +265,7 @@
   },
   "font-ui": {
     "type": "fontFamily",
-    "value": "\"Gothic A1\", sans-serif"
+    "value": "\"Moment Sans\", \"Pretendard\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", sans-serif"
   },
   "line-body": {
     "type": "number",
@@ -873,7 +873,7 @@
   },
   "font-display": {
     "type": "fontFamily",
-    "value": "\"Bricolage Grotesque\", \"Gothic A1\", sans-serif"
+    "value": "\"Bricolage Grotesque\", \"Moment Sans\", \"Pretendard\", sans-serif"
   },
   "radius-panel": {
     "type": "dimension",

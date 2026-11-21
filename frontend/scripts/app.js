@@ -144,7 +144,7 @@
   // a glass window holding the character, and an info band (Emotion · name · first line ·
   // No.0NN · date). Colors come from the fixed card tokens, so every theme shows the same card.
   const CARD_W = 1080, CARD_H = 1512;
-  const CARD_FONT = 'font-family="Bricolage Grotesque, Gothic A1, sans-serif"';
+  const CARD_FONT = 'font-family="Bricolage Grotesque, Moment Sans, sans-serif"';
   let cardSeq = 0;
   const cssToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   function cardPalette(type) {
@@ -197,7 +197,7 @@
       + '<linearGradient id="' + uid + '-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity=".12"/></linearGradient>'
       + '<filter id="' + uid + '-floor" x="280" y="860" width="520" height="135" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="13.2"/></filter>'
       + '<clipPath id="' + uid + '-clip"><rect width="' + CARD_W + '" height="' + CARD_H + '" rx="96"/></clipPath></defs>'
-      + '<g clip-path="url(#' + uid + '-clip)" font-family="Gothic A1, sans-serif">'
+      + '<g clip-path="url(#' + uid + '-clip)" font-family="Moment Sans, sans-serif">'
       + '<rect width="' + CARD_W + '" height="' + CARD_H + '" fill="url(#' + uid + '-bg)"/>'
       + '<rect y="1100" width="' + CARD_W + '" height="412" fill="' + c.mix + '"/>'
       + '<text x="96" y="142" ' + CARD_FONT + ' font-weight="800" font-size="40" letter-spacing="7" fill="#111114" fill-opacity=".6">MOMENT CARD' + (state.mode === "example" ? " · 예시" : "") + '</text>'

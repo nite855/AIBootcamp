@@ -3,7 +3,7 @@
   --ink: #262323;
   --blue: #4039db;
   --muted: #756d70;
-  font-family: var(--font-ui, "Gothic A1", sans-serif);
+  font-family: var(--font-ui, "Moment Sans", sans-serif);
   color: var(--ink);
   background: var(--paper);
 }

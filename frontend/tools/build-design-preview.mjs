@@ -5,9 +5,9 @@ const root = new URL('../',import.meta.url);
 const read = p => readFile(new URL(p,root),'utf8');
 const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 await buildTokens({check:process.argv.includes('--check')});
-const [base,diary,material,tokens,themeData,theme,fixtures,primitives,gothicLicense,bricolageLicense,soft] = await Promise.all([
+const [base,diary,material,tokens,themeData,theme,fixtures,primitives,pretendardLicense,bricolageLicense,soft] = await Promise.all([
   'styles/base.css','styles/diary.css','styles/themes.css','styles/generated/tokens.css',
-  'scripts/generated/theme-tokens.js','scripts/theme.js','design/fixtures/ui-states.json','design/tokens/primitives.json','docs/licenses/gothic-a1-ofl.txt','docs/licenses/bricolage-grotesque-ofl.txt','styles/soft.css',
+  'scripts/generated/theme-tokens.js','scripts/theme.js','design/fixtures/ui-states.json','design/tokens/primitives.json','docs/licenses/pretendard-ofl.txt','docs/licenses/bricolage-grotesque-ofl.txt','styles/soft.css',
 ].map(read));
 const states = JSON.parse(fixtures);
 const flip = await read("styles/flip.css");
@@ -30,7 +30,7 @@ const control=document.getElementById('review-theme');
 for(const t of CardexTheme.themes){const o=document.createElement('option');o.value=t.id;o.textContent=t.name;control.append(o);}
 control.value=CardexTheme.getTheme();control.addEventListener('change',()=>CardexTheme.setTheme(control.value));
 window.addEventListener('cardex-theme-change',()=>control.value=CardexTheme.getTheme());
-</script><script type="text/plain" id="embedded-font-license">${("== Gothic A1 (subset) ==\n"+gothicLicense+"\n\n== Bricolage Grotesque (static subset instances) ==\n"+bricolageLicense).replace(/<\/script/gi,'<\\/script')}</script></body></html>\n`;
+</script><script type="text/plain" id="embedded-font-license">${("== Moment Sans (Pretendard Variable subset) ==\n"+pretendardLicense+"\n\n== Bricolage Grotesque (static subset instances) ==\n"+bricolageLicense).replace(/<\/script/gi,'<\\/script')}</script></body></html>\n`;
 const output = new URL('docs/design/preview/index.html',root);
 if (process.argv.includes('--check')) {
   if (await readFile(output,'utf8') !== html) throw Error('Stale design preview');

@@ -26,7 +26,8 @@ test('soft UI v1.1 themes resolve with one scheme each and generated tokens are 
   assert.match(css,/data-appearance="tearoom"\][^}]*--color-text:#3a2f31;/);
   // Emotion card colors are fixed across themes (Figma Emotion Card v0.9).
   assert.match(css,/:root\{[^}]*--card-base-pos-1:#ffb3c7;[^}]*--card-deep-neu-3:#d97cc6;/);
-  assert.match(css,/--font-ui:"Gothic A1", sans-serif;/);
+  assert.match(css,/--font-ui:"Moment Sans", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;/);
+  assert.match(css,/--font-display:"Bricolage Grotesque", "Moment Sans", "Pretendard", sans-serif;/);
   await buildTokens({check:true});
 });
 

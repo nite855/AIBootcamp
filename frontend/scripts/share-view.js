@@ -215,7 +215,7 @@ function shareCard(record, x, y, w, rotate = 0) {
   return `<g transform="rotate(${rotate} ${x + w / 2} ${y + w * .7})"><rect x="${x + 10}" y="${y + 22}" width="${w}" height="${w * 1.4}" rx="${w * .09}" fill="#111114" opacity=".14"/><svg x="${x}" y="${y}" width="${w}" height="${w * 1.4}" viewBox="0 0 1080 1512">${shareCardInner(record)}</svg></g>`;
 }
 function shareBrand(x, y, ink) {
-  return `<circle cx="${x + 14}" cy="${y - 11}" r="14" fill="#ffb3c7"/><text x="${x + 40}" y="${y}" font-family="Bricolage Grotesque, Gothic A1, sans-serif" font-size="34" font-weight="700" fill="${ink}">moment</text>`;
+  return `<circle cx="${x + 14}" cy="${y - 11}" r="14" fill="#ffb3c7"/><text x="${x + 40}" y="${y}" font-family="Bricolage Grotesque, Moment Sans, sans-serif" font-size="34" font-weight="700" fill="${ink}">moment</text>`;
 }
 function shareSVG() {
   const record = shareRecord(), q = shareQuote(record), L = shareLabels(record);
@@ -233,7 +233,7 @@ function shareSVG() {
     const glow = `<defs><radialGradient id="share-glow"><stop offset="0" stop-color="${cardGlow(record)}" stop-opacity=".55"/><stop offset="1" stop-color="${cardGlow(record)}" stop-opacity="0"/></radialGradient></defs><circle cx="540" cy="590" r="470" fill="url(#share-glow)"/>`;
     body = `${glow}${shareCard(record, 250, 180, 580, 0)}${q ? `<text x="540" y="1112" text-anchor="middle" font-size="40" fill="${ink}">${shareWrap("“" + q + "”", 40, 20, 540, 2)}</text>` : ""}${L.prob ? `<text x="540" y="${q ? 1250 : 1120}" text-anchor="middle" font-size="28" fill="${muted}">${E(L.prob)} · 임시 분류</text>` : ""}`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-label="${E(L.name)} 공유 이미지 미리보기" class="share-art"><rect width="1080" height="1350" fill="${paper}"/><g font-family="Gothic A1, sans-serif">${shareBrand(76, 100, ink)}${L.date ? `<text x="1004" y="100" text-anchor="end" font-family="Bricolage Grotesque, Gothic A1, sans-serif" font-size="34" font-weight="500" fill="${muted}">${E(L.date)}</text>` : ""}${body}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-label="${E(L.name)} 공유 이미지 미리보기" class="share-art"><rect width="1080" height="1350" fill="${paper}"/><g font-family="Moment Sans, sans-serif">${shareBrand(76, 100, ink)}${L.date ? `<text x="1004" y="100" text-anchor="end" font-family="Bricolage Grotesque, Moment Sans, sans-serif" font-size="34" font-weight="500" fill="${muted}">${E(L.date)}</text>` : ""}${body}</g></svg>`;
 }
 // Glow color behind the shared card: the emotion's mix color, or a neutral tint for blank cards.
 function cardGlow(record) {
@@ -244,7 +244,7 @@ function cardGlow(record) {
 function storySVG() {
   const record = shareRecord(), q = shareQuote(record), L = shareLabels(record), card = DiaryCards.resolve(record);
   const c = card.status === "ready" ? cardPalette(card.type) : { base: "#e6e6eb", mix: "#f3f3f6" };
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" class="story-art"><defs><linearGradient id="story-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.mix}"/><stop offset="1" stop-color="${c.base}"/></linearGradient></defs><rect width="1080" height="1920" fill="url(#story-bg)"/><g font-family="Gothic A1, sans-serif">${shareBrand(90, 180, "#111114")}${L.date ? `<text x="990" y="180" text-anchor="end" font-family="Bricolage Grotesque, Gothic A1, sans-serif" font-size="34" fill="#111114" fill-opacity=".6">${E(L.date)}</text>` : ""}${shareCard(record, 190, 330, 700, -2)}<text x="540" y="1420" text-anchor="middle" font-size="58" font-weight="800" fill="#111114">${E(L.name)}</text>${L.prob ? `<text x="540" y="1484" text-anchor="middle" font-size="34" fill="#111114" fill-opacity=".6">${E(L.prob)} · 임시 분류</text>` : ""}${q ? `<text x="540" y="1600" text-anchor="middle" font-size="44" fill="#111114">${shareWrap("“" + q + "”", 44, 20, 540, 2)}</text>` : ""}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" class="story-art"><defs><linearGradient id="story-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.mix}"/><stop offset="1" stop-color="${c.base}"/></linearGradient></defs><rect width="1080" height="1920" fill="url(#story-bg)"/><g font-family="Moment Sans, sans-serif">${shareBrand(90, 180, "#111114")}${L.date ? `<text x="990" y="180" text-anchor="end" font-family="Bricolage Grotesque, Moment Sans, sans-serif" font-size="34" fill="#111114" fill-opacity=".6">${E(L.date)}</text>` : ""}${shareCard(record, 190, 330, 700, -2)}<text x="540" y="1420" text-anchor="middle" font-size="58" font-weight="800" fill="#111114">${E(L.name)}</text>${L.prob ? `<text x="540" y="1484" text-anchor="middle" font-size="34" fill="#111114" fill-opacity=".6">${E(L.prob)} · 임시 분류</text>` : ""}${q ? `<text x="540" y="1600" text-anchor="middle" font-size="44" fill="#111114">${shareWrap("“" + q + "”", 44, 20, 540, 2)}</text>` : ""}</g></svg>`;
 }
 function canDeviceShare() {
   try { return typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [new File([""], "moment.png", { type: "image/png" })] }); } catch { return false; }
