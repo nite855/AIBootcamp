@@ -8,12 +8,12 @@
 
 [data-grade] { --grade: #b9c2d6; --grade-2: #eef2fa; --grade-strength: .45; }
 [data-grade="error"], [data-grade="blank"] { --grade: #c4c4c4; --grade-2: #f1f1f1; --grade-strength: .4; }
-[data-grade="stage-1"] { --grade: #4fd1b0; --grade-2: #c9f4e8; --grade-strength: .6; }
-[data-grade="stage-2"] { --grade: #9b74ff; --grade-2: #e2d6ff; --grade-strength: .75; }
+[data-grade="stage-1"] { --grade: #4fd1b0; --grade-2: #c9f4e8; --grade-strength: .5; }
+[data-grade="stage-2"] { --grade: #9b74ff; --grade-2: #e2d6ff; --grade-strength: .85; }
 [data-grade="stage-3"] { --grade: #f6b73c; --grade-2: #fff0b8; --grade-strength: .9; }
 /* 2026-11-20: analyzed cards glow in their emotion's card color (data-emotion = 9 sub-emotions, the same
    --card-base/--card-deep tokens as the card art). The grade keeps only the strength and the effect shape:
-   stage-1 still glow, stage-2 breathing glow + orbit ring, stage-3 holographic rim. The colors above stay
+   stage-1 still glow, stage-2 breathing glow + solid double orbit ring with a running light, stage-3 holographic rim. The colors above stay
    as the fallback for surfaces without an emotion (pending, blank, error). */
 [data-emotion="pos_1"] { --emo: var(--card-base-pos-1); --emo-deep: var(--card-deep-pos-1); }
 [data-emotion="pos_2"] { --emo: var(--card-base-pos-2); --emo-deep: var(--card-deep-pos-2); }
@@ -129,7 +129,13 @@ html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; 
 /* ── Catalog: slots and the detail dialog ── */
 .slot[data-grade] .slot-thumb { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--grade) 55%, transparent), 0 0 12px 0 color-mix(in srgb, var(--grade) 35%, transparent); transition: box-shadow .2s ease; }
 .slot[data-grade]:is(:hover, :focus-visible, [aria-pressed="true"]) .slot-thumb { box-shadow: 0 0 0 2px var(--grade), 0 0 22px 4px var(--grade-glow); }
+/* Stage 2: a double outline (ring, gap, ring) so it never reads as stage 1's single line. */
+.slot[data-grade="stage-2"] .slot-thumb { box-shadow: 0 0 0 2px color-mix(in srgb, var(--grade) 85%, transparent), 0 0 0 4px var(--surface), 0 0 0 5.5px color-mix(in srgb, var(--grade) 60%, transparent), 0 0 16px 2px color-mix(in srgb, var(--grade) 45%, transparent); }
+.slot[data-grade="stage-2"]:is(:hover, :focus-visible, [aria-pressed="true"]) .slot-thumb { box-shadow: 0 0 0 2.5px var(--grade), 0 0 0 4.5px var(--surface), 0 0 0 6.5px var(--grade), 0 0 26px 5px var(--grade-glow); }
 .slot[data-grade="stage-3"] .slot-thumb { position: relative; overflow: hidden; }
+/* Stage 3: a holographic rim around the slot (ring only, masked), so it stays above stage 2 at rest. */
+.slot[data-grade="stage-3"] { position: relative; }
+.slot[data-grade="stage-3"]::before { content: ""; position: absolute; inset: -5px; padding: 3px; border-radius: 24px; background: var(--grade-holo); filter: blur(1.5px); pointer-events: none; animation: grade-holo-spin 6s linear infinite; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 .slot[data-grade="stage-3"] .slot-thumb::after { content: ""; position: absolute; inset: -40% -80%; background: linear-gradient(105deg, transparent 42%, #ffffffb3 50%, transparent 58%); transform: translateX(-60%); animation: mystery-shimmer 3.4s ease-in-out infinite; pointer-events: none; }
 .detail-card[data-grade] { position: relative; box-shadow: 0 0 0 6px color-mix(in srgb, var(--tone) 35%, var(--surface)), 0 0 34px 6px var(--grade-glow), 6px 8px 0 6px var(--sb-drop, var(--line)); }
 .detail-card[data-grade="stage-3"] { isolation: isolate; box-shadow: 0 0 0 6px var(--grade), 0 0 40px 10px var(--grade-glow), 6px 8px 0 6px var(--sb-drop, var(--line)); }
@@ -143,6 +149,7 @@ html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; 
 .moment-celebrate[data-grade] .celebrate-sparkles i { background: var(--grade); box-shadow: 0 0 8px var(--grade); }
 .moment-celebrate[data-grade] .celebrate-sparkles i:nth-child(3n) { background: var(--grade-2); }
 .moment-celebrate[data-grade] .celebrate-card { box-shadow: 0 0 0 2px color-mix(in srgb, var(--grade) 70%, transparent), 0 0 34px 6px var(--grade-glow); }
+.moment-celebrate[data-grade="stage-2"] .celebrate-card { box-shadow: 0 0 0 2.5px var(--grade), 0 0 0 5px var(--surface), 0 0 0 7px color-mix(in srgb, var(--grade) 65%, transparent), 0 0 40px 8px var(--grade-glow); }
 .moment-celebrate[data-grade="stage-3"] .celebrate-panel { box-shadow: inset 0 1px 0 #ffffff80, 0 0 0 2px var(--grade), 0 0 40px 8px var(--grade-glow), 0 30px 70px -24px color-mix(in srgb, var(--tone) 60%, #000); }
 .share-art-frame[data-grade] { filter: drop-shadow(0 0 14px var(--grade-glow)); }
 .share-art-frame[data-grade="stage-3"] { animation: grade-share-glow 2.8s ease-in-out infinite; }
@@ -153,7 +160,7 @@ html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; 
 .mini-art[data-grade="stage-2"]::after { width: 15px; border-radius: 999px; background: radial-gradient(circle at 4px 50%, var(--grade) 0 2.6px, transparent 3px), radial-gradient(circle at 10px 50%, var(--grade) 0 2.6px, transparent 3px), var(--surface); }
 
 @keyframes grade-holo-spin { to { --holo-angle: 360deg; } }
-@keyframes grade-breathe { 50% { opacity: 1; box-shadow: 0 0 34px 6px var(--grade-glow), 0 0 0 2px color-mix(in srgb, var(--grade) 55%, transparent); } }
+@keyframes grade-breathe { 50% { opacity: 1; box-shadow: 0 0 44px 9px var(--grade-glow), 0 0 0 2px color-mix(in srgb, var(--grade) 55%, transparent); } }
 /* `scale` (not transform) so the halo keeps its translateZ while pulsing. */
 @keyframes grade-pulse { 0% { opacity: 1; scale: 1; } 40% { opacity: 1; scale: 1.05; box-shadow: 0 0 48px 12px var(--grade-glow); } 100% { scale: 1; } }
 @keyframes grade-ring-out { 0% { opacity: .9; scale: 1; } 100% { opacity: 0; scale: 1.12; } }
@@ -266,9 +273,14 @@ html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2
   88%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); }
 }
 
-/* Card page halo: stage 2 gets an outer orbit ring (stage 1 stays still, stage 3 keeps the holo rim). */
-.card-box[data-grade="stage-2"] .grade-aura::before { content: ""; position: absolute; inset: -9px; border: 1.5px dashed color-mix(in srgb, var(--grade) 65%, transparent); border-radius: calc(var(--card-r, 28px) + 9px); }
+/* Card page halo (2026-11-22, stage 1 vs 2 made distinct): stage 1 stays a still glow; stage 2 gets a solid
+   double orbit ring (::before border + outline, both concentric with the card corner) and a light that runs
+   around the outer ring (::after, masked to the ring so it never paints over a face); stage 3 keeps the holo rim. */
+@property --orbit-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.card-box[data-grade="stage-2"] .grade-aura::before { content: ""; position: absolute; inset: -8px; border: 2px solid color-mix(in srgb, var(--grade) 80%, transparent); border-radius: calc(var(--card-r, 28px) + 8px); outline: 1.5px solid color-mix(in srgb, var(--grade) 55%, transparent); outline-offset: 5px; box-shadow: 0 0 14px 1px var(--grade-glow); }
+.card-box[data-grade="stage-2"]:not(.grade-pulse) .grade-aura::after { content: ""; position: absolute; inset: -16px; padding: 3.5px; border-radius: calc(var(--card-r, 28px) + 16px); background: conic-gradient(from var(--orbit-angle), transparent 0 72%, color-mix(in srgb, var(--grade-2) 70%, transparent) 84%, #fff 92%, transparent 96%); filter: drop-shadow(0 0 4px var(--grade)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: grade-orbit 4s linear infinite; }
 .card-box.is-sealed .grade-aura::before { display: none; }
+@keyframes grade-orbit { to { --orbit-angle: 360deg; } }
 
 /* ── Card screen, second pass (Figma 06 "카드 공개", "카드 등장 · 분석 대기", 07 "카드 뽑기 연출") ──
    One centered column: a small back link, the white stage (chip, glow, card, hint), then the copy and
@@ -392,4 +404,9 @@ html .record-layout.is-editing .record-copy > .row { justify-content: flex-end; 
 
 /* Catalog detail (Figma second pass): the card stands straight; it only fades and scales in. */
 .card-detail[open] .detail-card[data-grade] { animation-name: grade-detail-in-flat; }
+/* Detail dialog rings (2026-11-22): collection.css sets one glow for every grade at higher specificity and
+   the card clips its children, so the grade ladder lives in box-shadow here: stage 2 a double ring,
+   stage 3 a thick grade ring with a wide glow (its holo sheen stays as before). */
+.card-detail .detail-card[data-grade="stage-2"] { box-shadow: 0 0 0 2.5px var(--grade), 0 0 0 6px var(--surface), 0 0 0 8px color-mix(in srgb, var(--grade) 65%, transparent), 0 0 40px 8px var(--grade-glow); }
+.card-detail .detail-card[data-grade="stage-3"] { box-shadow: 0 0 0 5px var(--grade), 0 0 0 7px var(--grade-2), 0 0 48px 12px var(--grade-glow); }
 @keyframes grade-detail-in-flat { 0% { opacity: 0; transform: scale(.88); } 100% { opacity: 1; transform: none; } }

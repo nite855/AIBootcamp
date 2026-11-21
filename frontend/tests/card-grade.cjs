@@ -170,6 +170,36 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     }));
     assert.equal(new Set(glows).size, 9, 'nine distinct emotion glows: ' + glows.join(','));
     assert.ok(!glows.includes('#9b74ff'));
+    // 2026-11-22: stage 1 and stage 2 must look different at rest — stage 1 a still glow, stage 2 a solid
+    // double ring with a running light; blank/pending and sealed cards get no ring.
+    const ladder = await page.evaluate(() => {
+      const probe = (grade, extra = '') => {
+        const box = document.createElement('div'); box.className = 'card-box ' + extra; box.dataset.grade = grade; box.dataset.emotion = 'pos_1';
+        const aura = document.createElement('span'); aura.className = 'grade-aura'; box.append(aura); document.body.append(box);
+        const b = getComputedStyle(aura, '::before'), a = getComputedStyle(aura, '::after');
+        const out = {before: b.content !== 'none' && b.display !== 'none' ? b.borderTopStyle + '/' + b.outlineStyle : 'none', after: a.content !== 'none' ? a.animationName : 'none', anim: getComputedStyle(aura).animationName};
+        box.remove(); return out;
+      };
+      const slot = grade => {
+        const s = document.createElement('div'); s.className = 'slot'; s.dataset.grade = grade; s.dataset.emotion = 'pos_1';
+        const t = document.createElement('span'); t.className = 'slot-thumb'; s.append(t); document.body.append(s);
+        const shadow = getComputedStyle(t).boxShadow; s.remove(); return shadow.split(/,(?![^(]*\))/).length;
+      };
+      const rim = grade => { const s = document.createElement('div'); s.className = 'slot'; s.dataset.grade = grade; document.body.append(s); const c = getComputedStyle(s, '::before'); const r = c.content !== 'none' ? c.animationName : 'none'; s.remove(); return r; };
+      return {s1: probe('stage-1'), s2: probe('stage-2'), blank: probe('blank'), pending: probe('pending'), sealed: probe('stage-2', 'is-sealed'), slot1: slot('stage-1'), slot2: slot('stage-2'), rim2: rim('stage-2'), rim3: rim('stage-3')};
+    });
+    assert.equal(ladder.s1.before, 'none', 'stage 1: no ring');
+    assert.equal(ladder.s1.after, 'none', 'stage 1: no running light');
+    assert.equal(ladder.s1.anim, 'none', 'stage 1: still glow');
+    assert.equal(ladder.s2.before, 'solid/solid', 'stage 2: solid double ring');
+    assert.equal(ladder.s2.after, 'grade-orbit', 'stage 2: light runs around the ring');
+    assert.equal(ladder.s2.anim, 'grade-breathe', 'stage 2: breathing glow');
+    for (const k of ['blank', 'pending', 'sealed']) assert.equal(ladder[k].before, 'none', `${k}: no stage 2 ring`);
+    assert.equal(ladder.blank.after, 'none');
+    assert.equal(ladder.pending.after, 'none');
+    assert.equal(ladder.rim3, 'grade-holo-spin', 'catalog slot: stage 3 holographic rim');
+    assert.equal(ladder.rim2, 'none', 'catalog slot: no holo rim below stage 3');
+    assert.ok(ladder.slot2 >= 3 && ladder.slot2 > ladder.slot1, `catalog slot: stage 2 double outline (${ladder.slot1} vs ${ladder.slot2} layers)`);
 
     // Phone width: sealed card fits without horizontal overflow.
     await page.setViewportSize({width: 390, height: 844});
