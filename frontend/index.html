@@ -2460,6 +2460,14 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-editor[data-storage-error="true"] .write-bar { border: 2px solid CanvasText; }
 }
 
+/* Fixed hit surface, moving artwork and a clipped pointer-following foil. */
+.cm-art { perspective: 1200px; }
+.cm-art:has(.cm-tilt) { touch-action: none; }
+.cm-tilt { position: relative; border-radius: 8.888889% / 6.349206%; transform: rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)); transition: transform .18s ease-out; }
+.cm-tilt .art-card { border-radius: inherit; }
+.cm-light { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--shine,0); transition: opacity .2s ease; mix-blend-mode: screen;
+  background: radial-gradient(circle at var(--light-x,50%) var(--light-y,50%), #ffffffb3, #ffffff26 23%, transparent 58%), conic-gradient(from 115deg at var(--light-x,50%) var(--light-y,50%), transparent, #c4eaff66, #ffc4ea66, #fff5b866, transparent); }
+
 /* Soft UI v1.1 card collection, second pass (Figma 06 "도감 · 전체", "도감 · 첫 실행", "도감 · 카드 상세",
    "M · 도감 · 전체", 2026-11-21 F4). No board panel: 44px Light title, 22px text tabs with superscript
    counts, a 320×112 progress card, six 192×268.8 cards (gap 36/32) without captions, a bottom scroll fade.
@@ -4312,7 +4320,59 @@ return {LIMIT,WARN,MAX_RECORDS,FILE_LIMIT,normalize,lengthState,recordLimitState
   return { DB_NAME, validateSnapshot, create };
 });
 
-window.DiaryFlip = Object.freeze({ bind(app) {
+// Shared pointer light; the hit surface stays fixed while its artwork tilts.
+function cardPointerLight(scene, tilt) {
+  let frame = 0, point = null;
+  function reset() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0; point = null;
+    tilt.style.setProperty("--tilt-x", "0deg");
+    tilt.style.setProperty("--tilt-y", "0deg");
+    tilt.style.setProperty("--shine", "0");
+  }
+  function renderLight(e) {
+    point = { x: e.clientX, y: e.clientY };
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!point || !scene.isConnected) return;
+      const r = scene.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const x = Math.max(0, Math.min(1, (point.x - r.left) / r.width));
+      const y = Math.max(0, Math.min(1, (point.y - r.top) / r.height));
+      tilt.style.setProperty("--tilt-x", ((.5 - y) * 18).toFixed(2) + "deg");
+      tilt.style.setProperty("--tilt-y", ((x - .5) * 18).toFixed(2) + "deg");
+      tilt.style.setProperty("--light-x", (x * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--rear-light-x", ((1 - x) * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--light-y", (y * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--shine", "1");
+    });
+  }
+  return { reset, renderLight };
+}
+function bindCardFoil(scene) {
+  const controller = new AbortController(), signal = controller.signal;
+  const { reset, renderLight } = cardPointerLight(scene, scene.querySelector('.cm-tilt'));
+  const hover = matchMedia('(hover: hover) and (pointer: fine)');
+  let active = null;
+  const listen = (type, fn) => scene.addEventListener(type, fn, { signal });
+  listen('pointerdown', e => {
+    if (e.pointerType !== 'touch' || !e.isPrimary) return;
+    active = e.pointerId; scene.setPointerCapture(e.pointerId); renderLight(e);
+  });
+  listen('pointermove', e => {
+    if ((e.pointerType === 'mouse' && hover.matches) || e.pointerId === active) renderLight(e);
+  });
+  function stop() { active = null; reset(); }
+  listen('pointerup', stop);
+  listen('pointercancel', stop);
+  listen('lostpointercapture', stop);
+  listen('pointerleave', e => { if (e.pointerType === 'mouse') reset(); });
+  window.addEventListener('cardex-theme-change', stop, { signal });
+  window.addEventListener('blur', stop, { signal });
+  return () => { controller.abort(); stop(); };
+}
+window.DiaryFlip = Object.freeze({ bindFoil: bindCardFoil, bind(app) {
 window.DiaryFlipObserver?.disconnect();
 const observer = new ResizeObserver(entries => entries.forEach(({target}) => {
   const scene = target.querySelector('.flip-scene');
@@ -4332,8 +4392,8 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       const frontButton=front.querySelector("button"), text=rear.querySelector(".flip-text");
       const hover=matchMedia("(hover: hover) and (pointer: fine)");
       const effectsOff=()=>false; // card effects always run the same way (2026-11-20)
-      let frame=0, point=null, active=null, timer=0, suppressTap=false;
-      function reset(){if(frame)cancelAnimationFrame(frame);frame=0;point=null;tilt.style.setProperty("--tilt-x","0deg");tilt.style.setProperty("--tilt-y","0deg");tilt.style.setProperty("--shine","0");}
+      let active=null, timer=0, suppressTap=false;
+      const { reset, renderLight } = cardPointerLight(scene, tilt);
       resets.push(reset);
       // Grade pulse (grade-effects.css): restart a one-shot burst around the card on every turn.
       function pulse(){const box=scene.closest(".card-box[data-grade]");if(!box||effectsOff())return;box.classList.remove("grade-pulse");void box.offsetWidth;box.classList.add("grade-pulse");}
@@ -4343,22 +4403,6 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       frontButton.addEventListener("click",e=>{if(e.detail!==0 && suppressTap){suppressTap=false;return;}flip(true);});
       rear.addEventListener("click",e=>{if(e.target.closest("button"))return;if((e.detail!==0 && suppressTap)||selectedText()){suppressTap=false;return;}flip(false);});
       rear.addEventListener("keydown",e=>{if(e.target===rear && (e.key==="Enter"||e.key===" ")){e.preventDefault();flip(false);}});
-      function renderLight(e){
-        if(effectsOff())return;
-        point={x:e.clientX,y:e.clientY};
-        if(frame)return;
-        frame=requestAnimationFrame(()=>{
-          frame=0;if(!point||!scene.isConnected||effectsOff())return;
-          const r=scene.getBoundingClientRect();if(!r.width||!r.height)return;
-          const x=Math.max(0,Math.min(1,(point.x-r.left)/r.width)),y=Math.max(0,Math.min(1,(point.y-r.top)/r.height));
-          tilt.style.setProperty("--tilt-x",((.5-y)*18).toFixed(2)+"deg");
-          tilt.style.setProperty("--tilt-y",((x-.5)*18).toFixed(2)+"deg");
-          tilt.style.setProperty("--light-x",(x*100).toFixed(1)+"%");
-          tilt.style.setProperty("--rear-light-x",((1-x)*100).toFixed(1)+"%");
-          tilt.style.setProperty("--light-y",(y*100).toFixed(1)+"%");
-          tilt.style.setProperty("--shine","1");
-        });
-      }
       scene.addEventListener("pointerdown",e=>{
         if(e.pointerType!=="touch"||!e.isPrimary)return;
         clearHold();reset();suppressTap=false;
@@ -4721,7 +4765,7 @@ async function benchmarkAction(a) {
       : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">Locked</text>'
         + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
       + '<desc>' + E(summary + example) + '</desc>'
       + '<defs><linearGradient id="' + uid + '-bg" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="' + c.mix + '"/><stop offset=".55" stop-color="' + c.base + '"/><stop offset="1" stop-color="' + c.base + '"/></linearGradient>'
       + '<linearGradient id="' + uid + '-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity=".12"/></linearGradient>'
@@ -4966,7 +5010,7 @@ function cardModalHTML(date) {
     + (ready ? `<button type="button" class="quiet" data-modal="catalog">도감에서 보기</button>` : "")
     + `<button type="button" class="text-link" data-modal="open">기록 자세히</button>`;
   // Figma "카드 모달": soft card area on the left (glow + foil hint), plain record text on the right.
-  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}>${cardSVG(record)}</div><p class="cm-foil" aria-hidden="true">카드를 기울이면 포일이 반짝여요</p></div>
+  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}>${ready ? `<div class="cm-tilt">${cardSVG(record)}<span class="cm-light" aria-hidden="true"></span></div>` : cardSVG(record)}</div>${ready ? `<p class="cm-foil">카드를 기울이면 포일이 반짝여요</p>` : ""}</div>
     <div class="cm-info">
       <div class="cm-top"><div class="cm-nav" role="group" aria-label="기록한 날 이동">${navArrow(-1, 'data-modal-step="-1"', "이전 기록", i <= 0)}<strong class="cm-date" aria-live="polite">${E(longDate(date))}</strong>${navArrow(1, 'data-modal-step="1"', "다음 기록", i >= days.length - 1)}</div><button type="button" class="quiet cm-close" data-modal="close" aria-label="닫기">✕</button></div>
       <h2 id="card-modal-title">${E(title)}</h2>
@@ -4977,12 +5021,20 @@ function cardModalHTML(date) {
       <div class="cm-actions">${actions}<small class="muted">${count}자</small></div>
     </div>`;
 }
+let disposeCardModalEffect = null;
+function clearCardModalEffect() {
+  disposeCardModalEffect?.();
+  disposeCardModalEffect = null;
+}
 function openCardModal(date) {
+  clearCardModalEffect();
   const dialog = app.querySelector("#card-modal"), html = cardModalHTML(date);
   if (!dialog || !html) { state.cardModal = null; return; }
   state.cardModal = date;
   state.calendarDay = date;
   dialog.innerHTML = html;
+  const foil = dialog.querySelector(".cm-art:has(.cm-tilt)");
+  if (foil) disposeCardModalEffect = DiaryFlip.bindFoil(foil);
   dialog.querySelectorAll("[data-modal-step]").forEach(b => b.onclick = () => {
     const step = Number(b.dataset.modalStep), days = recordDays(), next = days[days.indexOf(state.cardModal) + step];
     if (!next) return;
@@ -5006,6 +5058,7 @@ function openCardModal(date) {
     dialog.showModal();
     dialog.addEventListener("close", () => {
       if (!dialog.isConnected) return;
+      clearCardModalEffect();
       const from = state.cardModal;
       state.cardModal = null;
       // Back to the cell that opened it (record calendar, statistics dots or emotion calendar).
@@ -5014,6 +5067,7 @@ function openCardModal(date) {
   }
 }
 function bindHome() {
+  clearCardModalEffect();
   app.querySelectorAll("[data-card-day]").forEach(b => b.onclick = () => openCardModal(b.dataset.cardDay));
   app.querySelectorAll("[data-write-calendar]").forEach(b => b.onclick = () => {
     state.writeCalendar = b.dataset.writeCalendar;
@@ -6518,7 +6572,11 @@ function bindProfile() {
     history.replaceState(null, "", location.pathname + location.search);
   window.addEventListener("cardex-theme-change",()=>{
     CardexTheme.sync();
-    app.querySelectorAll(".art-card").forEach(el=>el.outerHTML=cardSVG());
+    app.querySelectorAll(".art-card").forEach(el => {
+      const record = activeRecords().find(r => r.id === el.dataset.cardRecord);
+      if (!record && el.dataset.cardRecord) return;
+      el.outerHTML = cardSVG(record || null, { snippet: el.dataset.cardSnippet !== "false", name: el.dataset.cardName !== "false" });
+    });
     app.querySelectorAll(".catalog-character, .mini-art [data-character]").forEach(el => {
       el.outerHTML = characterSVG(el.dataset.character, el.classList.contains("catalog-character") ? 'class="catalog-character"' : "");
     });

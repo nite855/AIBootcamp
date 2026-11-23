@@ -8,6 +8,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: require('./browser-runtime.cjs').executablePath });
   try {
+    await require('./modal-foil.cjs')(browser);
     const errors = [];
     let baseline;
     for (const mobile of [false, true]) {

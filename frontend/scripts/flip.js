@@ -1,4 +1,56 @@
-window.DiaryFlip = Object.freeze({ bind(app) {
+// Shared pointer light; the hit surface stays fixed while its artwork tilts.
+function cardPointerLight(scene, tilt) {
+  let frame = 0, point = null;
+  function reset() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0; point = null;
+    tilt.style.setProperty("--tilt-x", "0deg");
+    tilt.style.setProperty("--tilt-y", "0deg");
+    tilt.style.setProperty("--shine", "0");
+  }
+  function renderLight(e) {
+    point = { x: e.clientX, y: e.clientY };
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!point || !scene.isConnected) return;
+      const r = scene.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const x = Math.max(0, Math.min(1, (point.x - r.left) / r.width));
+      const y = Math.max(0, Math.min(1, (point.y - r.top) / r.height));
+      tilt.style.setProperty("--tilt-x", ((.5 - y) * 18).toFixed(2) + "deg");
+      tilt.style.setProperty("--tilt-y", ((x - .5) * 18).toFixed(2) + "deg");
+      tilt.style.setProperty("--light-x", (x * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--rear-light-x", ((1 - x) * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--light-y", (y * 100).toFixed(1) + "%");
+      tilt.style.setProperty("--shine", "1");
+    });
+  }
+  return { reset, renderLight };
+}
+function bindCardFoil(scene) {
+  const controller = new AbortController(), signal = controller.signal;
+  const { reset, renderLight } = cardPointerLight(scene, scene.querySelector('.cm-tilt'));
+  const hover = matchMedia('(hover: hover) and (pointer: fine)');
+  let active = null;
+  const listen = (type, fn) => scene.addEventListener(type, fn, { signal });
+  listen('pointerdown', e => {
+    if (e.pointerType !== 'touch' || !e.isPrimary) return;
+    active = e.pointerId; scene.setPointerCapture(e.pointerId); renderLight(e);
+  });
+  listen('pointermove', e => {
+    if ((e.pointerType === 'mouse' && hover.matches) || e.pointerId === active) renderLight(e);
+  });
+  function stop() { active = null; reset(); }
+  listen('pointerup', stop);
+  listen('pointercancel', stop);
+  listen('lostpointercapture', stop);
+  listen('pointerleave', e => { if (e.pointerType === 'mouse') reset(); });
+  window.addEventListener('cardex-theme-change', stop, { signal });
+  window.addEventListener('blur', stop, { signal });
+  return () => { controller.abort(); stop(); };
+}
+window.DiaryFlip = Object.freeze({ bindFoil: bindCardFoil, bind(app) {
 window.DiaryFlipObserver?.disconnect();
 const observer = new ResizeObserver(entries => entries.forEach(({target}) => {
   const scene = target.querySelector('.flip-scene');
@@ -18,8 +70,8 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       const frontButton=front.querySelector("button"), text=rear.querySelector(".flip-text");
       const hover=matchMedia("(hover: hover) and (pointer: fine)");
       const effectsOff=()=>false; // card effects always run the same way (2026-11-20)
-      let frame=0, point=null, active=null, timer=0, suppressTap=false;
-      function reset(){if(frame)cancelAnimationFrame(frame);frame=0;point=null;tilt.style.setProperty("--tilt-x","0deg");tilt.style.setProperty("--tilt-y","0deg");tilt.style.setProperty("--shine","0");}
+      let active=null, timer=0, suppressTap=false;
+      const { reset, renderLight } = cardPointerLight(scene, tilt);
       resets.push(reset);
       // Grade pulse (grade-effects.css): restart a one-shot burst around the card on every turn.
       function pulse(){const box=scene.closest(".card-box[data-grade]");if(!box||effectsOff())return;box.classList.remove("grade-pulse");void box.offsetWidth;box.classList.add("grade-pulse");}
@@ -29,22 +81,6 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       frontButton.addEventListener("click",e=>{if(e.detail!==0 && suppressTap){suppressTap=false;return;}flip(true);});
       rear.addEventListener("click",e=>{if(e.target.closest("button"))return;if((e.detail!==0 && suppressTap)||selectedText()){suppressTap=false;return;}flip(false);});
       rear.addEventListener("keydown",e=>{if(e.target===rear && (e.key==="Enter"||e.key===" ")){e.preventDefault();flip(false);}});
-      function renderLight(e){
-        if(effectsOff())return;
-        point={x:e.clientX,y:e.clientY};
-        if(frame)return;
-        frame=requestAnimationFrame(()=>{
-          frame=0;if(!point||!scene.isConnected||effectsOff())return;
-          const r=scene.getBoundingClientRect();if(!r.width||!r.height)return;
-          const x=Math.max(0,Math.min(1,(point.x-r.left)/r.width)),y=Math.max(0,Math.min(1,(point.y-r.top)/r.height));
-          tilt.style.setProperty("--tilt-x",((.5-y)*18).toFixed(2)+"deg");
-          tilt.style.setProperty("--tilt-y",((x-.5)*18).toFixed(2)+"deg");
-          tilt.style.setProperty("--light-x",(x*100).toFixed(1)+"%");
-          tilt.style.setProperty("--rear-light-x",((1-x)*100).toFixed(1)+"%");
-          tilt.style.setProperty("--light-y",(y*100).toFixed(1)+"%");
-          tilt.style.setProperty("--shine","1");
-        });
-      }
       scene.addEventListener("pointerdown",e=>{
         if(e.pointerType!=="touch"||!e.isPrimary)return;
         clearHold();reset();suppressTap=false;

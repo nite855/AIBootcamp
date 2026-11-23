@@ -298,3 +298,11 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .day-card.is-today::after { border-color: CanvasText; }
   .write-editor[data-storage-error="true"] .write-bar { border: 2px solid CanvasText; }
 }
+
+/* Fixed hit surface, moving artwork and a clipped pointer-following foil. */
+.cm-art { perspective: 1200px; }
+.cm-art:has(.cm-tilt) { touch-action: none; }
+.cm-tilt { position: relative; border-radius: 8.888889% / 6.349206%; transform: rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)); transition: transform .18s ease-out; }
+.cm-tilt .art-card { border-radius: inherit; }
+.cm-light { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--shine,0); transition: opacity .2s ease; mix-blend-mode: screen;
+  background: radial-gradient(circle at var(--light-x,50%) var(--light-y,50%), #ffffffb3, #ffffff26 23%, transparent 58%), conic-gradient(from 115deg at var(--light-x,50%) var(--light-y,50%), transparent, #c4eaff66, #ffc4ea66, #fff5b866, transparent); }
