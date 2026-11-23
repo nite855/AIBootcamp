@@ -55,6 +55,7 @@ header .brand {
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  min-width: 44px;
   min-height: 44px;
   padding: 0 0 0 12px;
   border: 0;
@@ -62,6 +63,7 @@ header .brand {
   color: var(--ink);
   box-shadow: none;
   transform: none;
+  cursor: pointer;
 }
 header .brand::after { content: none; }
 .brand-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--brand-dot); flex: none; }
@@ -299,6 +301,10 @@ footer { display: none; }
   .tabs .tab-icon { display: block; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
   .tabs .tab[aria-current="page"] { background: var(--tint); color: var(--ink); }
   .tabs .tab[aria-current="page"] .tab-icon { stroke-width: 2; transform: none; }
+  /* Focus, rather than keyboard height, also covers overlay and dual-resize keyboards. */
+  html.mobile-input-active .tabs { display: none; }
+  html.mobile-input-active .shell,
+  html.mobile-input-active .shell:has(.home-workspace) { padding-bottom: 10px; }
 }
 @media (forced-colors: active) {
   .theme-swatch[aria-current="true"] .swatch-thumb { outline: 3px solid Highlight; }

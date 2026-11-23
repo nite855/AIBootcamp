@@ -344,6 +344,7 @@
       app
         .querySelector(`[data-action="${old}"]`)
         ?.focus({ preventScroll: true });
+    syncMobileInput();
   }
   // A successful save opens the card page with a sealed "?" card; tapping it flips the card (share-view.js revealCard).
   // A failed save stays on the editor so the error and "저장 재시도" remain in place.
@@ -626,6 +627,24 @@
     dialog.querySelector('[data-next-prompt]').hidden=true; // Only the writing prompt re-enables it.
     dialog.addEventListener('close',()=>opener?.focus({preventScroll:true}),{once:true});dialog.showModal();
   }
+  // Input focus works even when a keyboard resizes both viewports or overlays them.
+  // Back/Done may close the keyboard without blurring: keep the tabs hidden until focus leaves.
+  const mobileLayout = window.matchMedia("(max-width: 959px)");
+  const textInputTypes = new Set(["text", "search", "email", "url", "tel", "password", "number"]);
+  function syncMobileInput() {
+    const field = document.activeElement;
+    const editable = field && (field.isContentEditable || (
+      (field.tagName === "TEXTAREA" || (field.tagName === "INPUT" && textInputTypes.has(field.type)))
+      && !field.readOnly && !field.matches(":disabled")
+    ));
+    document.documentElement.classList.toggle("mobile-input-active", mobileLayout.matches && Boolean(editable));
+  }
+  document.addEventListener("focusin", syncMobileInput, true);
+  // Wait for the next focused element, including when a render removes the old input.
+  document.addEventListener("focusout", () => requestAnimationFrame(syncMobileInput), true);
+  window.addEventListener("pageshow", syncMobileInput);
+  mobileLayout.addEventListener("change", syncMobileInput);
+
   // 16:9 stage (layout.css): width = min(viewport, height × 16/9), scaled up from the 1440 base.
   function stageMetrics(width, height) {
     const css = getComputedStyle(document.documentElement);
@@ -645,6 +664,7 @@
     root.style.setProperty("--stage-w", m.stage + "px");
     root.style.setProperty("--stage-zoom", String(Math.round(m.zoom * 1000) / 1000));
     root.style.setProperty("--stage-gutter", m.gutter + "px");
+    syncMobileInput();
   }
   size();
   window.visualViewport?.addEventListener("resize", size);
@@ -655,6 +675,7 @@
     if (state.view === "history" && state.archiveTab === "stats") render();
   });
   window.addEventListener("focus", () => {
+    syncMobileInput();
     if (state.view === "write" && state.date !== localDate()) {
       state.date = localDate();
       render();

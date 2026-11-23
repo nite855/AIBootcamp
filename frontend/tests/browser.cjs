@@ -47,6 +47,8 @@ const { chromium } = require(
     await p.locator('#diary-text').fill('입력 중 초점 유지');
     assert.equal(await p.evaluate(()=>document.activeElement.id),'diary-text');
     await p.locator('#diary-text').fill('');
+    // Menu geometry is checked after leaving the editor; mobile input focus hides it.
+    await p.locator('header .brand').focus();
     checks++;
     const fits = async () => {
       await p.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);

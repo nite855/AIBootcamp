@@ -4,11 +4,6 @@
 // the same way. Unlocked slots are compared in memory only; nothing is added to the saved snapshot.
 const seenSlots = { real: null, example: null };
 let lastCardShown = null, lastCardEnterAt = 0;
-// Hide the bottom tab bar while the on-screen keyboard shrinks the visual viewport.
-if (typeof window !== "undefined" && window.visualViewport) {
-  const syncKeyboard = () => document.documentElement.classList.toggle("keyboard-open", window.visualViewport.height < window.innerHeight * 0.75);
-  window.visualViewport.addEventListener("resize", syncKeyboard);
-}
 function storeSettled() {
   try { return !loading && storeReady; } catch { return false; }
 }
