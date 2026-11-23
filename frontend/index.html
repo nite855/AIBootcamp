@@ -6410,23 +6410,70 @@ function bindProfile() {
     dialog.querySelector('[data-next-prompt]').hidden=true; // Only the writing prompt re-enables it.
     dialog.addEventListener('close',()=>opener?.focus({preventScroll:true}),{once:true});dialog.showModal();
   }
-  // Input focus works even when a keyboard resizes both viewports or overlays them.
-  // Back/Done may close the keyboard without blurring: keep the tabs hidden until focus leaves.
+  // Focus hides tabs before the keyboard opens; viewport recovery restores them even without blur.
   const mobileLayout = window.matchMedia("(max-width: 959px)");
   const textInputTypes = new Set(["text", "search", "email", "url", "tel", "password", "number"]);
-  function syncMobileInput() {
-    const field = document.activeElement;
-    const editable = field && (field.isContentEditable || (
+  let keyboardSession = null, lastInputViewport = null;
+  function isTextInput(field) {
+    return Boolean(field && (field.isContentEditable || (
       (field.tagName === "TEXTAREA" || (field.tagName === "INPUT" && textInputTypes.has(field.type)))
       && !field.readOnly && !field.matches(":disabled")
-    ));
-    document.documentElement.classList.toggle("mobile-input-active", mobileLayout.matches && Boolean(editable));
+    )));
+  }
+  function syncMobileInput() {
+    const root = document.documentElement, field = document.activeElement;
+    // Normalize pinch zoom, and handle browsers that resize either or both viewports.
+    const viewport = { width: root.clientWidth, height: Math.min(innerHeight, (window.visualViewport?.height || innerHeight) * (window.visualViewport?.scale || 1)) };
+    if (!mobileLayout.matches || !isTextInput(field)) keyboardSession = null;
+    else {
+      const key = field.id || field;
+      if (!keyboardSession || (keyboardSession.dismissed && keyboardSession.key !== key)) {
+        const baseline = lastInputViewport?.width === viewport.width ? Math.max(lastInputViewport.height, viewport.height) : viewport.height;
+        keyboardSession = { key, width: viewport.width, baseline, low: viewport.height, dismissed: false, geometry: null };
+      }
+      const session = keyboardSession;
+      if (session.width !== viewport.width) {
+        // Rotation/split-screen starts a new height baseline, not a keyboard-close signal.
+        session.width = viewport.width; session.baseline = session.low = viewport.height;
+      }
+      const threshold = Math.max(120, session.baseline * 0.15);
+      if (session.geometry !== null) session.dismissed = !session.geometry;
+      else if (session.baseline - viewport.height >= threshold) {
+        session.dismissed = false;
+        session.low = Math.min(session.low, viewport.height);
+      } else if (!session.dismissed && viewport.height - session.low >= threshold) {
+        session.dismissed = true;
+      }
+      // Retain the high-water mark during the next keyboard opening animation.
+      session.baseline = Math.max(session.baseline, viewport.height);
+      if (!session.dismissed) session.low = Math.min(session.low, viewport.height);
+      session.key = key;
+    }
+    lastInputViewport = viewport;
+    root.classList.toggle("mobile-input-active", Boolean(keyboardSession && !keyboardSession.dismissed));
   }
   document.addEventListener("focusin", syncMobileInput, true);
+  // Back leaves the input focused on Android; tapping it again must re-arm hiding without focusin.
+  document.addEventListener("pointerdown", event => {
+    const field = event.target.closest?.("input,textarea,[contenteditable]");
+    if (mobileLayout.matches && isTextInput(field)) {
+      if (keyboardSession?.dismissed) keyboardSession = null;
+      syncMobileInput();
+    }
+  }, true);
   // Wait for the next focused element, including when a render removes the old input.
   document.addEventListener("focusout", () => requestAnimationFrame(syncMobileInput), true);
   window.addEventListener("pageshow", syncMobileInput);
   mobileLayout.addEventListener("change", syncMobileInput);
+  // Optional overlay-keyboard signal; do not change the browser's viewport/overlay policy.
+  const virtualKeyboard = navigator.virtualKeyboard;
+  virtualKeyboard?.addEventListener("geometrychange", () => {
+    syncMobileInput();
+    if (keyboardSession) {
+      keyboardSession.geometry = virtualKeyboard.boundingRect.height > 0;
+      syncMobileInput();
+    }
+  });
 
   // 16:9 stage (layout.css): width = min(viewport, height × 16/9), scaled up from the 1440 base.
   function stageMetrics(width, height) {

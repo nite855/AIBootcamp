@@ -40,6 +40,15 @@ async function expectMenu(page, hidden) {
 
       // Visual-only, dual-resize, overlay and a small height change (< the old 25% threshold).
       for (const [inner, visual, scale] of [[844, 440, 1], [440, 440, 1], [844, 844, 1], [844, 760, 1], [844, 422, 2]]) {
+        // Independent openings; keyboard-close.cjs covers a shrink/recovery sequence.
+        await page.locator('header .brand').focus();
+        await page.evaluate(() => {
+          Object.defineProperty(window, 'innerHeight', window.testInnerHeightDescriptor);
+          if (window.visualViewport) { delete visualViewport.height; delete visualViewport.scale; }
+          window.dispatchEvent(new Event('resize'));
+        });
+        await page.locator('#diary-text').focus();
+        await page.locator('#diary-text').evaluate(el => el.setSelectionRange(3, 7));
         await page.evaluate(({ inner, visual, scale }) => {
           Object.defineProperty(window, 'innerHeight', { configurable: true, value: inner });
           if (window.visualViewport) {
@@ -52,7 +61,7 @@ async function expectMenu(page, hidden) {
         await expectMenu(page, true);
         assert.deepEqual(await page.locator('#diary-text').evaluate(el => [el.value, el.selectionStart, el.selectionEnd]), [draft, 3, 7]);
       }
-      // Closing a keyboard without blurring must retain the agreed focus-based policy.
+      // Without measurable keyboard shrink/geometry, retain the focus fallback.
       await page.evaluate(() => {
         Object.defineProperty(window, 'innerHeight', window.testInnerHeightDescriptor);
         delete window.testInnerHeightDescriptor;
