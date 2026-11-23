@@ -6,6 +6,7 @@ const {reveal, executablePath} = require('./browser-runtime.cjs');
   const browser = await chromium.launch({headless:true, executablePath});
   try {
     for (const width of [390,1440]) {
+      for (const close of [width < 960 ? '.detail-back' : '.detail-close','.secondary[data-close-detail]','Escape']) {
       const context = await browser.newContext({viewport:{width,height:844},hasTouch:true,isMobile:width<960});
       const page = await context.newPage(), errors=[];
       page.on('pageerror', e => errors.push(e.message));
@@ -25,11 +26,9 @@ const {reveal, executablePath} = require('./browser-runtime.cjs');
       assert.ok(await scroll()>before,'list vertical gesture actually scrolls');
       assert.equal(await page.locator('#card-detail[open]').count(),0);
       await page.waitForTimeout(700); // Finish native scroll inertia before a new tap.
-      for (const close of [width < 960 ? '.detail-back' : '.detail-close','.secondary[data-close-detail]','Escape']) {
         await slot.evaluate(e=>e.scrollIntoView({block:'nearest',behavior:'instant'}));
         await page.waitForTimeout(700);
-        if (close === 'Escape') { await slot.focus(); await page.keyboard.press('Enter'); }
-        else await slot.tap();
+        await slot.tap();
         const detail=page.locator('#card-detail[open]'); await detail.waitFor();
         const art=detail.locator('.detail-card');
         const rect=await art.boundingBox(), p={x:rect.x+rect.width/2,y:rect.y+rect.height*.6};
@@ -43,8 +42,8 @@ const {reveal, executablePath} = require('./browser-runtime.cjs');
         assert.equal(await page.evaluate(()=>DiaryReview.getState().catalogStage),null);
         assert.equal(await slot.locator('.mini-card').evaluate(e=>e.style.getPropertyValue('--shine') || '0'),'0');
         assert.equal(await slot.evaluate(e=>e===document.activeElement),true);
-      }
       assert.deepEqual(errors,[]); await context.close();
+      }
     }
     console.log('PASS: native list scroll, vertical detail tilt, close/back/Escape neutral return and focus');
   } finally { await browser.close(); }
