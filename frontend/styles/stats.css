@@ -22,7 +22,7 @@
 
 /* ── Summary tiles (421×200) ── */
 .stats-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.stats-page .stats-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; gap: 0; height: 200px; min-height: 0; padding: 30px 32px; overflow: hidden; }
+.stats-page .stats-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; gap: 0; height: 200px; min-height: 0; padding: 30px 32px; overflow: visible; }
 .stats-label { margin: 0; color: var(--muted); font-size: 14px; font-weight: 400; }
 .stats-big { display: flex; align-items: baseline; gap: 4px; margin: 10px 0 0; color: var(--muted); font-size: 18px; }
 .stats-big b { color: var(--ink); font-family: var(--font-display); font-size: 56px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }

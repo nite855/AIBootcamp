@@ -275,7 +275,8 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .sheet-handle { position: absolute; top: 10px; left: 50%; display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--subtle, #b8b8c0); opacity: .5; transform: translateX(-50%); }
   .cm-art { width: 180px; }
   .cm-art .art-card { border-radius: 18px; }
-  .cm-foil, .cm-rule, .cm-label { display: none; }
+  .cm-rule, .cm-label { display: none; }
+  .cm-foil { display: block; margin-top: 14px; padding: 0 16px; text-align: center; }
   .cm-info { padding: 20px 22px calc(30px + env(safe-area-inset-bottom, 0px)); }
   .card-modal .cm-nav .nav-arrow { width: 30px; height: 30px; min-height: 30px; }
   .cm-date { font-size: 13px; }
@@ -301,7 +302,7 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 
 /* Fixed hit surface, moving artwork and a clipped pointer-following foil. */
 .cm-art { perspective: 1200px; }
-.cm-art:has(.cm-tilt) { touch-action: none; }
+.cm-art:has(.cm-tilt) { touch-action: pan-y; }
 .cm-tilt { position: relative; border-radius: 8.888889% / 6.349206%; transform: rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)); transition: transform .18s ease-out; }
 .cm-tilt .art-card { border-radius: inherit; }
 .cm-light { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--shine,0); transition: opacity .2s ease; mix-blend-mode: screen;

@@ -181,11 +181,14 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
         box.remove(); return out;
       };
       const slot = grade => {
-        const s = document.createElement('div'); s.className = 'slot'; s.dataset.grade = grade; s.dataset.emotion = 'pos_1';
-        const t = document.createElement('span'); t.className = 'slot-thumb'; s.append(t); document.body.append(s);
-        const shadow = getComputedStyle(t).boxShadow; s.remove(); return shadow.split(/,(?![^(]*\))/).length;
+        const s = document.createElement('div'); s.className = 'mini-card card-fx'; s.dataset.grade = grade; s.dataset.emotion = 'pos_1';
+        s.style.setProperty('--fx-unit', '2px'); s.style.setProperty('--card-r', '18px');
+        const t = document.createElement('span'); t.className = 'card-fx-rim'; s.append(t); document.body.append(s);
+        const c = getComputedStyle(t, '::before');
+        const out = { border: c.borderTopStyle, outline: c.outlineStyle, holo: c.animationName };
+        s.remove(); return out;
       };
-      const rim = grade => { const s = document.createElement('div'); s.className = 'slot'; s.dataset.grade = grade; document.body.append(s); const c = getComputedStyle(s, '::before'); const r = c.content !== 'none' ? c.animationName : 'none'; s.remove(); return r; };
+      const rim = grade => slot(grade).holo;
       return {s1: probe('stage-1'), s2: probe('stage-2'), blank: probe('blank'), pending: probe('pending'), sealed: probe('stage-2', 'is-sealed'), slot1: slot('stage-1'), slot2: slot('stage-2'), rim2: rim('stage-2'), rim3: rim('stage-3')};
     });
     assert.equal(ladder.s1.before, 'none', 'stage 1: no ring');
@@ -193,13 +196,14 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     assert.equal(ladder.s1.anim, 'none', 'stage 1: still glow');
     assert.equal(ladder.s2.before, 'solid/solid', 'stage 2: solid double ring');
     assert.equal(ladder.s2.after, 'grade-orbit', 'stage 2: light runs around the ring');
-    assert.equal(ladder.s2.anim, 'grade-breathe', 'stage 2: breathing glow');
+    assert.equal(ladder.s2.anim, 'card-fx-breathe', 'stage 2: breathing glow');
     for (const k of ['blank', 'pending', 'sealed']) assert.equal(ladder[k].before, 'none', `${k}: no stage 2 ring`);
     assert.equal(ladder.blank.after, 'none');
     assert.equal(ladder.pending.after, 'none');
     assert.equal(ladder.rim3, 'grade-holo-spin', 'catalog slot: stage 3 holographic rim');
     assert.equal(ladder.rim2, 'none', 'catalog slot: no holo rim below stage 3');
-    assert.ok(ladder.slot2 >= 3 && ladder.slot2 > ladder.slot1, `catalog slot: stage 2 double outline (${ladder.slot1} vs ${ladder.slot2} layers)`);
+    assert.equal(ladder.slot2.border + '/' + ladder.slot2.outline, 'solid/solid', 'shared mini card: stage 2 double outline');
+    assert.equal(ladder.slot1.border, 'none', 'stage 1 has no extra inner ring');
 
     // Phone width: sealed card fits without horizontal overflow.
     await page.setViewportSize({width: 390, height: 844});

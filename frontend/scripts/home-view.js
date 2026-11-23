@@ -190,7 +190,7 @@ function cardModalHTML(date) {
     + (ready ? `<button type="button" class="quiet" data-modal="catalog">도감에서 보기</button>` : "")
     + `<button type="button" class="text-link" data-modal="open">기록 자세히</button>`;
   // Figma "카드 모달": soft card area on the left (glow + foil hint), plain record text on the right.
-  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}>${ready ? `<div class="cm-tilt">${cardSVG(record)}<span class="cm-light" aria-hidden="true"></span></div>` : cardSVG(record)}</div>${ready ? `<p class="cm-foil">카드를 기울이면 포일이 반짝여요</p>` : ""}</div>
+  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}><div class="cm-tilt">${cardSVG(record)}<span class="cm-light" aria-hidden="true"></span></div></div><p class="cm-foil card-effect-hint"></p></div>
     <div class="cm-info">
       <div class="cm-top"><div class="cm-nav" role="group" aria-label="기록한 날 이동">${navArrow(-1, 'data-modal-step="-1"', "이전 기록", i <= 0)}<strong class="cm-date" aria-live="polite">${E(longDate(date))}</strong>${navArrow(1, 'data-modal-step="1"', "다음 기록", i >= days.length - 1)}</div><button type="button" class="quiet cm-close" data-modal="close" aria-label="닫기">✕</button></div>
       <h2 id="card-modal-title">${E(title)}</h2>

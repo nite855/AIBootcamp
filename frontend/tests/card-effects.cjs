@@ -66,7 +66,8 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
         const angles = await page.locator('.tilt-layer').evaluate(el => ['--tilt-x', '--tilt-y'].map(k => parseFloat(el.style.getPropertyValue(k))));
         assert.ok(angles.every(n => n > 0 && n <= 9));
         if (mobile) {
-          const moved = { x: box.x + box.width * .3, y: box.y + box.height * .7 };
+          // Horizontal drag keeps the card gesture; vertical drag belongs to native scrolling.
+          const moved = { x: box.x + box.width * .3, y: point.y };
           await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [moved] });
           await page.waitForFunction(() => parseFloat(document.querySelector('.tilt-layer').style.getPropertyValue('--tilt-y')) < 0);
           // Give the browser a rendered drag frame before releasing the contact.
