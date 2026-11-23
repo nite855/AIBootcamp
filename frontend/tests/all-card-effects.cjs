@@ -9,6 +9,7 @@ const snapshot = el => {
   return { grade: el.dataset.grade, emotion: el.dataset.emotion, color: getComputedStyle(el).getPropertyValue('--grade').trim(),
     anim: css.animationName, duration: css.animationDuration, inner: before.borderTopStyle, outline: before.outlineStyle,
     holo: before.animationName, orbit: after.animationName, orbitDuration: after.animationDuration,
+    layers: (css.backgroundImage.match(/gradient\(/g) || []).length, rimBorder: css.borderTopStyle,
     transition: getComputedStyle(el).transitionDuration, foilTransition: getComputedStyle(el.querySelector('.card-fx-light')).transitionDuration };
 };
 (async () => {
@@ -44,9 +45,11 @@ const snapshot = el => {
             const graded = page.locator(`.slot .mini-card[data-grade="stage-${stage}"]`).first();
             if (!await graded.count()) continue;
             const effect = await graded.evaluate(snapshot);
-            assert.equal(effect.anim, stage === 2 ? 'card-fx-breathe' : 'none');
+            // 2026-11-24 ladder: stage 1 breathes, stage 2 runs lights on a metal frame, stage 3 spins the holo ring.
+            assert.equal(effect.anim, stage === 1 ? 'card-fx-breathe' : 'none');
             assert.equal(effect.holo, stage === 3 ? 'grade-holo-spin' : 'none');
             assert.equal(effect.orbit, stage === 2 ? 'grade-orbit' : 'none');
+            assert.equal(effect.layers, [1, 8, 15][stage - 1], `stage ${stage}: gloss / brackets / brackets + sparkles`);
           }
         }
         const locked = page.locator('.slot.is-locked .mini-card').first();

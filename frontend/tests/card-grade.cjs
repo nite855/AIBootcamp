@@ -84,7 +84,8 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     // The draw runs on its own and always the same way: charge → rise → burst → result. Tapping does nothing.
     await page.locator('.card-box.is-sealed[data-reveal="stage-3"][data-phase="charge"]').waitFor();
     assert.equal(await page.locator('.mystery-card').evaluate(el => el.tagName), 'DIV', 'the sealed card is not a button');
-    assert.equal(await page.locator('[data-draw-skip]').count(), 0, 'no skip button');
+    assert.equal(await page.locator('.seal-hint [data-reveal-skip]').count(), 1, 'skip button in the hint');
+    assert.equal(await page.locator('.seal-motion-note').count(), 0, 'no reduced-motion note by default');
     assert.match(await page.locator('#seal-hint-title').innerText(), /카드로 만들고 있어요/);
     // The legend names the effect per grade; the color belongs to the emotion.
     assert.match(await page.locator('.seal-legend').getAttribute('aria-label'), /색은 감정, 공개 효과는 등급/);
@@ -177,7 +178,9 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
         const box = document.createElement('div'); box.className = 'card-box ' + extra; box.dataset.grade = grade; box.dataset.emotion = 'pos_1';
         const aura = document.createElement('span'); aura.className = 'grade-aura'; box.append(aura); document.body.append(box);
         const b = getComputedStyle(aura, '::before'), a = getComputedStyle(aura, '::after');
-        const out = {before: b.content !== 'none' && b.display !== 'none' ? b.borderTopStyle + '/' + b.outlineStyle : 'none', after: a.content !== 'none' ? a.animationName : 'none', anim: getComputedStyle(aura).animationName};
+        const self = getComputedStyle(aura);
+        const out = {before: b.content !== 'none' && b.display !== 'none' ? b.borderTopStyle + '/' + b.outlineStyle : 'none', after: a.content !== 'none' ? a.animationName : 'none', anim: self.animationName,
+          border: self.borderTopStyle, layers: (self.backgroundImage.match(/gradient\(/g) || []).length, blend: a.content !== 'none' ? a.mixBlendMode : 'none'};
         box.remove(); return out;
       };
       const slot = grade => {
@@ -189,14 +192,21 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
         s.remove(); return out;
       };
       const rim = grade => slot(grade).holo;
-      return {s1: probe('stage-1'), s2: probe('stage-2'), blank: probe('blank'), pending: probe('pending'), sealed: probe('stage-2', 'is-sealed'), slot1: slot('stage-1'), slot2: slot('stage-2'), rim2: rim('stage-2'), rim3: rim('stage-3')};
+      return {s1: probe('stage-1'), s2: probe('stage-2'), s3: probe('stage-3'), blank: probe('blank'), pending: probe('pending'), sealed: probe('stage-2', 'is-sealed'), slot1: slot('stage-1'), slot2: slot('stage-2'), rim2: rim('stage-2'), rim3: rim('stage-3')};
     });
+    // 2026-11-24 ladder: rim (1) → frame (2) → surface (3), with a shape cue per grade.
     assert.equal(ladder.s1.before, 'none', 'stage 1: no ring');
     assert.equal(ladder.s1.after, 'none', 'stage 1: no running light');
-    assert.equal(ladder.s1.anim, 'none', 'stage 1: still glow');
+    assert.equal(ladder.s1.anim, 'card-fx-breathe', 'stage 1: slow breathing glow');
+    assert.equal(ladder.s1.layers, 1, 'stage 1: satin top gloss only, no brackets');
     assert.equal(ladder.s2.before, 'solid/solid', 'stage 2: solid double ring');
-    assert.equal(ladder.s2.after, 'grade-orbit', 'stage 2: light runs around the ring');
-    assert.equal(ladder.s2.anim, 'card-fx-breathe', 'stage 2: breathing glow');
+    assert.equal(ladder.s2.after, 'grade-orbit', 'stage 2: light runs around the metal frame');
+    assert.equal(ladder.s2.anim, 'none', 'stage 2: the ring itself stays still');
+    assert.equal(ladder.s2.layers, 8, 'stage 2: four corner brackets (eight bars)');
+    assert.ok(ladder.s3.layers > ladder.s2.layers, 'stage 3: brackets plus sparkles');
+    assert.equal(ladder.s3.blend, 'screen', 'stage 3: prism foil over the surface');
+    assert.equal(ladder.blank.border, 'dashed', 'blank: dashed empty-slot rim');
+    assert.equal(ladder.pending.border, 'none', 'pending: no rim');
     for (const k of ['blank', 'pending', 'sealed']) assert.equal(ladder[k].before, 'none', `${k}: no stage 2 ring`);
     assert.equal(ladder.blank.after, 'none');
     assert.equal(ladder.pending.after, 'none');
@@ -244,6 +254,69 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
       assert.ok(steps.y + steps.height <= card.y + 1, 'wait chips above the card on phones');
       assert.equal(await fresh.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       await fresh.close();
+    }
+    // 2026-11-24: "건너뛰기" and the reduced-motion draw. Both open an analyzed example card that has not drawn yet.
+    const openUnseen = async p => {
+      await reveal(p, 'settings'); await reveal(p, 'preview'); await reveal(p, 'archive-records');
+      const id = await p.evaluate(() => {
+        const s = DiaryReview.getState();
+        return [...document.querySelectorAll('.entry-list [data-open]')].filter(b => /^stage-/.test(b.querySelector('[data-grade]')?.dataset.grade || '')).map(b => b.dataset.open).find(i => !s.revealed[`example:${i}`]);
+      });
+      assert.ok(id, 'an unseen analyzed example card');
+      await p.locator(`.entry-list [data-open="${id}"]`).first().click();
+      await p.locator('.card-box.is-sealed[data-phase="charge"]').waitFor();
+      return id;
+    };
+    {
+      const p = await browser.newPage({viewport: {width: 1366, height: 768}});
+      p.on('pageerror', e => errors.push(e.message));
+      await p.goto(pathToFileURL(path.resolve(__dirname, '../index.html')).href);
+      await p.waitForFunction(() => DiaryReview.isReady());
+      const id = await openUnseen(p);
+      const skip = p.locator('.seal-hint [data-reveal-skip]');
+      const box = await skip.boundingBox();
+      assert.ok(box.height >= 44 && box.width >= 44, 'skip button is a 44px target');
+      await skip.click();
+      // First press: straight to the grade burst (the effect still plays) with the grade in words.
+      await p.locator('.card-box.is-flipping[data-phase="burst"]').waitFor({timeout: 500});
+      assert.match(await p.locator('#seal-hint-title').innerText(), /단계 · .+ 카드예요$/);
+      assert.equal(await skip.innerText(), '바로 보기');
+      // Second step (Esc): the result at once, focus on the card title.
+      await p.keyboard.press('Escape');
+      await p.waitForFunction(() => !document.querySelector('.card-box.is-flipping, .mystery-card, .seal-hint'), null, {timeout: 500});
+      assert.equal(await p.evaluate(() => document.activeElement?.id), 'card-info-title');
+      // Re-entering never replays the draw.
+      await reveal(p, 'write');
+      await reveal(p, 'archive-records');
+      await p.locator(`.entry-list [data-open="${id}"]`).first().click();
+      assert.equal(await p.locator('.mystery-card').count(), 0, 'skipped draw does not replay');
+      await p.close();
+    }
+    {
+      const context = await browser.newContext({viewport: {width: 1366, height: 768}, reducedMotion: 'reduce'});
+      const p = await context.newPage();
+      p.on('pageerror', e => errors.push(e.message));
+      await p.goto(pathToFileURL(path.resolve(__dirname, '../index.html')).href);
+      await p.waitForFunction(() => DiaryReview.isReady());
+      const started = Date.now();
+      await openUnseen(p);
+      assert.match(await p.locator('.seal-motion-note').innerText(), /움직임을 줄여/);
+      assert.equal(await p.locator('.mystery-card').evaluate(el => getComputedStyle(el).animationName), 'none', 'sealed card stays still');
+      await p.waitForTimeout(900);
+      assert.ok(parseFloat(await p.locator('.draw-progress i').evaluate(el => el.style.width)) > 0, 'progress bar follows the percentage');
+      // Same timing as the full draw: no burst before ① + ②.
+      assert.equal(await p.locator('.card-box.is-flipping').count(), 0, 'no shortcut under reduced motion');
+      await p.locator('.card-box.is-flipping').waitFor({timeout: 3000});
+      assert.ok(Date.now() - started >= 2400, 'burst keeps the 2.7s lead-in');
+      assert.equal(await p.locator('.grade-particles').evaluate(el => getComputedStyle(el).display), 'none', 'no flying particles');
+      assert.equal(await p.locator('.grade-flash').count() ? await p.locator('.grade-flash').evaluate(el => getComputedStyle(el).display) : 'none', 'none', 'no full-screen flash');
+      assert.equal(await p.locator('.grade-burst').evaluate(el => getComputedStyle(el, '::before').animationName), 'rm-glow', 'the glow fades (opacity only)');
+      assert.ok(await unseal(p));
+      // The static ladder still shows on the revealed card.
+      const rest = await p.locator('.card-box .grade-aura').evaluate(el => ({anim: getComputedStyle(el).animationName, layers: (getComputedStyle(el).backgroundImage.match(/gradient\(/g) || []).length, glow: getComputedStyle(el).boxShadow}));
+      assert.equal(rest.anim, 'none', 'no motion on the card at rest');
+      assert.ok(rest.layers >= 1 && rest.glow !== 'none', 'static grade layer stays: ' + JSON.stringify(rest));
+      await context.close();
     }
     assert.deepEqual(errors, []);
     console.log('PASS: save opens a sealed card, tap/Enter flip with grade effects, no reseal, grade on catalog/detail/share/badge/rows; evidence: ' + evidence);

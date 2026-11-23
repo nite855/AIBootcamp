@@ -52,15 +52,21 @@ function gradeParticles(grade) {
 }
 // Real records: the version just saved. Example records: once per record, so editing one never replays it.
 // The legend names the effect of each grade (the color now belongs to the emotion).
-const SEAL_GRADES = [["blank", "빈 카드", "잔잔한 먼지"], ["stage-1", "1단계", "은은한 빛"], ["stage-2", "2단계", "빛의 고리"], ["stage-3", "3단계", "홀로그램"]];
+// 2026-11-24: the effect names follow the strengthened card ladder (grade-effects.css "Grade ladder").
+const SEAL_GRADES = [["blank", "빈 카드", "빈 슬롯"], ["stage-1", "1단계", "은은한 빛"], ["stage-2", "2단계", "금속 이중 링"], ["stage-3", "3단계", "홀로그램 포일"]];
+const SEAL_EFFECT = Object.fromEntries(SEAL_GRADES.map(([g, label, effect]) => [g, [label, effect]]));
 // Soft UI v1.1 draw sequence (Figma 07 "카드 뽑기 연출"): ① 두근두근 1.5s → ② 고조 1.2s → ③ 펑 (burst,
-// GRADE_REVEAL_MS) → ④ front with the result. It always runs the same way (2026-11-20 request): no skip,
-// no tap shortcut and no reduced-motion variant. Start times survive re-renders so the phases never restart.
+// GRADE_REVEAL_MS) → ④ front with the result. Each grade plays the same way every time; tapping the card never
+// shortcuts it. 2026-11-24: a "건너뛰기" button jumps to ③ (the grade burst still plays; a second press or Esc
+// shows the result), and reduced-motion devices get a still variant with the same timing (grade-effects.css).
+// Start times survive re-renders so the phases never restart.
 const DRAW_PHASES = { charge: 1500, rise: 1200 };
 const drawStarted = {};
+const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function sealHint() {
   const legend = SEAL_GRADES.map(([g, label, effect]) => `<li data-effect="${g}"><i aria-hidden="true"></i><b>${label}</b><span>${effect}</span></li>`).join("");
-  return `<section class="seal-hint" aria-labelledby="seal-hint-title"><h2 id="seal-hint-title" aria-live="polite">오늘의 마음을 카드로 만들고 있어요</h2><p class="seal-sub muted">기록 속 감정을 읽는 중이에요</p><div class="draw-progress" aria-hidden="true"><i></i></div><p class="draw-caption" aria-hidden="true">감정 읽는 중 · <span class="draw-pct">0</span>%</p><ul class="seal-legend" aria-label="빛의 색은 감정, 공개 효과는 등급에 따라 달라요">${legend}</ul></section>`;
+  const note = reducedMotion() ? `<p class="seal-motion-note">기기 설정에 맞춰 움직임을 줄여 보여드려요</p>` : "";
+  return `<section class="seal-hint" aria-labelledby="seal-hint-title"><h2 id="seal-hint-title" aria-live="polite">오늘의 마음을 카드로 만들고 있어요</h2><p class="seal-sub muted">기록 속 감정을 읽는 중이에요</p><div class="draw-progress" aria-hidden="true"><i></i></div><p class="draw-caption" aria-hidden="true">감정 읽는 중 · <span class="draw-pct">0</span>%</p><ul class="seal-legend" aria-label="빛의 색은 감정, 공개 효과는 등급에 따라 달라요">${legend}</ul>${note}<button type="button" class="secondary seal-skip" data-reveal-skip>건너뛰기</button></section>`;
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
 function waitPanel() {
@@ -119,8 +125,11 @@ function sealCard(box, key, grade) {
     if (phase === "rise") { if (title) title.textContent = "곧 열려요…"; if (em) em.textContent = "곧 열려요"; const sub = hint?.querySelector(".seal-sub"); if (sub) sub.textContent = "카드가 반응하고 있어요. 두근두근"; }
   };
   // ④ result: remove the seal and show the information panel (with focus on its title).
+  const keys = new AbortController();
   const finish = () => {
     timers.forEach(clearTimeout);
+    clearTimeout(revealTimer);
+    keys.abort();
     sizer.disconnect();
     if (!box.isConnected) return;
     state.revealed[key] = true;
@@ -150,6 +159,15 @@ function sealCard(box, key, grade) {
     if (state.pendingReveal === key) state.pendingReveal = null;
     box.dataset.phase = "burst";
     box.classList.replace("is-sealed", "is-flipping");
+    // The grade in words as the burst starts (aria-live title), so it reads without the effect too.
+    const [label, effect] = SEAL_EFFECT[grade] || [];
+    const title = hint?.querySelector("#seal-hint-title");
+    if (title && label) title.textContent = grade === "blank" ? `빈 카드예요 · ${effect}` : `${label} · ${effect} 카드예요`;
+    const pctNow = hint?.querySelector(".draw-pct"), barNow = hint?.querySelector(".draw-progress i");
+    if (pctNow) pctNow.textContent = "100";
+    if (barNow) barNow.style.width = "100%";
+    const skip = hint?.querySelector("[data-reveal-skip]");
+    if (skip) skip.textContent = "바로 보기";
     if (grade === "stage-3") {
       document.querySelector(".grade-flash")?.remove();
       const flash = document.createElement("div");
@@ -174,6 +192,8 @@ function sealCard(box, key, grade) {
     if (!pct?.isConnected || !box.classList.contains("is-sealed")) return;
     const p = Math.min(100, Math.round((Date.now() - started) / burstAt * 100));
     pct.textContent = p;
+    // Inline width keeps the bar moving where the CSS fill is switched off (reduced motion).
+    if (bar && reducedMotion()) bar.style.width = p + "%";
     if (p >= 100) { caption.firstChild.textContent = "감정 읽기 완료 · "; return; }
     requestAnimationFrame(tick);
   };
@@ -181,6 +201,19 @@ function sealCard(box, key, grade) {
   setPhase(elapsed >= riseAt ? "rise" : "charge");
   if (elapsed < riseAt) timers.push(setTimeout(() => box.isConnected && box.classList.contains("is-sealed") && setPhase("rise"), riseAt - elapsed));
   timers.push(setTimeout(() => box.isConnected && box.classList.contains("is-sealed") && open(), Math.max(0, burstAt - elapsed)));
+  // 건너뛰기: ①② → ③ burst (the grade effect still plays); during ③ → result. Esc does the same.
+  const skip = () => {
+    if (!box.isConnected) return;
+    if (box.classList.contains("is-sealed")) open();
+    else if (box.classList.contains("is-flipping")) finish();
+  };
+  hint?.querySelector("[data-reveal-skip]")?.addEventListener("click", skip, { signal: keys.signal });
+  document.addEventListener("keydown", e => {
+    if (!box.isConnected) { keys.abort(); return; }
+    if (e.key !== "Escape" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
+    e.preventDefault();
+    skip();
+  }, { signal: keys.signal });
 }
 
 // ── Share sheet (soft UI v1.1 "카드 공유하기", 2026-11-20 P8) ──

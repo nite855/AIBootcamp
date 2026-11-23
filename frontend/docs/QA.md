@@ -325,3 +325,10 @@ UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`.
 - 새 회귀 사례: 초점 유지 상태의 키보드 닫힘, 시각/양쪽/창 높이만 변화, resize가 focus보다 먼저 도착하는 순서, 닫힘 애니메이션과 주소창 높이 차이, 같은 입력 재터치/커서 이동, 열린 키보드 중 입력 재터치, 복구된 하단 탭 터치, 작은 주소창 변화·확대, 초점 이탈 후 닫힘(iOS 형태), 크기 변화 없는 오버레이 키보드 이벤트, 검색 재렌더링 후 상태 유지·초안·선택 범위 보존.
 - 동작 근거: [Chrome의 키보드·뷰포트 처리 설명](https://developer.chrome.com/blog/viewport-resize-behavior), [VisualViewport 배율](https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport/scale), [VirtualKeyboard 크기 이벤트](https://developer.mozilla.org/en-US/docs/Web/API/VirtualKeyboard_API). 키보드 위치 설정은 변경하지 않으며 개인정보나 입력 원문을 로깅하지 않습니다.
 - 한계: 높이 회복/키보드 크기 이벤트가 모두 없으면 키보드만 닫았는지 판별할 수 없어 초점 기반 폴백을 유지합니다. 물리적 S23 Ultra·S24·iPhone 17 Pro에서는 수정 빌드 미검증이며, 모의 브라우저 검사를 실기기 통과로 간주하지 않습니다.
+
+## 등급 시각화 강화·건너뛰기·움직임 줄이기 검증 (2026-11-24)
+
+- 범위: `styles/grade-effects.css` 등급 사다리(빈 카드 점선 / 1단계 하이라이트·반광 / 2단계 금속 프레임·꺾쇠 / 3단계 홀로그램 링·반짝임·프리즘 반사광), 3단계 고조 점멸 완화, "건너뛰기" 버튼·Esc, `prefers-reduced-motion` 정지 대체 연출(`scripts/share-view.js`).
+- 자동 검사: 공식 빌드, 단위 100/100, `card-grade.cjs`(새 사례: 등급별 배경 층 수·점선·sheen 블렌드, 건너뛰기 44px·펑 즉시 진입·Esc 결과·초점·재생 없음, 움직임 줄이기 안내·정지 카드·진행 막대·2.7초 선행 유지·입자/섬광 없음·`rm-glow`·결과 카드 정적 층), `all-card-effects.cjs`(10테마×6폭), `modal-foil`·`collection`·`simplification`·`card-effects`·`celebrate-popup`·`share-reveal`·`gesture-return`·`moment-card`·`week-calendar`·`browser`(46)·`themes`·`ux-review` 통과.
+- `persistence-browser.cjs`는 173행(기록 뒷면 본문 터치 스크롤 후 뒤집힘 유지)에서 실패하며, 변경 전 HEAD(65304b3) 빌드에서도 같은 위치에서 실패해 이번 변경과 무관한 기존 문제로 기록합니다.
+- 수동 확인 필요: 실기기 OS의 동작 줄이기 설정, 55px 월간 미니카드에서 꺾쇠·반짝임 가독성, 저사양 기기의 3단계 반사광 성능.
