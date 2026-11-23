@@ -37,6 +37,9 @@ function bindCardFoil(scene) {
   const tilt = scene.querySelector('.cm-tilt') || scene;
   const { reset, renderLight } = cardPointerLight(scene, tilt);
   tilt.classList.add('card-fx');
+  const policy = scene.matches('.cm-art, .detail-card, .share-art-frame, .empty-card') ? 'detail' : 'list';
+  scene.dataset.gesture = policy;
+  tilt.dataset.gesture = policy;
   const grade = scene.matches('.mini-card') ? scene : scene.closest('[data-grade]');
   tilt.dataset.grade = grade?.dataset.grade || 'pending';
   if (grade?.dataset.emotion) tilt.dataset.emotion = grade.dataset.emotion;
@@ -56,15 +59,26 @@ function bindCardFoil(scene) {
     tilt.style.setProperty('--card-r', scene.clientWidth * 96 / 1080 + 'px');
   };
   size();
-  const resize = new ResizeObserver(() => { if (active) suppressTap = true; stop(); size(); }); resize.observe(scene);
+  let geometry = [scene.clientWidth, scene.clientHeight];
+  const resize = new ResizeObserver(() => {
+    const next = [scene.clientWidth, scene.clientHeight];
+    if (next.some((value, i) => value !== geometry[i])) { if (active?.moved) suppressTap = true; stop(); geometry = next; size(); }
+  }); resize.observe(scene);
   listen('pointerdown', e => {
     if (e.pointerType !== 'touch' || !e.isPrimary) return;
     suppressTap = false;
-    active = { id: e.pointerId, x: e.clientX, y: e.clientY, time: performance.now(), moved: false };
+    active = { id: e.pointerId, x: e.clientX, y: e.clientY, time: performance.now(), moved: false, direction: null };
     renderLight(e);
   });
   listen('pointermove', e => {
-    if (active?.id === e.pointerId && Math.hypot(e.clientX-active.x, e.clientY-active.y) > 8) active.moved = true;
+    if (active?.id === e.pointerId) {
+      const dx = Math.abs(e.clientX-active.x), dy = Math.abs(e.clientY-active.y);
+      if (Math.hypot(dx,dy) > 8) {
+        active.moved = true;
+        active.direction ||= dx > dy ? 'tilt' : 'scroll';
+      }
+      if (policy === 'list' && active.direction === 'scroll') { reset(); return; }
+    }
     if (e.pointerType === 'mouse' || e.pointerType === 'pen' || e.pointerId === active?.id) renderLight(e);
   });
   function stop() { active = null; reset(); }
@@ -78,11 +92,12 @@ function bindCardFoil(scene) {
   listen('click', e => { if (e.detail && suppressTap) { e.preventDefault(); e.stopImmediatePropagation(); suppressTap = false; } }, true);
   const owner = scene.closest('button, [role="button"], [tabindex]');
   if (owner) {
-    owner.addEventListener('focus', () => { tilt.style.setProperty('--light-x', '50%'); tilt.style.setProperty('--light-y', '50%'); tilt.style.setProperty('--shine', '1'); }, { signal });
+    owner.addEventListener('pointerdown', () => { suppressTap = false; }, { signal, capture: true });
+    owner.addEventListener('focus', () => { if (cardInput !== 'keyboard' || !owner.matches(':focus-visible')) return; tilt.style.setProperty('--light-x', '50%'); tilt.style.setProperty('--light-y', '50%'); tilt.style.setProperty('--shine', '1'); }, { signal });
     owner.addEventListener('blur', stop, { signal });
   }
   function dispose() { controller.abort(); resize.disconnect(); stop(); cardEffects.delete(scene); }
-  cardEffects.set(scene, { dispose, reset: () => { if (active) suppressTap = true; stop(); } });
+  cardEffects.set(scene, { dispose, reset: () => { if (active?.moved) suppressTap = true; stop(); } });
   return dispose;
 }
 function syncCardEffects() {
@@ -101,16 +116,26 @@ function syncCardEffects() {
 let cardInput = matchMedia('(pointer: coarse)').matches ? 'touch' : 'mouse';
 function updateCardHints() {
   const text = cardInput === 'touch' ? '카드를 터치하고 움직이면 포일이 반짝여요' : '카드 위에서 마우스를 움직이면 포일이 반짝여요';
-  document.querySelectorAll('.card-effect-hint').forEach(hint => { if (hint.textContent !== text) hint.textContent = text; });
+  document.querySelectorAll('.card-effect-hint').forEach(hint => {
+    const detail = hint.closest('.cm-stage, .detail-info, .share-preview, .record-top');
+    const message = cardInput === 'touch' ? (detail ? '카드 위에서 움직이면 기울어져요 · 카드 바깥에서 스크롤하세요' : '좌우로 움직이면 포일이 반짝여요 · 위아래로 스크롤하세요') : text;
+    if (hint.textContent !== message) hint.textContent = message;
+  });
 }
 function trackCardInput(e) { const input = e.pointerType === 'touch' ? 'touch' : 'mouse'; if (input !== cardInput) { cardInput = input; updateCardHints(); } }
+document.addEventListener('keydown', e => { if (['Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) { cardInput = 'keyboard'; updateCardHints(); } });
 document.addEventListener('pointerdown', trackCardInput, { passive: true });
 document.addEventListener('pointermove', trackCardInput, { passive: true });
 const resetCardEffects = () => { cardEffects.forEach(effect => effect.reset()); window.DiaryFlipReset?.(); };
 window.addEventListener('cardex-theme-change', resetCardEffects);
 window.addEventListener('blur', resetCardEffects);
 window.addEventListener('resize', resetCardEffects);
-window.visualViewport?.addEventListener('resize', resetCardEffects);
+// Height-only viewport changes (mobile browser chrome) must not cancel a card gesture.
+let cardViewportWidth = innerWidth;
+function resetOnWidthChange() { if (innerWidth !== cardViewportWidth) { cardViewportWidth = innerWidth; resetCardEffects(); } }
+window.removeEventListener('resize', resetCardEffects);
+window.addEventListener('resize', resetOnWidthChange);
+document.addEventListener('scroll', resetCardEffects, true);
 document.addEventListener('visibilitychange', resetCardEffects);
 document.addEventListener('close', e => {
   for (const [scene, effect] of cardEffects) if (e.target.contains(scene)) effect.dispose();
@@ -120,7 +145,9 @@ new MutationObserver(records => {
   // Counter animation and hint text changes do not need a full surface scan.
   if (records.some(record => [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === 1))) syncCardEffects();
 }).observe(document.documentElement, { childList: true, subtree: true });
-window.DiaryFlip = Object.freeze({ bindFoil: bindCardFoil, sync: syncCardEffects, bind(app) {
+window.DiaryFlip = Object.freeze({ bindFoil: bindCardFoil, sync: syncCardEffects,
+clearWithin(root) { if (root) for (const [scene, effect] of cardEffects) if (root.contains(scene)) effect.reset(); },
+bind(app) {
 window.DiaryFlipReset?.();
 syncCardEffects();
 window.DiaryFlipObserver?.disconnect();
@@ -128,6 +155,7 @@ const observer = new ResizeObserver(entries => entries.forEach(({target}) => {
   const scene = target.querySelector('.flip-scene');
   if (!scene) return;
   const width = Math.max(0, Math.min(320, target.clientWidth - 32));
+  if (Math.abs(scene.clientWidth - width) > .5) window.DiaryFlipReset?.();
   scene.style.width = width + 'px';
   scene.style.height = width * 1.4 + 'px'; // 5:7 moment card (soft UI v1.1)
   scene.style.setProperty('--fx-unit', width / 100 + 'px');
@@ -139,9 +167,10 @@ window.removeEventListener("cardex-theme-change",window.DiaryFlipReset);
 window.DiaryFlipReset=()=>resets.forEach(reset=>reset());
 window.addEventListener("cardex-theme-change",window.DiaryFlipReset);
 window.removeEventListener("resize",window.DiaryFlipResizeReset);
-window.DiaryFlipResizeReset=window.DiaryFlipReset;
+window.DiaryFlipResizeReset=resetOnWidthChange;
 window.addEventListener("resize",window.DiaryFlipResizeReset);
 app.querySelectorAll(".flip-scene").forEach(scene=>{
+      scene.dataset.gesture = 'detail';
       const tilt=scene.querySelector(".tilt-layer"), front=scene.querySelector(".flip-front"), rear=scene.querySelector(".flip-back");
       const frontButton=front.querySelector("button"), text=rear.querySelector(".flip-text");
       const rearRim = document.createElement('span'); rearRim.className = 'card-fx-rim'; rearRim.setAttribute('aria-hidden','true'); rear.append(rearRim);

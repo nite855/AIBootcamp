@@ -19,9 +19,8 @@ function slotBest(slot) {
 // the best record's mini card; locked slots a grey "?" frame. The .slot data-* contract is unchanged.
 function catalogSlot(s, all) {
   const t = CardexCore.type(s.type), got = s.records.length > 0, best = got ? slotBest(s) : null;
-  const pressed = !all && state.catalogStage === s.stage;
   const art = got ? miniCard(best.record, "mc-character catalog-character") : lockedMiniCard(`${t.name} ${s.stage}단계`);
-  return `<button type="button" class="slot ${got ? "" : "is-locked"}" data-locked="${!got}"${got ? ` data-grade="stage-${s.stage}" data-emotion="${s.type}"` : ""} data-slot-type="${s.type}" data-stage="${s.stage}" aria-pressed="${pressed}" aria-label="${got ? `${E(t.name)} ${s.stage}단계, 연결 기록 ${s.records.length}편, ${E(dotDate(best.record.recordDate))}, 카드 상세 열기` : `미발견, ${E(t.name)} ${s.stage}단계`}"><span class="slot-thumb">${art}</span></button>`;
+  return `<button type="button" class="slot ${got ? "" : "is-locked"}" data-locked="${!got}"${got ? ` data-grade="stage-${s.stage}" data-emotion="${s.type}"` : ""} data-slot-type="${s.type}" data-stage="${s.stage}" aria-haspopup="dialog" aria-label="${got ? `${E(t.name)} ${s.stage}단계, 연결 기록 ${s.records.length}편, ${E(dotDate(best.record.recordDate))}, 카드 상세 열기` : `미발견, ${E(t.name)} ${s.stage}단계`}"><span class="slot-thumb">${art}</span></button>`;
 }
 // Parent tabs (전체 27 · 긍정 9 · 부정 9 · 중립 9) narrow the board; emotion chips narrow it to one emotion.
 function catalogParent() {
@@ -107,7 +106,12 @@ function bindCatalog() {
     detail.showModal();
     detail.addEventListener("close", () => {
       state.catalogDetail = null;
-      if (detail.isConnected) app.querySelector(state.detailOpener || ".slot")?.focus({ preventScroll: true });
+      state.catalogStage = null;
+      if (detail.isConnected) {
+        const opener = app.querySelector(state.detailOpener || ".slot");
+        opener?.focus({ preventScroll: true });
+        DiaryFlip.clearWithin(opener);
+      }
       detail.remove();
     }, { once: true });
     detail.querySelectorAll("[data-close-detail]").forEach(b => (b.onclick = () => detail.close()));

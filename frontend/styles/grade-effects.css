@@ -404,3 +404,5 @@ html .flip-front .flip-light { background: radial-gradient(circle at var(--light
 @media (max-width:959px) {
   .catalog-head > .card-effect-hint { flex-basis: auto; width: 100%; }
 }
+html [data-gesture="detail"]:not(.flip-scene), html .flip-trigger, html .flip-back :is(.back-band,.back-date,.back-foot) { touch-action: none; }
+html .flip-back, html .flip-text { touch-action: pan-y; }
