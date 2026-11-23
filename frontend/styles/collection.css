@@ -51,8 +51,9 @@
 .catalog-page .catalog-board.is-first-run .catalog-grid-wrap { opacity: .45; -webkit-mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); max-height: 520px; overflow: hidden; }
 .catalog-page .collection-empty { position: absolute; z-index: 2; left: 50%; top: 290px; display: grid; justify-items: center; gap: 10px; width: min(100%, 520px); margin: 0; padding: 36px 24px; border-radius: 0; background: radial-gradient(closest-side, var(--bg, var(--surface)) 55%, transparent); text-align: center; transform: translateX(-50%); }
 .collection-empty h3 { margin: 0; font-size: 22px; font-weight: 500; color: var(--ink); }
-.collection-empty p { margin: 0; color: var(--muted); font-size: 14px; }
-.collection-empty .primary { margin-top: 6px; min-height: 44px; padding: 10px 24px; font-size: 14px; }
+.collection-empty p { margin: 0; color: var(--muted); font-size: 14px; text-align: center; text-wrap: balance; }
+.collection-empty :is(.primary, .secondary) { margin-top: 6px; min-height: 44px; padding: 10px 24px; font-size: 14px; }
+.collection-empty .primary + .secondary { margin-top: 0; }
 .collection-empty small { color: var(--muted); font-size: 12px; }
 
 /* ── Detail (1040×700, radius 40): a 460px soft stage with the card, information on the right ── */

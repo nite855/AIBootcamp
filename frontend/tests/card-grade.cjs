@@ -32,7 +32,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     assert.match(await wait.innerText(), /기록은 잘 저장됐어요/);
     assert.match(await wait.innerText(), /감정 분석이 끝나면 카드가 열려요/);
     assert.deepEqual(await wait.locator('.wait-steps li').evaluateAll(xs => xs.map(x => x.className)), ['is-done', 'is-current', '']);
-    assert.equal(await wait.locator('[aria-current=step]').innerText().then(t => t.trim()), '감정 읽기');
+    assert.match(await wait.locator('[aria-current=step]').innerText().then(t => t.trim()), /^감정 읽기\s*대기$/);
     assert.equal(await page.locator('.card-box').getAttribute('data-reveal'), 'pending');
     assert.equal(await page.locator('.card-info').isVisible(), false);
     assert.equal(await page.locator('.card-info').evaluate(el => el.inert), true);

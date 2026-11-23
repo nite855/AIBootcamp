@@ -133,7 +133,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     assert.match(await page.locator('#feedback').innerText(), /앱 주소를 복사했어요/);
     await page.evaluate(() => { navigator.clipboard.writeText = () => Promise.reject(Error('denied')); });
     await click('share-link');
-    assert.match(await page.locator('#feedback').innerText(), /링크를 복사하지 못했어요/);
+    assert.match(await page.locator('#feedback').innerText(), /앱 주소를 복사하지 못했어요/);
     await click('share-close');
     assert.equal(await page.evaluate(() => DiaryReview.getState().view), 'entry');
 

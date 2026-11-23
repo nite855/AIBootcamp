@@ -39,6 +39,7 @@
 .share-page .share-sentence[hidden] { display: none; }
 .share-page .share-sentence input { min-height: 44px; padding: 8px 14px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); color: var(--ink); font: inherit; font-size: 14px; font-weight: 400; }
 .share-page .share-privacy { margin: 10px 0 0; padding: 0; border-radius: 0; background: transparent; font-size: 12px; font-weight: 500; color: var(--muted); }
+.share-page .share-link-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 .share-page .share-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: auto; padding-top: 24px; }
 .share-page .share-actions > button { width: 100%; min-height: 52px; }
 .share-page .share-actions > button.secondary { border: 0; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); box-shadow: none; }

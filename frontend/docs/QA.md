@@ -332,3 +332,9 @@ UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`.
 - 자동 검사: 공식 빌드, 단위 100/100, `card-grade.cjs`(새 사례: 등급별 배경 층 수·점선·sheen 블렌드, 건너뛰기 44px·펑 즉시 진입·Esc 결과·초점·재생 없음, 움직임 줄이기 안내·정지 카드·진행 막대·2.7초 선행 유지·입자/섬광 없음·`rm-glow`·결과 카드 정적 층), `all-card-effects.cjs`(10테마×6폭), `modal-foil`·`collection`·`simplification`·`card-effects`·`celebrate-popup`·`share-reveal`·`gesture-return`·`moment-card`·`week-calendar`·`browser`(46)·`themes`·`ux-review` 통과.
 - `persistence-browser.cjs`는 173행(기록 뒷면 본문 터치 스크롤 후 뒤집힘 유지)에서 실패하며, 변경 전 HEAD(65304b3) 빌드에서도 같은 위치에서 실패해 이번 변경과 무관한 기존 문제로 기록합니다.
 - 수동 확인 필요: 실기기 OS의 동작 줄이기 설정, 55px 월간 미니카드에서 꺾쇠·반짝임 가독성, 저사양 기기의 3단계 반사광 성능.
+
+## 분석 대기 실사용자 안내 검증 (2026-11-24 묶음 B)
+
+- 범위: 도감 빈 상태 2종(첫 실행·분석 대기)과 제자리 시연 모드 버튼(`preview-catalog`), 통계 분석 대기 배너·요일 라벨, 분석 대기 패널 정지 칩, 공유 "앱 주소 복사"와 안내, 알림 스위치 "준비 중".
+- 자동 검사: 공식 빌드, 단위 100/100, 신규 `pending-ux.cjs`(1440·390·320px: 문구·44px 버튼·대기 패널 애니메이션 0개·실제 저장 후 도감 기록 버튼 없음·통계 배너 1개·요일 "분석 대기/기록 없음"·도감에 머무는 시연 전환·시연 통계 배너 없음·공유 안내 연결·준비 중 배지·가로 넘침 없음), `card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`profile`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view` 통과.
+- 수동 확인 필요: 스크린리더에서 통계 배너(`role="note"`)와 공유 안내(`aria-describedby`) 낭독.

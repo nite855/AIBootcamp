@@ -20,6 +20,12 @@
 .month-pill button:disabled { opacity: .35; }
 .month-pill strong { min-height: 40px; display: inline-grid; place-items: center; padding: 0 18px; border-radius: 999px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-size: 14px; font-weight: 600; }
 
+/* ── 분석 대기 banner (2026-11-24): records saved, none analyzed yet ── */
+.stats-wait-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 14px 20px; border-radius: 20px; background: color-mix(in srgb, var(--tint) 55%, var(--surface)); color: var(--ink); font-size: 14px; line-height: 1.5; }
+.stats-wait-banner b { flex: none; padding: 3px 10px; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 600; }
+.stats-wait-banner span { flex: 1 1 240px; min-width: 0; }
+.stats-wait-banner .quiet { min-height: 44px; padding: 10px 16px; font-size: 13px; }
+
 /* ── Summary tiles (421×200) ── */
 .stats-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .stats-page .stats-card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; gap: 0; height: 200px; min-height: 0; padding: 30px 32px; overflow: visible; }

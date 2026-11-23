@@ -2522,8 +2522,9 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 .catalog-page .catalog-board.is-first-run .catalog-grid-wrap { opacity: .45; -webkit-mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); max-height: 520px; overflow: hidden; }
 .catalog-page .collection-empty { position: absolute; z-index: 2; left: 50%; top: 290px; display: grid; justify-items: center; gap: 10px; width: min(100%, 520px); margin: 0; padding: 36px 24px; border-radius: 0; background: radial-gradient(closest-side, var(--bg, var(--surface)) 55%, transparent); text-align: center; transform: translateX(-50%); }
 .collection-empty h3 { margin: 0; font-size: 22px; font-weight: 500; color: var(--ink); }
-.collection-empty p { margin: 0; color: var(--muted); font-size: 14px; }
-.collection-empty .primary { margin-top: 6px; min-height: 44px; padding: 10px 24px; font-size: 14px; }
+.collection-empty p { margin: 0; color: var(--muted); font-size: 14px; text-align: center; text-wrap: balance; }
+.collection-empty :is(.primary, .secondary) { margin-top: 6px; min-height: 44px; padding: 10px 24px; font-size: 14px; }
+.collection-empty .primary + .secondary { margin-top: 0; }
 .collection-empty small { color: var(--muted); font-size: 12px; }
 
 /* ── Detail (1040×700, radius 40): a 460px soft stage with the card, information on the right ── */
@@ -2615,6 +2616,12 @@ dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; he
 .month-pill button:hover:not(:disabled) { background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); }
 .month-pill button:disabled { opacity: .35; }
 .month-pill strong { min-height: 40px; display: inline-grid; place-items: center; padding: 0 18px; border-radius: 999px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-size: 14px; font-weight: 600; }
+
+/* ── 분석 대기 banner (2026-11-24): records saved, none analyzed yet ── */
+.stats-wait-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 14px 20px; border-radius: 20px; background: color-mix(in srgb, var(--tint) 55%, var(--surface)); color: var(--ink); font-size: 14px; line-height: 1.5; }
+.stats-wait-banner b { flex: none; padding: 3px 10px; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 600; }
+.stats-wait-banner span { flex: 1 1 240px; min-width: 0; }
+.stats-wait-banner .quiet { min-height: 44px; padding: 10px 16px; font-size: 13px; }
 
 /* ── Summary tiles (421×200) ── */
 .stats-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
@@ -2909,6 +2916,7 @@ button.emo-day:hover { transform: translateY(-2px); }
 .profile-page .pref-row + .pref-row { border-top: 1px solid var(--line); }
 .pref-text { display: grid; gap: 4px; min-width: 0; }
 .pref-text strong { font-size: 15px; font-weight: 400; }
+.soon-badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 11px; font-style: normal; font-weight: 600; vertical-align: 2px; }
 .pref-text small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .pref-row > button { flex: none; min-height: 44px; padding: 0 24px; border: 0; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); box-shadow: none; font-size: 15px; font-weight: 500; }
 .notice-note { margin: -6px 0 0; padding-bottom: 14px; font-size: 12px; color: var(--muted); }
@@ -3019,6 +3027,7 @@ button.emo-day:hover { transform: translateY(-2px); }
 .share-page .share-sentence[hidden] { display: none; }
 .share-page .share-sentence input { min-height: 44px; padding: 8px 14px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); color: var(--ink); font: inherit; font-size: 14px; font-weight: 400; }
 .share-page .share-privacy { margin: 10px 0 0; padding: 0; border-radius: 0; background: transparent; font-size: 12px; font-weight: 500; color: var(--muted); }
+.share-page .share-link-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 .share-page .share-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: auto; padding-top: 24px; }
 .share-page .share-actions > button { width: 100%; min-height: 52px; }
 .share-page .share-actions > button.secondary { border: 0; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); box-shadow: none; }
@@ -3332,7 +3341,8 @@ html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2
 .wait-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 13px; font-weight: 600; }
 .wait-steps li.is-done { background: color-mix(in srgb, #2fb67c 16%, var(--surface)); color: #1d7a52; }
 .wait-steps li.is-current { background: var(--ink); color: var(--surface); }
-.wait-steps li.is-current i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: draw-dot 1s ease-in-out infinite; }
+/* 2026-11-24: the model is not connected, so the step reads "대기" and stays still instead of pulsing. */
+.wait-steps li.is-current small { padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 22%, transparent); font-size: 11px; font-weight: 600; }
 @keyframes draw-dot { 50% { opacity: .25; } }
 @media (max-width: 959px) {
   html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 2 / 1; }
@@ -5445,7 +5455,7 @@ function weekdayMood(month) {
   const top = insight && insight.positive !== null ? insight.positive : -1;
   const rows = summary.map((d, i) => {
     const p = d.parents, seg = (key, cls) => p && p[key] > 0 ? `<b class="${cls}" style="--p:${p[key]}"></b>` : "";
-    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : "분석 없음";
+    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : d.count ? "분석 대기" : "기록 없음";
     return `<li class="weekday-row${d.weekday === top ? " is-top" : ""}" style="--i:${i}"><span class="weekday-pct" aria-hidden="true">${p ? Math.round(p.positive * 100) + "%" : "—"}</span><span class="weekday-bar" role="img" aria-label="${WEEKDAYS[d.weekday]}요일, ${text}, ${d.count}편">${seg("positive", "seg-pos")}${seg("neutral", "seg-neu")}${seg("negative", "seg-neg")}</span><span class="weekday-name">${WEEKDAYS[d.weekday]}</span><small>${d.count}편</small></li>`;
   }).join("");
   const parts = insight ? [insight.positive !== null ? `${WEEKDAYS[insight.positive]}요일엔 긍정이` : "", insight.negative !== null ? `${WEEKDAYS[insight.negative]}요일엔 부정이` : ""].filter(Boolean) : [];
@@ -5481,7 +5491,10 @@ function statisticsPanel() {
   const trendBody = stats.valid
     ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">아래 점은 그날 받은 카드의 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
     : `<div class="stats-empty"><p>감정 분석은 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
-  return `${head}${summary}<div class="stats-sections">
+  // Records exist but none is analyzed (real records until the model is connected): one page-level
+  // banner says why the ratio, distribution and weekday panels are empty, so writing more never looks like the fix.
+  const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>분석 대기</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 분석이 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
+  return `${head}${waiting}${summary}<div class="stats-sections">
     <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균</small></div>${trendBody}${insightLine(stats)}</section>
     <section class="panel stats-dist" aria-labelledby="dist-title"><div class="row"><h3 id="dist-title"><span class="wide-only">감정 분포</span><span class="narrow-only">많이 받은 감정</span></h3><small>9종 · 받은 카드 수</small></div>${distributionRows(state.month)}</section>
     <section class="panel stats-mood"><div class="stats-calendar" aria-labelledby="stats-calendar-title"><div class="row"><div><h3 id="stats-calendar-title">${monthShort(state.month)} 감정 달력</h3><small>칸 색 = 그날 받은 카드 · 점 = 카드 단계 · 회색 = 분석 전</small></div></div>${emotionCalendar(state.month)}</div><div class="stats-weekday" aria-labelledby="weekday-title"><div class="row"><div><h3 id="weekday-title">요일별 마음</h3><small>요일마다 긍정 · 중립 · 부정 비율</small></div><p class="weekday-legend" aria-hidden="true"><span><i class="seg-pos"></i>긍정</span><span><i class="seg-neu"></i>중립</span><span><i class="seg-neg"></i>부정</span></p></div>${weekdayMood(state.month)}</div></section>
@@ -5611,7 +5624,13 @@ function catalogPanel() {
     grid = `<p class="muted">${E(t.name)} · ${CardexCore.parent(t.parent).name} · 3칸 중 ${visible.filter(s => s.records.length).length}칸 수집 · 카드를 누르면 카드 상세가 열려요</p><div class="catalog-grid collection-grid is-type">${visible.map(s => catalogSlot(s, false)).join("")}</div>${selected && !selected.records.length ? '<p role="status">아직 만나지 않은 캐릭터예요.</p>' : ""}`;
   }
   // First run (Figma "도감 · 첫 실행"): the locked grid fades under a veil with one call to action.
-  const empty = found ? "" : `<div class="collection-empty" role="status"><h3>아직 모은 카드가 없어요</h3><p>하루를 기록하면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${btn("write", "첫 기록 남기기", "primary")}${state.mode === "real" ? '<small>프로필 › 시연 모드에서 미리 볼 수 있어요</small>' : ""}</div>`;
+  // Real records stay "분석 대기" until the model is connected, so the copy never promises a card per
+  // record; writers who already saved get the waiting count and a direct way into the demo binder.
+  const saved = state.mode === "real" ? activeRecords().length : 0;
+  const demo = state.mode === "real" ? btn("preview-catalog", "시연 모드로 미리 보기", saved ? "primary" : "secondary") : "";
+  const empty = found ? "" : saved
+    ? `<div class="collection-empty" role="status" data-empty="waiting"><h3>카드가 분석을 기다리고 있어요</h3><p>기록 ${saved}편은 잘 저장됐어요. AI 감정 분석이 연결되면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${demo}</div>`
+    : `<div class="collection-empty" role="status" data-empty="first"><h3>아직 모은 카드가 없어요</h3><p>기록을 남기면 감정 분석을 거쳐 그날의 감정 카드가 이 바인더에 꽂혀요${state.mode === "real" ? " · AI 감정 분석은 아직 연결 전이에요" : ""}</p>${btn("write", "첫 기록 남기기", "primary")}${demo}</div>`;
   const progress = found ? `<section class="collect-card" aria-label="수집 현황${state.mode === "example" ? " · 예시 도감" : ""}"><p><strong class="moment-number">${found}</strong><span> / ${slots.length} 수집</span></p><i class="collect-bar" aria-hidden="true"><b style="width:${(found / slots.length) * 100}%"></b></i></section>` : "";
   const legend = '<p class="catalog-legend">단계는 분류 확률 구간(1단계 30~60% 미만 · 2단계 60~90% 미만 · 3단계 90% 이상)이며 감정의 강도가 아니에요. 중립에는 객관적 서술·의문·놀람·당황을 포함해요.</p>';
   return `<div class="catalog-head page-heading"><div class="catalog-heading"><h2 class="catalog-title">모은 마음 카드</h2>${tabs}</div>${progress}</div>${filters}<section class="catalog-board${found ? "" : " is-first-run"}" aria-label="카드 ${slots.length}칸">${empty}<div class="catalog-grid-wrap"${found ? "" : " inert"}>${grid}</div>${found ? legend : ""}</section><div class="catalog-fade" aria-hidden="true"></div>${catalogDetail(slots)}`;
@@ -5904,7 +5923,7 @@ function sealHint() {
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
 function waitPanel() {
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <i aria-hidden="true"></i></li><li>카드 공개</li></ol><h2 id="wait-title">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }
 function revealCard() {
@@ -6126,7 +6145,7 @@ function sharePanel() {
     <section class="panel share-sheet" aria-label="공유 옵션"><h3>공유 옵션</h3><div class="share-options">${SHARE_OPTIONS.map(toggle).join("")}</div>
     <label class="share-sentence" ${state.shareOpts.quote ? "" : "hidden"}><span>인용 문장 <small>비우면 첫 문장 · 최대 ${SHARE_SENTENCE_MAX}자</small></span><input id="share-sentence" type="text" maxlength="${SHARE_SENTENCE_MAX}" placeholder="${E(auto || "인용할 문장을 적어 보세요")}" value="${E(state.shareSentence)}"></label>
     <p class="share-privacy">인용 문장 말고 기록 본문은 이미지에 들어가지 않아요</p>
-    <div class="share-actions">${btn("share-download", "이미지로 저장", "primary", state.busy ? "disabled" : "")}${btn("share-story", "인스타그램 스토리로 공유", "secondary", state.busy ? "disabled" : "")}${btn("share-link", "링크 복사", "secondary")}</div><div class="share-foot"><small>${canDeviceShare() ? "스토리는 기기 공유 창으로 보내요." : "스토리 이미지는 저장한 뒤 인스타그램에서 올려 주세요."}</small>${btn("share-close", "닫기", "quiet")}</div></section></div></section>`;
+    <div class="share-actions">${btn("share-download", "이미지로 저장", "primary", state.busy ? "disabled" : "")}${btn("share-story", "인스타그램 스토리로 공유", "secondary", state.busy ? "disabled" : "")}${btn("share-link", "앱 주소 복사", "secondary", 'aria-describedby="share-link-note"')}</div><p class="share-link-note" id="share-link-note">앱 주소만 복사돼요 · 받는 사람에게 내 카드나 기록은 보이지 않아요</p><div class="share-foot"><small>${canDeviceShare() ? "스토리는 기기 공유 창으로 보내요." : "스토리 이미지는 저장한 뒤 인스타그램에서 올려 주세요."}</small>${btn("share-close", "닫기", "quiet")}</div></section></div></section>`;
 }
 async function svgToPNG(svg, width, height) {
   await document.fonts.ready;
@@ -6182,8 +6201,8 @@ async function shareAction(a) {
     const link = location.href.split("#")[0];
     try {
       await navigator.clipboard.writeText(link);
-      state.error = false; state.status = "앱 주소를 복사했어요. 카드별 링크는 아직 없어요."; showToast("링크를 복사했어요");
-    } catch { state.error = true; state.status = "링크를 복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요: " + link; }
+      state.error = false; state.status = "앱 주소를 복사했어요. 카드별 링크는 아직 없어요."; showToast("앱 주소를 복사했어요");
+    } catch { state.error = true; state.status = "앱 주소를 복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요: " + link; }
     render(); return true;
   }
   if (a === "share-download" || a === "share-device" || a === "share-story") {
@@ -6235,7 +6254,7 @@ function profilePanel() {
   }).join("");
   // Figma prefs panel: one row per setting, a hairline between rows.
   const pref = (title, sub, control, extra = "") => `<div class="pref-row"${extra}><span class="pref-text"><strong>${title}</strong><small>${sub}</small></span>${control}</div>`;
-  const notice = (key, title, sub) => `<label class="switch-row pref-row notice-row"><span class="pref-text"><strong>${title}</strong><small>${sub}</small></span><input type="checkbox" role="switch" data-notice="${key}" ${profile[key] ? "checked" : ""}></label>`;
+  const notice = (key, title, sub) => `<label class="switch-row pref-row notice-row"><span class="pref-text"><strong>${title} <em class="soon-badge">준비 중</em></strong><small>${sub}</small></span><input type="checkbox" role="switch" data-notice="${key}" ${profile[key] ? "checked" : ""}></label>`;
   const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group"><h2 id="${id}-title" class="sr-only" tabindex="-1">${title}</h2>${body}</div>`;
   const card = `<section class="panel profile-card" aria-labelledby="profile-name"><span class="profile-avatar" style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(profile.icon)}</span><div class="profile-who"><h3 id="profile-name">${E(profile.name)}</h3><p class="profile-days">${s.days ? `moment와 함께한 지 ${s.days}일째` : "첫 기록을 남기면 함께한 날을 세어 드려요"}</p></div><dl class="profile-stats"><div><dt>기록</dt><dd>${s.records}</dd></div><div><dt>카드</dt><dd>${s.cards}</dd></div><div><dt>연속</dt><dd>${s.streak}일</dd></div></dl><button type="button" class="secondary" data-profile-edit aria-haspopup="dialog" aria-label="프로필 편집"><span class="wide-only">프로필 편집</span><span class="narrow-only" aria-hidden="true">편집 ›</span></button></section>`;
   const nav = `<nav class="profile-nav" aria-labelledby="profile-nav-label"><p class="profile-nav-label" id="profile-nav-label">설정</p>${PROFILE_SECTIONS.map(([id, label]) => `<button type="button" class="profile-jump" data-profile-jump="${id}"${id === profileSection ? ' aria-current="true"' : ""}>${label}</button>`).join("")}</nav>`;
@@ -6244,7 +6263,7 @@ function profilePanel() {
     <div class="profile-grid"><aside class="profile-side">${card}${nav}</aside><div class="profile-main">
     <section class="panel settings-col" id="settings-theme" aria-labelledby="theme-title"><div class="settings-col-head"><h2 id="theme-title" tabindex="-1">테마</h2><p>다이어리의 분위기를 바꿀 수 있어요. 카드 색은 그대로 유지돼요.</p></div><div class="theme-swatches">${swatches}</div></section>
     <section class="panel prefs-panel" aria-label="설정">
-    ${group("notice", "알림", notice("notifyDaily", "매일 기록 알림", "오후 9:00에 오늘의 기록을 알려드려요") + notice("notifyAnalysis", "카드 분석 완료 알림", "카드가 열리면 알려드려요") + '<p class="notice-note">이 기기에서는 아직 알림을 보낼 수 없어요. 설정만 저장해 두었다가 알림이 준비되면 사용해요.</p>')}
+    ${group("notice", "알림", notice("notifyDaily", "매일 기록 알림", "켜 두면 알림이 준비된 뒤 오후 9:00에 알려드릴게요") + notice("notifyAnalysis", "카드 분석 완료 알림", "켜 두면 알림이 준비된 뒤 카드가 열릴 때 알려드릴게요") + '<p class="notice-note">이 기기에서는 아직 알림을 보낼 수 없어요. 설정만 저장해 두었다가 알림이 준비되면 사용해요.</p>')}
     ${group("records", "기록", `<label class="switch-row pref-row"><span class="pref-text"><strong>시연 모드</strong><small>합성 데이터로 화면을 보여줘요 · 실제 기록과 섞이지 않아요</small></span><input type="checkbox" role="switch" data-action="preview" ${state.mode === "example" ? "checked" : ""}></label>`)}
     ${group("data", "데이터", pref("모든 기록 삭제", "기록은 이 브라우저에만 보관돼요. 계정·동기화·서버 백업은 없어요", btn("delete-all", deleteLabel, "secondary danger", `aria-label="${state.clearAllConfirm ? "정말 모든 기록 삭제" : "모든 기록 삭제"}"`)))}
     ${group("about", "정보", pref("앱 정보 · 글꼴 라이선스", 'AI 감정 분석은 아직 연결 전이라 실제 기록은 "분석 대기"로 보여요 · Moment Sans(Pretendard 기반), Bricolage Grotesque (SIL OFL)', '<button type="button" class="secondary" data-profile-action="license" aria-haspopup="dialog">라이선스 보기</button>'))}
@@ -6416,6 +6435,9 @@ function bindProfile() {
   }
   async function action(a) {
     if (loading) return;
+    // "시연 모드로 미리 보기" on the empty catalog switches modes but stays on the catalog.
+    const previewTo = a === "preview-catalog" ? "catalog" : "records";
+    if (a === "preview-catalog") a = "preview";
     let opener = document.activeElement;
     const popover = opener?.closest('[popover]');
     if (popover) { opener = app.querySelector(`[popovertarget="${popover.id}"]`); popover.hidePopover(); opener?.focus(); }
@@ -6486,7 +6508,8 @@ function bindProfile() {
         activeRecords().find((r) => DiaryCards.resolve(r).status === "ready")
           ?.id || null;
       state.view = "history";
-      state.archiveTab = "records";
+      state.archiveTab = previewTo;
+      state.catalogDetail = null;
       state.page = 0;
       state.cardFilter = null;
       state.dateFilter = "";

@@ -70,7 +70,7 @@ function sealHint() {
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
 function waitPanel() {
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <i aria-hidden="true"></i></li><li>카드 공개</li></ol><h2 id="wait-title">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }
 function revealCard() {
@@ -292,7 +292,7 @@ function sharePanel() {
     <section class="panel share-sheet" aria-label="공유 옵션"><h3>공유 옵션</h3><div class="share-options">${SHARE_OPTIONS.map(toggle).join("")}</div>
     <label class="share-sentence" ${state.shareOpts.quote ? "" : "hidden"}><span>인용 문장 <small>비우면 첫 문장 · 최대 ${SHARE_SENTENCE_MAX}자</small></span><input id="share-sentence" type="text" maxlength="${SHARE_SENTENCE_MAX}" placeholder="${E(auto || "인용할 문장을 적어 보세요")}" value="${E(state.shareSentence)}"></label>
     <p class="share-privacy">인용 문장 말고 기록 본문은 이미지에 들어가지 않아요</p>
-    <div class="share-actions">${btn("share-download", "이미지로 저장", "primary", state.busy ? "disabled" : "")}${btn("share-story", "인스타그램 스토리로 공유", "secondary", state.busy ? "disabled" : "")}${btn("share-link", "링크 복사", "secondary")}</div><div class="share-foot"><small>${canDeviceShare() ? "스토리는 기기 공유 창으로 보내요." : "스토리 이미지는 저장한 뒤 인스타그램에서 올려 주세요."}</small>${btn("share-close", "닫기", "quiet")}</div></section></div></section>`;
+    <div class="share-actions">${btn("share-download", "이미지로 저장", "primary", state.busy ? "disabled" : "")}${btn("share-story", "인스타그램 스토리로 공유", "secondary", state.busy ? "disabled" : "")}${btn("share-link", "앱 주소 복사", "secondary", 'aria-describedby="share-link-note"')}</div><p class="share-link-note" id="share-link-note">앱 주소만 복사돼요 · 받는 사람에게 내 카드나 기록은 보이지 않아요</p><div class="share-foot"><small>${canDeviceShare() ? "스토리는 기기 공유 창으로 보내요." : "스토리 이미지는 저장한 뒤 인스타그램에서 올려 주세요."}</small>${btn("share-close", "닫기", "quiet")}</div></section></div></section>`;
 }
 async function svgToPNG(svg, width, height) {
   await document.fonts.ready;
@@ -348,8 +348,8 @@ async function shareAction(a) {
     const link = location.href.split("#")[0];
     try {
       await navigator.clipboard.writeText(link);
-      state.error = false; state.status = "앱 주소를 복사했어요. 카드별 링크는 아직 없어요."; showToast("링크를 복사했어요");
-    } catch { state.error = true; state.status = "링크를 복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요: " + link; }
+      state.error = false; state.status = "앱 주소를 복사했어요. 카드별 링크는 아직 없어요."; showToast("앱 주소를 복사했어요");
+    } catch { state.error = true; state.status = "앱 주소를 복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요: " + link; }
     render(); return true;
   }
   if (a === "share-download" || a === "share-device" || a === "share-story") {

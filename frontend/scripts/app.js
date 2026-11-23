@@ -362,6 +362,9 @@
   }
   async function action(a) {
     if (loading) return;
+    // "시연 모드로 미리 보기" on the empty catalog switches modes but stays on the catalog.
+    const previewTo = a === "preview-catalog" ? "catalog" : "records";
+    if (a === "preview-catalog") a = "preview";
     let opener = document.activeElement;
     const popover = opener?.closest('[popover]');
     if (popover) { opener = app.querySelector(`[popovertarget="${popover.id}"]`); popover.hidePopover(); opener?.focus(); }
@@ -432,7 +435,8 @@
         activeRecords().find((r) => DiaryCards.resolve(r).status === "ready")
           ?.id || null;
       state.view = "history";
-      state.archiveTab = "records";
+      state.archiveTab = previewTo;
+      state.catalogDetail = null;
       state.page = 0;
       state.cardFilter = null;
       state.dateFilter = "";

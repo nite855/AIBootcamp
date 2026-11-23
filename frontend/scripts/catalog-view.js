@@ -47,7 +47,13 @@ function catalogPanel() {
     grid = `<p class="muted">${E(t.name)} · ${CardexCore.parent(t.parent).name} · 3칸 중 ${visible.filter(s => s.records.length).length}칸 수집 · 카드를 누르면 카드 상세가 열려요</p><div class="catalog-grid collection-grid is-type">${visible.map(s => catalogSlot(s, false)).join("")}</div>${selected && !selected.records.length ? '<p role="status">아직 만나지 않은 캐릭터예요.</p>' : ""}`;
   }
   // First run (Figma "도감 · 첫 실행"): the locked grid fades under a veil with one call to action.
-  const empty = found ? "" : `<div class="collection-empty" role="status"><h3>아직 모은 카드가 없어요</h3><p>하루를 기록하면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${btn("write", "첫 기록 남기기", "primary")}${state.mode === "real" ? '<small>프로필 › 시연 모드에서 미리 볼 수 있어요</small>' : ""}</div>`;
+  // Real records stay "분석 대기" until the model is connected, so the copy never promises a card per
+  // record; writers who already saved get the waiting count and a direct way into the demo binder.
+  const saved = state.mode === "real" ? activeRecords().length : 0;
+  const demo = state.mode === "real" ? btn("preview-catalog", "시연 모드로 미리 보기", saved ? "primary" : "secondary") : "";
+  const empty = found ? "" : saved
+    ? `<div class="collection-empty" role="status" data-empty="waiting"><h3>카드가 분석을 기다리고 있어요</h3><p>기록 ${saved}편은 잘 저장됐어요. AI 감정 분석이 연결되면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${demo}</div>`
+    : `<div class="collection-empty" role="status" data-empty="first"><h3>아직 모은 카드가 없어요</h3><p>기록을 남기면 감정 분석을 거쳐 그날의 감정 카드가 이 바인더에 꽂혀요${state.mode === "real" ? " · AI 감정 분석은 아직 연결 전이에요" : ""}</p>${btn("write", "첫 기록 남기기", "primary")}${demo}</div>`;
   const progress = found ? `<section class="collect-card" aria-label="수집 현황${state.mode === "example" ? " · 예시 도감" : ""}"><p><strong class="moment-number">${found}</strong><span> / ${slots.length} 수집</span></p><i class="collect-bar" aria-hidden="true"><b style="width:${(found / slots.length) * 100}%"></b></i></section>` : "";
   const legend = '<p class="catalog-legend">단계는 분류 확률 구간(1단계 30~60% 미만 · 2단계 60~90% 미만 · 3단계 90% 이상)이며 감정의 강도가 아니에요. 중립에는 객관적 서술·의문·놀람·당황을 포함해요.</p>';
   return `<div class="catalog-head page-heading"><div class="catalog-heading"><h2 class="catalog-title">모은 마음 카드</h2>${tabs}</div>${progress}</div>${filters}<section class="catalog-board${found ? "" : " is-first-run"}" aria-label="카드 ${slots.length}칸">${empty}<div class="catalog-grid-wrap"${found ? "" : " inert"}>${grid}</div>${found ? legend : ""}</section><div class="catalog-fade" aria-hidden="true"></div>${catalogDetail(slots)}`;
