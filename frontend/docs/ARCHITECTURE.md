@@ -50,6 +50,6 @@ Figma "Prototype · 데스크톱 v1.1"로 전면 개편했습니다. 화면별 �
 
 - 카드 화면(`app.js` `panel()`·`cardArea()`, `share-view.js` `cardInfo`·`sealHint`): `.card-stage` 무대가 카드와 연출을 감싸는 1열 구조입니다. 스타일은 `grade-effects.css`에 있습니다.
 - 도감 상세(`catalog-view.js`)의 "도감에 넣기"는 `card-catalog` 동작으로, 토스트를 띄운 뒤 상세를 엽니다.
-- 공유(`share-view.js`): `shareDefaults()`의 `hideProb`가 `true`입니다. 모바일 뒤로 링크(`data-share-back`)는 `share-close` 처리 경로를 그대로 씁니다.
+- 공유(`share-view.js`): `shareDefaults()`의 `prob`("분석 확률 표시", 2026-11-24 이전 `hideProb`)가 `false`입니다. 모바일 뒤로 링크(`data-share-back`)는 `share-close` 처리 경로를 그대로 씁니다.
 - 프로필(`profile-view.js`): 설정 묶음(`#settings-notice`·`records`·`data`·`about`)은 `.prefs-panel` 하나 안에 있습니다. 각 묶음에는 메뉴 이동 시 포커스를 받는 sr-only 제목이 있습니다. 선택한 메뉴는 모듈 변수 `profileSection`에 기억합니다.
 - 테마 장식(`theme-decor.css`): 캔디 별과 첫눈 눈송이는 1440×900 SVG 한 장(`assets/themes/candy-stars.svg`·`mist-snow.svg`)으로 바뀌었습니다. 모눈 페이지 라벨(`.diary-page`)은 `home-view.js`가 날짜 줄에 넣고, CSS가 모눈 테마에서만 보여 줍니다.

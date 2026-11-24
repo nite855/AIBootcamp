@@ -65,11 +65,12 @@
 .done-actions .secondary { background: var(--surface); }
 /* Save failure: a pale pink pill with a round "!" mark; the draft note sits under the panel. */
 .save-error, .save-note { display: none; margin: 0; }
-.write-editor[data-storage-error="true"] .write-bar { background: #fbe6ea; }
+/* Theme tokens (2026-11-24): the bar follows each theme's --error and --ink, dark themes included. */
+.write-editor[data-storage-error="true"] .write-bar { background: color-mix(in srgb, var(--error, #d64561) 14%, var(--surface)); }
 .write-editor[data-storage-error="true"] :is(.status-dot, .write-status) { display: none; }
-.write-editor[data-storage-error="true"] .save-error { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; color: #111114; font-size: 13px; line-height: 1.45; }
+.write-editor[data-storage-error="true"] .save-error { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; color: var(--ink); font-size: 13px; line-height: 1.45; }
 .write-editor[data-storage-error="true"] .save-error strong { font-weight: 600; }
-.error-mark { display: grid; flex: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--blue); color: #fff; font-family: var(--font-display); font-size: 12px; font-weight: 700; }
+.error-mark { display: grid; flex: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--error, #d64561); color: #fff; font-family: var(--font-display); font-size: 12px; font-weight: 700; }
 .save-error .storage-details { min-height: 32px; padding: 0 2px; border: 0; background: transparent; color: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; opacity: .75; }
 .write-main > .write-editor[data-storage-error="true"] + .save-note { display: block; margin: 12px 24px 0; color: var(--muted-bg, var(--muted)); font-size: 13px; }
 .write-main > #privacy { margin: 8px 16px 0; font-size: 12px; line-height: 1.35; color: var(--muted-bg, var(--muted)); }
@@ -116,7 +117,10 @@
 /* The stage is 420px at 900px tall screens and shrinks on shorter ones (1366×768) so the week rail
    stays above the fold; card sizes follow the stage height (container query units). */
 .write-side .today-panel { position: relative; display: grid; grid-template-rows: auto auto; align-content: start; padding: 0 0 32px; overflow: hidden; }
-.today-stage { position: relative; display: block; height: clamp(240px, calc(100vh - 480px), 420px); container-type: size; }
+/* Heights inside the zoomed desktop stage use the unzoomed viewport (--stage-vh = app height / zoom),
+   like layout.css; a bare 100vh grew with the zoom on 1920×1080 and wider screens (2026-11-24). */
+.write-workspace { --stage-vh: calc(var(--app-height, 100vh) / var(--stage-zoom, 1)); }
+.today-stage { position: relative; display: block; height: clamp(240px, calc(var(--stage-vh, 100vh) - 480px), 420px); container-type: size; }
 .today-stage .stage-glow { top: 52%; width: 85.7cqh; height: 85.7cqh; }
 .fan-card, .fan-center, .today-card { position: absolute; left: 50%; }
 .fan-card { top: 21.9cqh; width: 45.7cqh; aspect-ratio: 5 / 7; border-radius: 19px; opacity: .6; box-shadow: var(--soft-shadow-sm); }
@@ -133,7 +137,7 @@
 .write-side[data-view="month"] .today-panel { display: none; }
 
 /* ── First run: "카드는 이렇게 모여요" fills the side column (480×758) ── */
-.how-panel { position: relative; display: grid; align-content: start; min-height: min(758px, calc(100vh - 136px)); padding: 48px 40px 40px; overflow: hidden; }
+.how-panel { position: relative; display: grid; align-content: start; min-height: min(758px, calc(var(--stage-vh, 100vh) - 136px)); padding: 48px 40px 40px; overflow: hidden; }
 .how-stage { position: relative; display: grid; place-items: center; height: 286px; }
 .how-stage .stage-glow { width: 300px; height: 300px; }
 .how-stage .mini-card { position: relative; width: 204px; box-shadow: 0 17px 34px -11px rgb(89 77 115 / .18); }
@@ -183,7 +187,7 @@ button.day-card:hover { transform: translateY(-2px); }
 }
 .month-count, .month-hint { display: none; }
 .write-side[data-view="month"] { align-content: stretch; }
-.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(756px, calc(100vh - 136px)); padding: 26px 36px 24px; }
+.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(756px, calc(var(--stage-vh, 100vh) - 136px)); padding: 26px 36px 24px; }
 .write-side[data-view="month"] .calendar-head { margin-left: -8px; margin-right: -12px; }
 .write-side[data-view="month"] .calendar-title { font-size: 17px; }
 .month-cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px 12px; align-content: start; }
@@ -244,7 +248,8 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .recent-panel { margin-top: 2px; }
   .recent-head { justify-content: flex-end; padding-left: 4px; }
   .recent-head h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .write-main > #privacy:not(.limit-note) { display: none; }
+  /* Phones keep the storage warning too (2026-11-24), as one small line. */
+  .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 11px; }
   .write-side[data-view="month"] .streak-chip { display: none; }
   .how-panel { min-height: 0; padding: 28px 24px; }
   .how-stage { height: 200px; }

@@ -24,7 +24,7 @@
     shareFrom: "record",
     shareFormat: "card",
     shareSentence: "",
-    shareOpts: { quote: true, date: true, name: true, hideProb: false },
+    shareOpts: { quote: true, date: true, name: true, prob: false },
     revealed: {},
     pendingReveal: null,
     cardFilter: null,
@@ -262,7 +262,13 @@
 
   // #feedback is redrawn on every render, so it is only the visible copy. A new status is spoken once from
   // the live regions outside #app (#announcer polite, #alerter for errors), which re-renders never recreate.
-  let spokenStatus = "";
+  let spokenStatus = "", lastScreen = null;
+  // Browser tab / history title per screen (2026-11-24): the brand button's label used to be the only name.
+  function screenTitle() {
+    const page = state.view === "write" ? "기록" : state.view === "settings" ? "프로필" : state.view === "share" ? "카드 공유"
+      : state.view === "entry" ? "카드" : state.archiveTab === "stats" ? "통계" : state.archiveTab === "catalog" ? "도감" : "지난 기록";
+    return `${page} · 오늘의 모먼트`;
+  }
   function speakStatus() {
     if (!state.status) { spokenStatus = ""; return; }
     if (state.status === spokenStatus) return;
@@ -281,6 +287,12 @@
     const openDetails = new Set([...app.querySelectorAll("details[open] > summary")].map(el => el.textContent));
     app.innerHTML = `<div class="shell"><div class="app-scenery" aria-hidden="true"></div><header>${mainNavigation()}</header><main id="main-content" class="workspace ${state.view === "write" ? "write-workspace" : ""}" data-view="${state.view}" data-tab="${currentTab()}">${state.view === "write" ? homeView() : panel()}</main><dialog id="card-modal" class="card-modal" aria-labelledby="card-modal-title"></dialog><dialog id="info-dialog" class="read-dialog" aria-labelledby="info-title"><h2 id="info-title"></h2><p id="info-copy"></p><div class="row"><button type="button" class="quiet" data-next-prompt hidden>다른 질문</button><button type="button" class="quiet" data-close-info>닫기</button></div></dialog><dialog id="confirm-dialog" class="read-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title">삭제 확인</h2><p id="confirm-copy"></p><div class="row"><button type="button" class="quiet" data-confirm="cancel" autofocus>취소</button><button type="button" class="primary" data-confirm="accept">삭제</button></div></dialog><dialog id="read-full-dialog" class="read-dialog" aria-labelledby="full-title"><div class="full-heading"><div><p class="full-date muted"></p><h2 id="full-title">그날의 기록</h2></div><form method="dialog"><button type="submit" class="quiet">닫기</button></form></div><div class="full-text" tabindex="0"></div></dialog><div><p id="feedback" class="status ${state.error ? "error" : ""}">${E(state.status)}</p><footer><span>EVERY DAY IS A LITTLE ART.</span><span>나만의 속도로 기록해요 ✧</span></footer></div></div>`;
     speakStatus();
+    // A new screen opens at the top: the window kept the previous screen's scroll, so phones could open a
+    // card page with the card's top cut off (2026-11-24). Re-renders of the same screen keep their scroll.
+    const screen = `${state.view}:${state.view === "history" ? state.archiveTab : ""}:${state.view === "entry" ? state.selected : ""}`;
+    if (lastScreen !== null && screen !== lastScreen) window.scrollTo(0, 0);
+    lastScreen = screen;
+    document.title = screenTitle();
     app.querySelectorAll("[popover]").forEach(el => el.addEventListener("toggle", e => { if (e.newState === "closed") app.querySelector(`[popovertarget="${el.id}"]`)?.focus(); }));
     app
       .querySelectorAll("[data-action]")
@@ -389,7 +401,7 @@
     if (storeReady) schedulePersist();
     return true;
   }
-  // A failed save stays on the editor so the error and "저장 재시도" remain in place.
+  // A failed save stays on the editor so the error and "다시 시도" remain in place.
   function openSavedCard() {
     const record = state.sessions.find((x) => x.id === state.currentEntryId);
     if (!record) return;
@@ -668,7 +680,7 @@
       if (deleted.mode === "real" && deleted.currentEntryId === deleted.entry.id) { state.currentEntryId = deleted.currentEntryId; state.savedText = deleted.savedText; }
       state.error = false;
       state.status = "삭제한 기록을 되돌렸어요.";
-      if (deleted.mode === "real") { markChanged(); if (!await persist()) state.status = "되돌린 기록을 저장하지 못했어요. 저장 재시도를 눌러 주세요."; }
+      if (deleted.mode === "real") { markChanged(); if (!await persist()) state.status = "되돌린 기록을 저장하지 못했어요. 다시 시도를 눌러 주세요."; }
       render(); // speakStatus() announces the result
       app.querySelector("h1,h2")?.focus?.();
     };

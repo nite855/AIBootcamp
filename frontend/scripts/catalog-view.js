@@ -55,7 +55,8 @@ function catalogPanel() {
     ? `<div class="collection-empty" role="status" data-empty="waiting"><h3>카드가 분석을 기다리고 있어요</h3><p>기록 ${saved}편은 잘 저장됐어요. AI 감정 분석이 연결되면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${demo}</div>`
     : `<div class="collection-empty" role="status" data-empty="first"><h3>아직 모은 카드가 없어요</h3><p>기록을 남기면 감정 분석을 거쳐 그날의 감정 카드가 이 바인더에 꽂혀요${state.mode === "real" ? " · AI 감정 분석은 아직 연결 전이에요" : ""}</p>${btn("write", "첫 기록 남기기", "primary")}${demo}</div>`;
   const progress = found ? `<section class="collect-card" aria-label="수집 현황${state.mode === "example" ? " · 예시 도감" : ""}"><p><strong class="moment-number">${found}</strong><span> / ${slots.length} 수집</span></p><i class="collect-bar" aria-hidden="true"><b style="width:${(found / slots.length) * 100}%"></b></i></section>` : "";
-  const legend = '<p class="catalog-legend">단계는 분류 확률 구간(1단계 30~60% 미만 · 2단계 60~90% 미만 · 3단계 90% 이상)이며 감정의 강도가 아니에요. 중립에는 객관적 서술·의문·놀람·당황을 포함해요.</p>';
+  // Plain words (2026-11-24): "분류 확률 구간" read as jargon; the bands and the "not intensity" rule stay.
+  const legend = '<p class="catalog-legend">단계는 AI가 그 감정이라고 본 확신 정도예요(1단계 30~60% · 2단계 60~90% · 3단계 90% 이상). 감정이 얼마나 강했는지와는 달라요. 중립에는 사실 위주의 글·궁금함·놀람·당황이 들어가요.</p>';
   return `<div class="catalog-head page-heading"><div class="catalog-heading"><h2 class="catalog-title">모은 마음 카드</h2>${tabs}</div>${progress}</div>${filters}<section class="catalog-board${found ? "" : " is-first-run"}" aria-label="카드 ${slots.length}칸">${empty}<div class="catalog-grid-wrap"${found ? "" : " inert"}>${grid}</div>${found ? legend : ""}</section><div class="catalog-fade" aria-hidden="true"></div>${catalogDetail(slots)}`;
 }
 // Card detail: the 5:7 card, No. and first date, best probability, the three-stage growth row and the records.

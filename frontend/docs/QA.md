@@ -352,4 +352,12 @@ UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`.
 - 자동 검사: 공식 빌드, 단위 100/100, 신규 `data-safety.cjs`(1440·390px, Playwright clock으로 11-24 23:50 → 11-25 → 11-26 → 11-27) 통과. `a11y-pass`·`pending-ux`·`card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`profile`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view`·`record-ui`·`ux`·`ux-p0`·`ux-general`·`ux-retro`·`ux-writing`·`week-calendar`·`modal-foil`·`gesture-return`·`all-card-effects`·`layout-stage`·`benchmark-browser`(52)·`mobile-input`·`keyboard-close`·`compatibility-browser`·`taxonomy-browser`·`moment-card` 통과.
 - `card-effects.cjs`: 묶음 B(60d30fc)부터 375px에서 시간 초과. 프로필 알림 설명이 길어져 시연 스위치 위치가 내려갔고, 그 스크롤이 카드 화면까지 이어져 포인터 지점(카드 위 30%)이 화면 위로 벗어난 것이 원인입니다(앱 동작 오류 아님, e103717 빌드는 통과). 측정 전에 카드를 화면 가운데로 스크롤하도록 테스트를 고쳐 통과했습니다.
 - `persistence-browser.cjs`는 기존과 같은 173행에서만 실패합니다(같은 날 재저장·초안 지우기·전체 삭제 단계는 통과).
-- 참고(미수정): 화면을 바꿔도 이전 스크롤 위치가 남아 모바일에서 카드 위쪽이 잘린 채 열릴 수 있습니다(묶음 E 후보).
+- 참고(미수정): 화면을 바꿔도 이전 스크롤 위치가 남아 모바일에서 카드 위쪽이 잘린 채 열릴 수 있습니다(묶음 E 후보). → 아래 묶음 E에서 수정.
+
+## 화면 다듬기·남은 문제 검증 (2026-11-24 묶음 E)
+
+- 범위: 화면 전환 시 맨 위 스크롤·화면별 `document.title`, 카드 뒷면에서 끊긴 터치를 탭으로 치지 않기(`flip.js`), 카드 없는 도감·통계의 포일 안내 제거, 확대 스테이지 높이(`--stage-vh`), 저장 오류 바 토큰 색, 모바일 보관 경고, 공유 인용문 공백 줄바꿈·말줄임·닫는 따옴표, "분석 확률 표시", 도감 범례 쉬운 말, "다시 시도"·"도감에서 보기" 문구.
+- `persistence-browser.cjs` 173행 실패 원인: 본문 스크롤이 문서 전체 `scroll` 리셋(`DiaryFlipReset`)으로 진행 중 제스처를 지워 pointerup이 무시되고 뒤따른 click이 카드를 뒤집었습니다(앱 수정). 테스트도 이미 끝까지 스크롤된 본문에 200을 넣어 변화가 없던 문제를 0으로 바꿨습니다. 수정 후 4회 연속 통과.
+- 자동 검사: 공식 빌드, 단위 100/100, 신규 `polish.cjs`(375px·1920×1080) 통과, 전체 35종 통과(`persistence-browser`·`card-effects` 포함). 첫 전체 실행에서 `card-grade`·`benchmark-browser`가 빈 저장 버튼에 넣은 `aria-disabled`(Playwright가 비활성으로 판단) 때문에 실패해 그 변경을 되돌렸고, `stats-motion`·`all-card-effects`는 단독 재실행에서 통과(간헐).
+- 의도적 유지: 완료 바 "카드 보기"(카드 화면)와 오늘 카드 탭(모달 미리보기), "임시 분류" 표기, 빈 저장 버튼의 `aria-disabled` 미적용.
+- 수동 확인 필요: 1920×1080 이상 실제 모니터에서 오늘 카드·월간 달력 높이, 실기기에서 카드 뒷면 본문 스크롤 후 손을 뗐을 때 뒤집히지 않는지.

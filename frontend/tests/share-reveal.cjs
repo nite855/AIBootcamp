@@ -89,11 +89,13 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
       assert.ok((await artText()).includes('오랜만에'), 'quote in ' + format);
     }
     // Options: hide probability, date and emotion name; turn the quote off and on.
-    assert.deepEqual(await page.locator('[data-share-opt]').evaluateAll(xs => xs.map(x => [x.dataset.shareOpt, x.checked])), [['quote', true], ['date', true], ['name', true], ['hideProb', true]]);
-    await page.locator('[data-share-opt=hideProb]').uncheck();
-    assert.equal(await page.evaluate(() => document.activeElement.dataset.shareOpt), 'hideProb');
-    assert.match(await artText(), /최고 확률 95%/, 'probability shown when the switch is off');
-    await page.locator('[data-share-opt=hideProb]').check();
+    // 2026-11-24: "분석 확률 표시" (on = shown, default off) replaced the inverted "확률 숨기기".
+    assert.deepEqual(await page.locator('[data-share-opt]').evaluateAll(xs => xs.map(x => [x.dataset.shareOpt, x.checked])), [['quote', true], ['date', true], ['name', true], ['prob', false]]);
+    assert.ok(!(await artText()).includes('최고 확률'), 'probability hidden by default');
+    await page.locator('[data-share-opt=prob]').check();
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.shareOpt), 'prob');
+    assert.match(await artText(), /최고 확률 95%/, 'probability shown when the switch is on');
+    await page.locator('[data-share-opt=prob]').uncheck();
     assert.ok(!(await artText()).includes('최고 확률'), 'probability hidden');
     const datesBefore = await dateTexts(); // header date + the card's own printed date
     await page.locator('[data-share-opt=date]').uncheck();

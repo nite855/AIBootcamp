@@ -167,7 +167,9 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     await touch.waitForFunction(() => document.querySelector('.flip-text').scrollTop > 0);
     assert.equal(await scene.evaluate(e => e.classList.contains('flipped')), true, 'native body scrolling does not flip');
     await scene.dispatchEvent('pointerdown', { pointerType: 'touch', isPrimary: true, pointerId: 9, clientX: 100, clientY: 200, bubbles: true });
-    await touch.locator('.flip-text').evaluate(e => { e.scrollTop = 200; });
+    // The swipe above may already have scrolled the body to its end, where 200 would be no change;
+    // scrolling back to the top is always a change (scrollTop > 0 was asserted above).
+    await touch.locator('.flip-text').evaluate(e => { e.scrollTop = 0; });
     await scene.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 9, bubbles: true });
     await touch.locator('.flip-text').dispatchEvent('click', { detail: 1, bubbles: true });
     assert.equal(await scene.evaluate(e => e.classList.contains('flipped')), true);

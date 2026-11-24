@@ -108,6 +108,9 @@ function syncCardEffects() {
     bindCardFoil(scene);
   });
   document.querySelectorAll('.recent-panel, .catalog-head, .stats-head, .record-top, .share-preview, .card-detail .detail-info').forEach(region => {
+    // Lists without a single open card (first-run catalog, empty or pending months) get no foil hint (2026-11-24).
+    const list = region.closest('.catalog-page, .stats-page');
+    if (list && !list.querySelector('.mini-card:not(.is-locked)')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     if (region.querySelector('.card-effect-hint')) return;
     const hint = document.createElement('p'); hint.className = 'card-effect-hint'; region.append(hint);
   });
@@ -177,7 +180,9 @@ app.querySelectorAll(".flip-scene").forEach(scene=>{
       const effectsOff=()=>false; // card effects always run the same way (2026-11-20)
       let active=null, timer=0, suppressTap=false;
       const { reset, renderLight } = cardPointerLight(scene, tilt);
-      resets.push(() => { clearHold(); active=null; reset(); });
+      // A gesture cut off by a scroll (the body text's own scroll included), resize or blur is never a tap:
+      // without this, the pointerup found no gesture and the following click flipped the card (2026-11-24).
+      resets.push(() => { clearHold(); if (active) suppressTap = true; active=null; reset(); });
       scene.addEventListener('focusin', e => {
         if (!e.target.matches(':focus-visible') || e.target.closest('.flip-text')) return;
         tilt.style.setProperty('--light-x','50%'); tilt.style.setProperty('--light-y','50%'); tilt.style.setProperty('--shine','1');

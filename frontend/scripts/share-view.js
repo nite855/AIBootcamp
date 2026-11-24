@@ -23,10 +23,10 @@ function cardInfo(record) {
     + btn("favorite", record.favorite ? "★ 즐겨찾기 해제" : "☆ 즐겨찾기", "quiet", `aria-pressed="${Boolean(record.favorite)}"`)
     + (state.view === "entry" ? btn("edit-example", "수정하기") : "")
     + btn("delete-example", "삭제", "quiet danger"), "자세히 보기");
-  const main = card.status === "ready" ? btn("card-catalog", "도감에 넣기", "primary") + `<button type="button" class="secondary" data-action="share">공유하기</button>`
+  const main = card.status === "ready" ? btn("card-catalog", "도감에서 보기", "primary") + `<button type="button" class="secondary" data-action="share">공유하기</button>`
     : card.status === "blank" ? `<button type="button" class="primary" data-action="share">공유하기</button>`
     : btn("write", "기록으로 돌아가기", "primary") + btn("catalog", "도감 보기", "secondary");
-  return `<section class="card-info" aria-labelledby="card-info-title"><h2 id="card-info-title">${E(title)}</h2><p class="card-info-copy muted">${E(copy)}</p><div class="card-info-actions">${failed ? btn("retry-save", "저장 재시도", "secondary") : ""}${main}${menu}</div></section>`;
+  return `<section class="card-info" aria-labelledby="card-info-title"><h2 id="card-info-title">${E(title)}</h2><p class="card-info-copy muted">${E(copy)}</p><div class="card-info-actions">${failed ? btn("retry-save", "다시 시도", "secondary", 'aria-label="저장 다시 시도"') : ""}${main}${menu}</div></section>`;
 }
 // Small chip in the stage's top-left corner (Figma "새 카드").
 function stageChip(record) {
@@ -227,8 +227,9 @@ function sealCard(box, key, grade) {
 const SHARE_FORMATS = [["card", "카드 중심"], ["record", "기록 중심"], ["mixed", "카드+기록"]];
 const SHARE_SENTENCE_MAX = MomentShare.QUOTE_MAX;
 // Figma "공유 · 미리보기" copy; the probability is hidden by default (2026-11-21 F6).
-const SHARE_OPTIONS = [["quote", "기록 문장 넣기", "한 줄 인용으로 들어가요"], ["date", "날짜 표시", ""], ["name", "감정 이름 표시", "임시 이름이 그대로 보여요"], ["hideProb", "확률 숨기기", "분석 수치는 공유하지 않아요"]];
-const shareDefaults = () => ({ quote: true, date: true, name: true, hideProb: true });
+const SHARE_OPTIONS = [["quote", "기록 문장 넣기", "한 줄 인용으로 들어가요"], ["date", "날짜 표시", ""], ["name", "감정 이름 표시", "임시 이름이 그대로 보여요"], ["prob", "분석 확률 표시", "기본은 꺼져 있어요 · 감정의 강도가 아닌 분류 확률이에요"]];
+// 2026-11-24: the only inverted switch ("확률 숨기기", on = hidden) became "분석 확률 표시" (on = shown); default still hides it.
+const shareDefaults = () => ({ quote: true, date: true, name: true, prob: false });
 function shareRecord() { return activeRecords().find(r => r.id === state.selected) || null; }
 function shareQuote(record) { return state.shareOpts.quote ? MomentShare.quote(record, state.shareSentence) : ""; }
 // The card SVG without its root element and <desc> (the description carries the probability text).
@@ -238,15 +239,29 @@ function shareCardInner(record) {
 function shareLabels(record) {
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const name = !state.shareOpts.name ? "오늘의 카드" : ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : "빈 카드";
-  const prob = state.shareOpts.hideProb ? "" : `최고 확률 ${Math.round(card.score * 100)}%`;
+  const prob = !state.shareOpts.prob ? "" : `최고 확률 ${Math.round(card.score * 100)}%`;
   return { name, prob, date: state.shareOpts.date ? dotDate(record.recordDate) : "" };
 }
 // Character wrapping for the quote (SVG has no automatic line breaks).
+// Wraps at spaces (a word longer than a line is split by characters). Text that needs more lines ends
+// the last one with "…" and keeps the closing quote, which used to fall off the image (2026-11-24).
 function shareWrap(text, size, max, x, lines = 3) {
-  const out = []; let line = "";
-  for (const ch of Array.from(text)) { if (Array.from(line).length >= max) { out.push(line); line = ""; } line += ch; }
+  const len = s => Array.from(s).length, out = []; let line = "";
+  for (const word of String(text).split(" ")) {
+    const next = line ? `${line} ${word}` : word;
+    if (len(next) <= max) { line = next; continue; }
+    if (line) out.push(line);
+    let rest = Array.from(word);
+    while (rest.length > max) { out.push(rest.slice(0, max).join("")); rest = rest.slice(max); }
+    line = rest.join("");
+  }
   if (line) out.push(line);
-  return out.slice(0, lines).map((l, i) => `<tspan x="${x}" dy="${i ? size * 1.4 : 0}">${E(l)}</tspan>`).join("");
+  if (out.length > lines) {
+    const closing = /”$/.test(text) ? "”" : "";
+    out.length = lines;
+    out[lines - 1] = Array.from(out[lines - 1]).slice(0, Math.max(1, max - 1 - closing.length)).join("").trimEnd() + "…" + closing;
+  }
+  return out.map((l, i) => `<tspan x="${x}" dy="${i ? size * 1.4 : 0}">${E(l)}</tspan>`).join("");
 }
 function shareCard(record, x, y, w, rotate = 0) {
   return `<g transform="rotate(${rotate} ${x + w / 2} ${y + w * .7})"><rect x="${x + 10}" y="${y + 22}" width="${w}" height="${w * 1.4}" rx="${w * .09}" fill="#111114" opacity=".14"/><svg x="${x}" y="${y}" width="${w}" height="${w * 1.4}" viewBox="0 0 1080 1512">${shareCardInner(record)}</svg></g>`;

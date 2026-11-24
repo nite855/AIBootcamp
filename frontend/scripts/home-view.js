@@ -19,7 +19,8 @@ function limitNotice() {
   const s = DiaryCore.recordLimitState(state.mode === "real" ? state.sessions.length : 0);
   if (s.level === "full") return `<p id="privacy" class="privacy-note limit-note" data-level="full">보관 한도 30편에 도달했어요. 새 기록은 정리한 뒤에 남길 수 있어요. ${btn("archive-records", "지난 기록 정리하기")}</p>`;
   if (s.level === "near") return `<p id="privacy" class="privacy-note limit-note" data-level="near">이 브라우저에만 보관돼요 · <strong>${s.remaining}편 남았어요</strong> (최대 30편)</p>`;
-  return `<p id="privacy" class="muted privacy-note">이 브라우저에만 보관돼요 · 최대 30편</p>`;
+  // The data-loss warning used to live only in the "⋯" menu (2026-11-24); it now shows on every width.
+  return `<p id="privacy" class="muted privacy-note">이 브라우저에만 보관돼요 · 브라우저 데이터를 지우면 함께 사라져요 · 최대 30편</p>`;
 }
 // Shown until the first record exists (Figma "기록 · 첫 실행"): replaces today's card and the
 // calendar with "카드는 이렇게 모여요". Step 3 states the real rule (stages come from the
