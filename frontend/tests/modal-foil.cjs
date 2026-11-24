@@ -14,12 +14,12 @@ module.exports = async function modalFoil(browser) {
       await page.waitForFunction(() => DiaryReview.isReady());
       await page.locator('#diary-text').fill('Modal foil pending regression');
       await reveal(page, 'save');
-      await page.locator('[data-card-day]:has(.mini-card.is-locked)').first().click();
+      await page.locator('[data-card-day]:visible:has(.mini-card.is-locked)').first().click();
       assert.equal(await page.locator('#card-modal .cm-tilt.card-fx').count(), 1, 'pending card also has neutral foil');
       assert.equal(await page.locator('#card-modal .cm-foil').isVisible(), true, 'hint visible on every viewport');
       await page.keyboard.press('Escape');
       await reveal(page, 'settings'); await reveal(page, 'preview'); await reveal(page, 'write');
-      const day = page.locator('[data-card-day]:has(.mini-card:not(.is-locked))').first();
+      const day = page.locator('[data-card-day]:visible:has(.mini-card:not(.is-locked))').first();
       await day.click();
       const modal = page.locator('#card-modal[open]');
       await modal.waitFor();

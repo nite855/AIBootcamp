@@ -73,7 +73,7 @@ const assertTarget = async (page, selector, label) => {
 
       // Card modal close and step arrows.
       await reveal(page, 'review-month');
-      await page.locator('[data-card-day]').first().click();
+      await page.locator('[data-card-day]:visible').first().click();
       await page.locator('#card-modal[open]').waitFor();
       await assertTarget(page, '#card-modal .cm-close', `${width}: modal close`);
       await assertTarget(page, '#card-modal .cm-nav .nav-arrow:not(:disabled)', `${width}: modal arrow`);

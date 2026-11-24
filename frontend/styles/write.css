@@ -74,7 +74,7 @@
 .write-editor[data-write-error] .write-status { white-space: normal; }
 .write-editor[data-write-error] .write-error { display: flex; align-items: center; gap: 10px; color: var(--ink); line-height: 1.45; }
 /* Today written: "○○ 카드를 받았어요" + 수정하기 / 카드 보기 replace the save controls. */
-.done-status, .done-actions { display: none; }
+.done-status, .done-actions, .done-card { display: none; }
 .write-editor[data-done="true"] :is(.status-dot, .write-status, .write-actions > .primary) { display: none; }
 .write-editor[data-done="true"] .write-actions { margin-left: 0; }
 .write-editor[data-done="true"] .done-status { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; margin: 0; overflow: hidden; color: var(--ink); font-size: 13px; white-space: nowrap; text-overflow: ellipsis; }
@@ -266,7 +266,13 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
      It now takes its own line and the buttons share the row below, so the bar becomes a rounded block. */
   .write-editor:is([data-done="true"], [data-write-error]) .write-bar { border-radius: 24px; padding: 12px 6px 6px 18px; }
   .write-editor[data-write-error] .write-status { flex: 1 1 100%; }
-  .write-editor[data-done="true"] .done-status { flex: 1 1 100%; white-space: normal; line-height: 1.45; }
+  .write-editor[data-done="true"] .done-status { flex: 1 1 calc(100% - 76px); white-space: normal; line-height: 1.45; }
+  /* Today's card in the done bar (2026-11-24): phones have no today panel, so the day's card sits beside the
+     sentence and opens the card modal. The dot is redundant next to the card itself. */
+  .write-editor[data-done="true"] .done-card { display: block; flex: none; width: 56px; margin: -4px 2px 0 -8px; padding: 0; border: 0; border-radius: 9px; background: none; cursor: pointer; }
+  .write-editor[data-done="true"] .done-card .mini-card { box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 6px 14px rgb(0 0 0 / .08); }
+  .write-editor[data-done="true"] .done-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .write-editor[data-done="true"] .done-status .done-dot { display: none; }
   .write-editor[data-done="true"] .done-actions { flex: 1; margin-left: 0; }
   .write-editor[data-done="true"] .done-actions > * { flex: 1; }
   /* Figma shows no today panel on phones. 2026-11-24 critique: hiding the recent tiles too left "☆ 즐겨찾기 ·
@@ -296,8 +302,8 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .rail-date { font-size: 12px; }
   .how-steps { gap: 22px; }
   .how-steps small { margin-bottom: 2px; }
-  /* Month view replaces the whole record screen (Figma "M · 기록 · 월간 달력"). */
-  .write-workspace:has(.write-side[data-view="month"]) .write-main { display: none; }
+  /* Month view: Figma "M · 기록 · 월간 달력" replaced the whole record screen, so the editor hid behind a view
+     toggle (2026-11-24 critique). The month grid now takes the week rail's place under the editor. */
   .write-side[data-view="month"] .write-calendar { min-height: 0; padding: 18px 18px 20px; }
   .write-side[data-view="month"] .calendar-head { margin: 0; }
   .month-count { display: block; margin: 0; color: var(--muted); font-size: 13px; }

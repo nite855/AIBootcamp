@@ -175,9 +175,12 @@ html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2
 .wait-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .wait-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 13px; font-weight: 600; }
 .wait-steps li.is-done { background: color-mix(in srgb, #2fb67c 16%, var(--surface)); color: #1d7a52; }
-.wait-steps li.is-current { background: var(--ink); color: var(--surface); }
-/* 2026-11-24: the model is not connected, so the step reads "대기" and stays still instead of pulsing. */
-.wait-steps li.is-current small { padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 22%, transparent); font-size: 11px; font-weight: 600; }
+/* 2026-11-24: the model is not connected, so the step reads "대기" and stays still instead of pulsing.
+   "봉인된 편지": the current step is a sealed state (a still wax dot on paper), not an active black chip
+   that reads like work in progress. */
+.wait-steps li.is-current { background: color-mix(in srgb, #e9e3da 70%, var(--surface)); color: var(--ink); }
+.wait-steps li.is-current::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #8c8491, #5f5866 60%, #4b4552); }
+.wait-steps li.is-current small { padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--muted); font-size: 12px; font-weight: 600; }
 @keyframes draw-dot { 50% { opacity: .25; } }
 @media (max-width: 959px) {
   html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 2 / 1; }

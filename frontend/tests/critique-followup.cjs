@@ -56,6 +56,26 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
       assert.equal(await page.locator('.done-actions [data-open]').getAttribute('class'), 'secondary', `${tag}: pending "카드 보기" is secondary`);
       assert.equal(await page.locator('.streak-chip').count(), 0, `${tag}: no "1일 연속" on day one`);
 
+      // 6) Critique 3 (2026-11-24): pending cards are sealed letters, phones carry today's card in the done bar,
+      //    and the phone month view keeps the editor.
+      assert.ok(await page.locator('.mini-card.is-sealed').count() >= 1, `${tag}: pending mini cards are sealed envelopes`);
+      assert.equal(await page.locator('.mini-card.is-sealed .mc-q').count(), 0, `${tag}: no "?" on a sealed card`);
+      const thumb = page.locator('.done-card');
+      assert.equal(await thumb.isVisible(), mobile, `${tag}: today's card in the done bar on phones only`);
+      if (mobile) {
+        const box = await thumb.boundingBox();
+        assert.ok(box.width >= 44 && box.height >= 44, `${tag}: thumbnail is a 44px target`);
+        await thumb.click();
+        await page.locator('#card-modal[open] .art-card[data-card-status="pending"]').waitFor();
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => !document.querySelector('#card-modal[open]'));
+        assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('done-card')), true, `${tag}: focus returns to the thumbnail`);
+      }
+      await page.locator('[data-write-calendar=month]').click();
+      await page.locator('.month-cards').waitFor();
+      assert.ok(await editor.isVisible(), `${tag}: the month view keeps the editor`);
+      await page.locator('[data-write-calendar=week]').click();
+
       // 5) Phones: heading + one tile, 12px floor on the storage note and calendar labels.
       if (mobile) {
         assert.ok(await page.locator('.recent-head h2').isVisible(), `${tag}: recent heading visible`);

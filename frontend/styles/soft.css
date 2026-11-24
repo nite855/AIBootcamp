@@ -264,6 +264,13 @@ footer { display: none; }
 .mini-card .mc-band em { font-family: var(--font-display); font-style: normal; font-weight: 800; font-size: 5.4cqw; }
 .mini-card.is-locked { background: linear-gradient(160deg, #f4f4f7, #dcdce2); color: #4a4a52; }
 .mini-card.is-locked .mc-band { background: #e9e9ee; }
+/* 2026-11-24 "봉인된 편지": a pending card is a sealed envelope on warm paper (never an emotion color);
+   blank and failed cards keep the grey "?". The window keeps its 5:7 proportions so rails do not shift. */
+.mini-card.is-sealed { background: linear-gradient(160deg, #f8f5f0, #e7e1d8); color: #4f4a45; }
+.mini-card.is-sealed .mc-band { background: #f2ede6; }
+.mini-card .mc-envelope { position: relative; width: 66%; aspect-ratio: 68 / 44; border-radius: 4cqw; background: #fbf8f3; box-shadow: 0 1.4cqw 3cqw rgb(60 50 40 / .16); }
+.mini-card .mc-flap { position: absolute; inset: 0 0 auto; height: 58%; border-radius: 4cqw 4cqw 0 0; background: #ece6dc; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.mini-card .mc-seal { position: absolute; left: 50%; top: 58%; width: 24%; aspect-ratio: 1; border-radius: 50%; translate: -50% -50%; background: radial-gradient(circle at 36% 30%, #8c8491, #5f5866 60%, #4b4552); box-shadow: 0 .6cqw 1.2cqw rgb(40 30 40 / .25); }
 
 /* ── Phones: brand + avatar on top, floating three-tab pill at the bottom ── */
 @media (max-width: 959px) {

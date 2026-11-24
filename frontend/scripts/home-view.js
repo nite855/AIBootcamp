@@ -178,7 +178,10 @@ function homeView() {
   const options = more("draft-more", btn("help-write", "무엇을 쓸까요?", "quiet", 'aria-haspopup="dialog"') + btn("clear-draft", "초안 지우기") + '<p class="menu-note">기록은 다른 기기와 동기화되지 않아요. 브라우저 데이터를 삭제하면 기록도 사라져요.</p>', '<span aria-hidden="true">⋯</span><span class="sr-only">작성 옵션</span>');
   // Today written: the bar reports the card and offers 수정하기 / 카드 보기 (typing switches back to save).
   const doneCard = done ? DiaryCards.resolve(done) : null;
-  const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="${doneCard.status === "pending" ? "secondary" : "primary"}" data-open="${E(done.id)}">카드 보기</button></div>` : "";
+  // Phones have no today panel (Figma), so the done bar carries today's card itself (2026-11-24 critique):
+  // a thumbnail that opens the same card modal as the calendar. Hidden on desktop, where the panel shows it.
+  const doneThumb = done ? `<button type="button" class="done-card" data-card-day="${E(done.recordDate)}" aria-label="오늘의 카드 보기 · ${E(cardLabel(done))}"${gradeAttrs(doneCard)}>${miniCard(done)}</button>` : "";
+  const doneBar = done ? `${doneThumb}<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="${doneCard.status === "pending" ? "secondary" : "primary"}" data-open="${E(done.id)}">카드 보기</button></div>` : "";
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>

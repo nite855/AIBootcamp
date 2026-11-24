@@ -174,6 +174,27 @@
     return chars.length > max ? chars.slice(0, max - 1).join("") + "…" : line;
   }
   const dotDate = date => String(date || "").replaceAll("-", ".");
+  // The pending card's window (2026-11-24 "봉인된 편지"): the letter's top edge stands out of an envelope with the
+  // writer's first line on it, and a neutral wax seal carries the day. It promises nothing about the emotion:
+  // the card is kept, sealed, until it can be read. { snippet: false } leaves the letter's lines blank.
+  function sealedLetterSVG(uid, record, snippet) {
+    const [, m, d] = String(record?.recordDate || state.date).split("-").map(Number);
+    const line = snippet ? firstLine(record?.text, 15) : "";
+    return '<defs><radialGradient id="' + uid + '-wax" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#8c8491"/><stop offset=".6" stop-color="#5f5866"/><stop offset="1" stop-color="#4b4552"/></radialGradient>'
+      + '<filter id="' + uid + '-lift" x="150" y="420" width="780" height="560" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#3c3228" flood-opacity=".16"/></filter></defs>'
+      // The letter, standing out of the envelope.
+      + '<rect x="262" y="296" width="556" height="420" rx="26" fill="#fffdf9" stroke="#efe9df" stroke-width="3"/>'
+      + (line ? '<text x="306" y="384" font-weight="600" font-size="40" fill="#111114" fill-opacity=".66">' + E(line) + '</text>' : '<rect x="306" y="356" width="360" height="12" rx="6" fill="#111114" fill-opacity=".1"/>')
+      + '<rect x="306" y="430" width="468" height="10" rx="5" fill="#111114" fill-opacity=".07"/><rect x="306" y="472" width="400" height="10" rx="5" fill="#111114" fill-opacity=".07"/>'
+      // Envelope body, its folds and the closed flap.
+      + '<g filter="url(#' + uid + '-lift)"><rect x="196" y="500" width="688" height="420" rx="38" fill="#fbf8f3"/></g>'
+      + '<path d="M214 902 L478 716 M866 902 L602 716" stroke="#e6dfd4" stroke-width="5" stroke-linecap="round" fill="none"/>'
+      + '<path d="M196 538 Q196 500 234 500 H846 Q884 500 884 538 L574 742 Q540 764 506 742 Z" fill="#f2ede5"/>'
+      // Wax seal with the day ("11.24").
+      + '<circle cx="540" cy="742" r="100" fill="url(#' + uid + '-wax)"/>'
+      + '<circle cx="540" cy="742" r="78" fill="none" stroke="#ffffff" stroke-opacity=".26" stroke-width="4"/>'
+      + '<text x="540" y="760" text-anchor="middle" ' + CARD_FONT + ' font-weight="800" font-size="50" fill="#ffffff" fill-opacity=".92">' + (m || "") + "." + (d || "") + '</text>';
+  }
   // Exported images (card PNG, share preview) leave out the diary's first line: { snippet: false }.
   // The share sheet's "감정 이름 표시" off draws the band without the emotion name: { name: false }.
   function cardSVG(record = currentRecord(), { snippet = true, name: showName = true } = {}) {
@@ -181,7 +202,9 @@
     const type = ready ? CardexCore.type(card.type) : null;
     const name = ready ? type.name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
     const uid = "mc" + (++cardSeq);
-    const c = ready ? cardPalette(card.type) : { base: "#e6e6eb", mix: "#f3f3f6", deep: "#9a9aa4" };
+    // 2026-11-24 "봉인된 편지": a pending card is a sealed letter on warm paper, never an emotion color.
+    const sealed = card.status === "pending";
+    const c = ready ? cardPalette(card.type) : sealed ? { base: "#e9e3da", mix: "#f7f4ef", deep: "#8f877c" } : { base: "#e6e6eb", mix: "#f3f3f6", deep: "#9a9aa4" };
     const date = dotDate(record?.recordDate || state.date);
     let dots = "";
     for (const i of [1, 2, 3]) dots += '<circle cx="' + (868 + i * 30) + '" cy="128" r="9" fill="#111114" fill-opacity="' + (ready && i <= card.stage ? 1 : 0.22) + '"/>';
@@ -193,6 +216,7 @@
     const art = ready
       // Figma glass-window proportions: floor shadow (.35, blur 3.9 → 13.2 at 1080) and the blob frame at 63% of the window.
       ? '<ellipse cx="540" cy="927.2" rx="210.7" ry="32.2" fill="' + c.deep + '" opacity=".35" filter="url(#' + uid + '-floor)"/>' + characterSVG(card.type, 'x="180.2" y="236.1" width="719.8" height="719.8"')
+      : sealed ? sealedLetterSVG(uid, record, snippet)
       : '<text x="540" y="720" text-anchor="middle" ' + CARD_FONT + ' font-weight="800" font-size="250" fill="#ffffff" fill-opacity=".9">?</text>';
     const band = ready
       ? '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".55">' + (showName ? "Emotion" : "Moment") + '</text>'
@@ -200,7 +224,7 @@
         + '<text x="96" y="1366" font-weight="600" font-size="40" fill="#111114" fill-opacity=".72">' + E(snippet ? firstLine(record?.text, 14) : "") + '</text>'
         + '<text x="984" y="1300" text-anchor="end" ' + CARD_FONT + ' font-weight="800" font-size="62" fill="#111114">' + cardNumber(card.type, card.stage) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".6">' + E(date) + '</text>'
-      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">잠긴 카드</text>'
+      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">' + (sealed ? "봉인된 카드" : "잠긴 카드") + '</text>'
         + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
@@ -228,7 +252,9 @@
   }
   function miniCard(record, characterClass = "mc-character") {
     const card = DiaryCards.resolve(record), grade = DiaryCards.grade(card);
-    if (card.status !== "ready") return lockedMiniCard(card.status === "pending" ? "분석 대기" : card.status === "blank" ? "빈 카드" : "분석 실패", grade);
+    // A pending record is a sealed letter (2026-11-24); blank and failed cards keep the locked "?".
+    if (card.status === "pending") return '<span class="mini-card is-locked is-sealed" data-grade="' + grade + '" aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-envelope"><i class="mc-flap"></i><i class="mc-seal"></i></span></span><span class="mc-band"><small>봉인된 카드</small><strong>분석 대기</strong></span></span>';
+    if (card.status !== "ready") return lockedMiniCard(card.status === "blank" ? "빈 카드" : "분석 실패", grade);
     const key = card.type.replace("_", "-");
     let dots = "";
     for (const i of [1, 2, 3]) dots += i <= card.stage ? '<b class="on"></b>' : "<b></b>";
