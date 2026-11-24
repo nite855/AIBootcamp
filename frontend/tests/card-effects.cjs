@@ -56,6 +56,9 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
         for (const other of boxes.slice(1)) boxes[0].forEach((v,i)=>assert.ok(Math.abs(v-other[i])<=1, `${id}/${mode}: card/light/rear geometry`));
         assert.ok(Math.abs(boxes[0][2]/boxes[0][3]-5/7)<.01, 'moment card is 5:7');
         for (const action of ['read-full','favorite','download']) assert.equal(await page.locator(`[data-action=${action}]`).count(),1);
+        // The page keeps the scroll position it was opened with (taller profile copy on phones moved it
+        // past the card top, 2026-11-24); centre the card so the pointer lands on it in every run.
+        await front.evaluate(el => el.scrollIntoView({ block: 'center' }));
         const box = await front.boundingBox();
         const point = { x: box.x + box.width * .7, y: box.y + box.height * .3 };
         if (mobile) {

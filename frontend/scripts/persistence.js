@@ -16,8 +16,8 @@ function syncWriteControls() {
   const editor=app.querySelector('.write-editor');if(!editor)return;
   const failed=Boolean(!loading && (lastStorageError || !storeReady)), button=editor.querySelector('.write-actions>.primary');
   button.dataset.action=lastStorageError?'retry-save':'save';
-  // SAVE_LABEL (home-view.js) shortens to "카드 받기" on phones.
-  button.innerHTML=savingRetry?'재시도 중…':lastStorageError?'다시 시도':SAVE_LABEL;button.disabled=loading||savingRetry;
+  // saveLabel() (home-view.js) names a new record, an edit or a replacement of today's record; phones drop ".save-long".
+  button.innerHTML=savingRetry?'재시도 중…':lastStorageError?'다시 시도':saveLabel();button.disabled=loading||savingRetry;
   editor.dataset.storageError=String(failed);
   editor.querySelector('#save-status').hidden=failed;
   editor.querySelector('[data-action=storage-details]').hidden=!failed;
@@ -82,7 +82,12 @@ async function restore() {
     state.error = true;
     state.status = '저장소를 열지 못했어요. 메모리에서 계속 작성할 수 있어요. ' + error.message;
     showStorage(state.status);
-  } finally { loading = false; render(); }
+  } finally {
+    loading = false;
+    // A snapshot from an earlier day opens on today (app.js rollDate; storage.test.cjs loads this file alone).
+    if (typeof rollDate === 'function' && storeReady) rollDate();
+    render();
+  }
 }
 window.addEventListener('beforeunload', e => {
   if (generation !== savedGeneration) { e.preventDefault(); e.returnValue = ''; }

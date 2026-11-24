@@ -4711,8 +4711,8 @@ function syncWriteControls() {
   const editor=app.querySelector('.write-editor');if(!editor)return;
   const failed=Boolean(!loading && (lastStorageError || !storeReady)), button=editor.querySelector('.write-actions>.primary');
   button.dataset.action=lastStorageError?'retry-save':'save';
-  // SAVE_LABEL (home-view.js) shortens to "카드 받기" on phones.
-  button.innerHTML=savingRetry?'재시도 중…':lastStorageError?'다시 시도':SAVE_LABEL;button.disabled=loading||savingRetry;
+  // saveLabel() (home-view.js) names a new record, an edit or a replacement of today's record; phones drop ".save-long".
+  button.innerHTML=savingRetry?'재시도 중…':lastStorageError?'다시 시도':saveLabel();button.disabled=loading||savingRetry;
   editor.dataset.storageError=String(failed);
   editor.querySelector('#save-status').hidden=failed;
   editor.querySelector('[data-action=storage-details]').hidden=!failed;
@@ -4777,7 +4777,12 @@ async function restore() {
     state.error = true;
     state.status = '저장소를 열지 못했어요. 메모리에서 계속 작성할 수 있어요. ' + error.message;
     showStorage(state.status);
-  } finally { loading = false; render(); }
+  } finally {
+    loading = false;
+    // A snapshot from an earlier day opens on today (app.js rollDate; storage.test.cjs loads this file alone).
+    if (typeof rollDate === 'function' && storeReady) rollDate();
+    render();
+  }
 }
 window.addEventListener('beforeunload', e => {
   if (generation !== savedGeneration) { e.preventDefault(); e.returnValue = ''; }
@@ -5110,7 +5115,14 @@ function dayRecord(date) {
 function recordDays() {
   return [...new Set(activeRecords().map(r => r.recordDate))].sort();
 }
-const SAVE_LABEL = '<span class="save-long">기록하고 </span>카드 받기';
+// Save button label by what the save does (2026-11-24): a new record, an edit of today's record, or a
+// draft that replaces today's record (one per day). ".save-long" is hidden on phones.
+const SAVE_LABELS = {
+  new: '<span class="save-long">기록하고 </span>카드 받기',
+  edit: '<span class="save-long">수정한 내용 </span>저장하기',
+  replace: '<span class="save-long">오늘 </span>기록 바꾸기',
+};
+const saveLabel = () => SAVE_LABELS[saveKind()];
 // One calendar slot: the day's mini card (opens the card modal) or an empty frame.
 // Today has an ink outline; days after today are dashed and never clickable.
 function dayCard(date, today) {
@@ -5199,7 +5211,7 @@ function homeView() {
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}">
       <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
-      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : SAVE_LABEL, "primary")}</div></div>
+      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
     ${limitNotice()}
@@ -6288,14 +6300,13 @@ function profilePanel() {
   const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group" tabindex="-1"><h2 id="${id}-title" class="sr-only">${title}</h2>${body}</div>`;
   const card = `<section class="panel profile-card" aria-labelledby="profile-name"><span class="profile-avatar" style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(profile.icon)}</span><div class="profile-who"><h3 id="profile-name">${E(profile.name)}</h3><p class="profile-days">${s.days ? `moment와 함께한 지 ${s.days}일째` : "첫 기록을 남기면 함께한 날을 세어 드려요"}</p></div><dl class="profile-stats"><div><dt>기록</dt><dd>${s.records}</dd></div><div><dt>카드</dt><dd>${s.cards}</dd></div><div><dt>연속</dt><dd>${s.streak}일</dd></div></dl><button type="button" class="secondary" data-profile-edit aria-haspopup="dialog" aria-label="프로필 편집"><span class="wide-only">프로필 편집</span><span class="narrow-only" aria-hidden="true">편집 ›</span></button></section>`;
   const nav = `<nav class="profile-nav" aria-labelledby="profile-nav-label"><p class="profile-nav-label" id="profile-nav-label">설정</p>${PROFILE_SECTIONS.map(([id, label]) => `<button type="button" class="profile-jump" data-profile-jump="${id}"${id === profileSection ? ' aria-current="true"' : ""}>${label}</button>`).join("")}</nav>`;
-  const deleteLabel = state.clearAllConfirm ? "정말 삭제" : "삭제";
   return `<section class="settings-panel settings-page profile-page" aria-labelledby="profile-title"><div class="profile-head page-heading"><h2 id="profile-title" class="profile-title">프로필</h2>${state.mode === "example" ? '<p class="profile-mode">시연 모드 · 숫자는 실제 기록 기준이에요</p>' : ""}</div>
     <div class="profile-grid"><aside class="profile-side">${card}${nav}</aside><div class="profile-main">
     <section class="panel settings-col" id="settings-theme" aria-labelledby="theme-title"><div class="settings-col-head"><h2 id="theme-title" tabindex="-1">테마</h2><p>다이어리의 분위기를 바꿀 수 있어요. 카드 색은 그대로 유지돼요.</p></div><div class="theme-swatches">${swatches}</div></section>
     <section class="panel prefs-panel" aria-label="설정">
     ${group("notice", "알림", notice("notifyDaily", "매일 기록 알림", "켜 두면 알림이 준비된 뒤 오후 9:00에 알려드릴게요") + notice("notifyAnalysis", "카드 분석 완료 알림", "켜 두면 알림이 준비된 뒤 카드가 열릴 때 알려드릴게요") + '<p class="notice-note">이 기기에서는 아직 알림을 보낼 수 없어요. 설정만 저장해 두었다가 알림이 준비되면 사용해요.</p>')}
     ${group("records", "기록", `<label class="switch-row pref-row"><span class="pref-text"><strong>시연 모드</strong><small>합성 데이터로 화면을 보여줘요 · 실제 기록과 섞이지 않아요</small></span><input type="checkbox" role="switch" data-action="preview" ${state.mode === "example" ? "checked" : ""}></label>`)}
-    ${group("data", "데이터", pref("모든 기록 삭제", "기록은 이 브라우저에만 보관돼요. 계정·동기화·서버 백업은 없어요", btn("delete-all", deleteLabel, "secondary danger", `aria-label="${state.clearAllConfirm ? "정말 모든 기록 삭제" : "모든 기록 삭제"}"`)))}
+    ${group("data", "데이터", pref("모든 기록 삭제", "기록은 이 브라우저에만 보관돼요. 계정·동기화·서버 백업은 없어요", btn("delete-all", "삭제", "secondary danger", 'aria-label="모든 기록 삭제" aria-haspopup="dialog"')))}
     ${group("about", "정보", pref("앱 정보 · 글꼴 라이선스", 'AI 감정 분석은 아직 연결 전이라 실제 기록은 "분석 대기"로 보여요 · Moment Sans(Pretendard 기반), Bricolage Grotesque (SIL OFL)', '<button type="button" class="secondary" data-profile-action="license" aria-haspopup="dialog">라이선스 보기</button>'))}
     </section>
     </div></div>
@@ -6462,6 +6473,37 @@ function bindProfile() {
     syncMobileInput();
   }
   // A successful save opens the card page with a sealed "?" card; tapping it flips the card (share-view.js revealCard).
+  // ── Data safety (2026-11-24 묶음 D) ──
+  // Today's real record, which a save replaces (one record per day).
+  function todayRealRecord() { const d = localDate(); return state.sessions.filter(x => x.recordDate === d).at(-1) || null; }
+  // "new": no record today · "edit": the editor holds today's record · "replace": another draft would overwrite it.
+  function saveKind() {
+    const today = todayRealRecord();
+    if (!today) return "new";
+    return state.currentEntryId === today.id || String(state.text || "").trim() === String(today.text || "").trim() ? "edit" : "replace";
+  }
+  let savedAs = "new";
+  // The editor can stay open past midnight, or be restored on a later day. Its draft then belongs to the
+  // new day: an unchanged copy of an earlier day's record is cleared, and unsaved text stays as the new
+  // day's draft with a notice. Returns true when the writer should read that notice before saving.
+  function rollDate() {
+    const today = localDate();
+    if (state.date === today) return false;
+    state.date = today;
+    const current = state.sessions.find(x => x.id === state.currentEntryId);
+    const text = String(state.text || "").trim();
+    if (!text) { if (current && current.recordDate !== today) { state.currentEntryId = null; state.savedText = null; } return false; }
+    state.error = false;
+    if (current && current.recordDate !== today && text === String(state.savedText ?? "").trim()) {
+      state.text = ""; state.savedText = null; state.currentEntryId = null;
+      state.status = "날짜가 바뀌었어요. 지난 기록은 저장돼 있고, 오늘의 새 기록장을 열었어요.";
+    } else {
+      if (current && current.recordDate !== today) { state.currentEntryId = null; state.savedText = null; }
+      state.status = `날짜가 바뀌었어요. 쓰던 내용은 ${longDate(today)} 기록으로 저장돼요. 맞으면 한 번 더 저장해 주세요.`;
+    }
+    if (storeReady) schedulePersist();
+    return true;
+  }
   // A failed save stays on the editor so the error and "저장 재시도" remain in place.
   function openSavedCard() {
     const record = state.sessions.find((x) => x.id === state.currentEntryId);
@@ -6489,13 +6531,29 @@ function bindProfile() {
     if (await shareAction(a)) return;
     if(a==='storage-details'){openInfo('저장 오류',lastStorageError || storageMessage,app.querySelector('[data-action=storage-details]'));return;}
     if (a === "catalog") { state.view = "history"; state.archiveTab = "catalog"; state.cardFilter = null; state.catalogDetail = null; render(true); return; }
-    if (a === "save" && state.mode === "example") {
-      // Saving writes the real draft, so leaving example mode must be explicit.
-      const accepted = await confirmAction('예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.', opener, { title: '실제 기록으로 저장', accept: '실제 기록으로 저장' });
-      if (!accepted) return;
+    // One record per day: a save from a draft that is not today's record replaces today's text and
+    // its analysis, so it is confirmed (2026-11-24). Editing today's record itself needs no dialog.
+    if (a === "save") {
+      if (rollDate()) { render(); return; } // the day changed under the editor; the notice explains
+      const kind = saveKind(), today = todayRealRecord();
+      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 감정 분석도 다시 기다려요. 이전 내용은 되돌릴 수 없어요.` : "";
+      if (state.mode === "example") {
+        // Saving writes the real draft, so leaving example mode must be explicit.
+        const accepted = await confirmAction(`예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.${replace ? " " + replace : ""}`, opener, { title: '실제 기록으로 저장', accept: replace ? '바꿔서 저장' : '실제 기록으로 저장' });
+        if (!accepted) return;
+      } else if (replace) {
+        const accepted = await confirmAction(replace, opener, { title: '오늘 기록 바꾸기', accept: '바꿔서 저장' });
+        if (!accepted) return;
+      }
+      savedAs = kind;
     }
     if (["delete-example", "clear-draft", "delete-all"].includes(a)) {
-      const accepted = await confirmAction(a === 'delete-all' ? '실제 기록 전체와 초안을 삭제합니다. 표시 설정과 예시 기록은 유지됩니다.' : a === 'clear-draft' ? '초안만 지웁니다. 저장된 기록은 유지됩니다.' : '이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.', opener);
+      const count = state.sessions.length;
+      const accepted = await confirmAction(
+        a === 'delete-all' ? `이 브라우저의 실제 기록 ${count}편과 작성 중인 초안을 모두 삭제해요. 되돌릴 수 없어요. 테마·프로필 설정과 시연 데이터는 그대로예요.`
+          : a === 'clear-draft' ? '작성 중인 초안만 지워요. 저장된 기록은 그대로예요.' : '이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.',
+        opener,
+        a === 'delete-all' ? { title: '모든 기록 삭제', accept: '모두 삭제' } : a === 'clear-draft' ? { title: '초안 지우기', accept: '지우기' } : undefined);
       if (!accepted) return;
       if (a === 'delete-example') state.deleteConfirm = true;
       if (a === 'clear-draft') state.clearDraftConfirm = true;
@@ -6518,11 +6576,13 @@ function bindProfile() {
     }
     if (a === "retry-save") { if (!storeReady) { await restore(); return; } savingRetry=true;syncWriteControls();try{await persist();}finally{savingRetry=false;render();}return; }
     if (a === "clear-draft" || a === "delete-all") {
+      // The dialog above is the only confirmation (the old "한 번 더 누르면" second press was unreachable).
       const key = a === "clear-draft" ? "clearDraftConfirm" : "clearAllConfirm";
-      if (!state[key]) { state[key] = true; state.status = a === "clear-draft" ? "한 번 더 누르면 초안을 지워요." : "한 번 더 누르면 모든 실제 기록과 초안을 지워요."; render(); return; }
       state.text = ""; state.savedText = null; state.currentEntryId = null; state[key] = false;
       if (a === "delete-all") { state.sessions = []; state.selected = null; }
-      markChanged(); await persist(); render(); return;
+      markChanged();
+      if (await persist()) state.status = a === "delete-all" ? "모든 기록과 초안을 삭제했어요." : "초안을 지웠어요.";
+      render(); return;
     }
     if (a === "archive-records") { state.archiveTab = "records"; state.dateFilter = ""; state.cardFilter = null; state.view = "history"; render(true); return; }
     if (a === "favorite-records") { state.archiveTab = "records"; state.dateFilter = ""; state.cardFilter = null; state.favoritesOnly = true; state.page = 0; state.view = "history"; render(true); return; }
@@ -6531,7 +6591,7 @@ function bindProfile() {
       state.editing = false;
       state.view = a;
       state.deleteConfirm = false;
-      if (a === "write") state.date = localDate();
+      if (a === "write") rollDate();
       render(true);
       return;
     }
@@ -6690,7 +6750,8 @@ function bindProfile() {
       // Message per action: a delete must never read as "saved".
       const stored = await persist();
       if (stored) state.status = a === "delete-example" ? "기록을 삭제했어요."
-        : a === "save-example" ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
+        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
+        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
         : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
       if (stored && state.status && a !== "new-entry") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
@@ -6840,13 +6901,15 @@ function bindProfile() {
   window.matchMedia?.("(max-width: 959px)").addEventListener?.("change", () => {
     if (state.view === "history" && state.archiveTab === "stats") render();
   });
-  window.addEventListener("focus", () => {
-    syncMobileInput();
-    if (state.view === "write" && state.date !== localDate()) {
-      state.date = localDate();
-      render();
-    }
-  });
+  // Coming back to the app after midnight moves the editor to the new day (rollDate); phones that resume a
+  // tab without a window focus event report it through visibilitychange.
+  const resumeDay = () => {
+    if (loading || state.view !== "write" || state.date === localDate()) return;
+    rollDate();
+    render();
+  };
+  window.addEventListener("focus", () => { syncMobileInput(); resumeDay(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") resumeDay(); });
   window.addEventListener("hashchange", () =>
     history.replaceState(null, "", location.pathname + location.search),
   );

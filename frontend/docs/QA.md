@@ -345,3 +345,11 @@ UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`.
 - 자동 검사: 공식 빌드, 단위 100/100, 신규 `a11y-pass.cjs`(1440·390px) 통과, `profile.cjs`는 초점 대상 변경(`about-title` → `settings-about`)에 맞춰 단언 갱신 후 통과. `pending-ux`·`card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view`·`record-ui`·`ux`·`ux-p0`·`ux-general`·`ux-retro`·`ux-writing`·`week-calendar`·`modal-foil`·`gesture-return`·`all-card-effects`·`layout-stage`·`benchmark-browser`(52)·`mobile-input`·`keyboard-close` 통과.
 - `profile.cjs`는 한 번 122행(시연 모드 전환 직후 `reveal(page, 'settings')`)에서 시간 초과가 났고, 이후 5회 연속 통과해 카드 획득 팝업 타이밍에 따른 간헐 실패로 기록합니다.
 - 수동 확인 필요: NVDA·VoiceOver에서 저장·오류·"도감에 넣기" 낭독이 한 번씩만 나오는지, 실기기 손가락으로 작은 버튼 터치.
+
+## 데이터 안전 검증 (2026-11-24 묶음 D)
+
+- 범위: 저장 버튼 새 기록/수정/"오늘 기록 바꾸기"(`saveKind`·`saveLabel`), 바꾸기 확인창(취소 시 기록·초안 보존), 자정 전환 `rollDate()`(focus·visibilitychange·기록 탭·저장 누름·복원), 모든 기록 삭제·초안 지우기 확인창 문구와 2단계 잔여 코드 제거.
+- 자동 검사: 공식 빌드, 단위 100/100, 신규 `data-safety.cjs`(1440·390px, Playwright clock으로 11-24 23:50 → 11-25 → 11-26 → 11-27) 통과. `a11y-pass`·`pending-ux`·`card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`profile`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view`·`record-ui`·`ux`·`ux-p0`·`ux-general`·`ux-retro`·`ux-writing`·`week-calendar`·`modal-foil`·`gesture-return`·`all-card-effects`·`layout-stage`·`benchmark-browser`(52)·`mobile-input`·`keyboard-close`·`compatibility-browser`·`taxonomy-browser`·`moment-card` 통과.
+- `card-effects.cjs`: 묶음 B(60d30fc)부터 375px에서 시간 초과. 프로필 알림 설명이 길어져 시연 스위치 위치가 내려갔고, 그 스크롤이 카드 화면까지 이어져 포인터 지점(카드 위 30%)이 화면 위로 벗어난 것이 원인입니다(앱 동작 오류 아님, e103717 빌드는 통과). 측정 전에 카드를 화면 가운데로 스크롤하도록 테스트를 고쳐 통과했습니다.
+- `persistence-browser.cjs`는 기존과 같은 173행에서만 실패합니다(같은 날 재저장·초안 지우기·전체 삭제 단계는 통과).
+- 참고(미수정): 화면을 바꿔도 이전 스크롤 위치가 남아 모바일에서 카드 위쪽이 잘린 채 열릴 수 있습니다(묶음 E 후보).

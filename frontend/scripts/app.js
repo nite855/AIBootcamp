@@ -358,6 +358,37 @@
     syncMobileInput();
   }
   // A successful save opens the card page with a sealed "?" card; tapping it flips the card (share-view.js revealCard).
+  // ── Data safety (2026-11-24 묶음 D) ──
+  // Today's real record, which a save replaces (one record per day).
+  function todayRealRecord() { const d = localDate(); return state.sessions.filter(x => x.recordDate === d).at(-1) || null; }
+  // "new": no record today · "edit": the editor holds today's record · "replace": another draft would overwrite it.
+  function saveKind() {
+    const today = todayRealRecord();
+    if (!today) return "new";
+    return state.currentEntryId === today.id || String(state.text || "").trim() === String(today.text || "").trim() ? "edit" : "replace";
+  }
+  let savedAs = "new";
+  // The editor can stay open past midnight, or be restored on a later day. Its draft then belongs to the
+  // new day: an unchanged copy of an earlier day's record is cleared, and unsaved text stays as the new
+  // day's draft with a notice. Returns true when the writer should read that notice before saving.
+  function rollDate() {
+    const today = localDate();
+    if (state.date === today) return false;
+    state.date = today;
+    const current = state.sessions.find(x => x.id === state.currentEntryId);
+    const text = String(state.text || "").trim();
+    if (!text) { if (current && current.recordDate !== today) { state.currentEntryId = null; state.savedText = null; } return false; }
+    state.error = false;
+    if (current && current.recordDate !== today && text === String(state.savedText ?? "").trim()) {
+      state.text = ""; state.savedText = null; state.currentEntryId = null;
+      state.status = "날짜가 바뀌었어요. 지난 기록은 저장돼 있고, 오늘의 새 기록장을 열었어요.";
+    } else {
+      if (current && current.recordDate !== today) { state.currentEntryId = null; state.savedText = null; }
+      state.status = `날짜가 바뀌었어요. 쓰던 내용은 ${longDate(today)} 기록으로 저장돼요. 맞으면 한 번 더 저장해 주세요.`;
+    }
+    if (storeReady) schedulePersist();
+    return true;
+  }
   // A failed save stays on the editor so the error and "저장 재시도" remain in place.
   function openSavedCard() {
     const record = state.sessions.find((x) => x.id === state.currentEntryId);
@@ -385,13 +416,29 @@
     if (await shareAction(a)) return;
     if(a==='storage-details'){openInfo('저장 오류',lastStorageError || storageMessage,app.querySelector('[data-action=storage-details]'));return;}
     if (a === "catalog") { state.view = "history"; state.archiveTab = "catalog"; state.cardFilter = null; state.catalogDetail = null; render(true); return; }
-    if (a === "save" && state.mode === "example") {
-      // Saving writes the real draft, so leaving example mode must be explicit.
-      const accepted = await confirmAction('예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.', opener, { title: '실제 기록으로 저장', accept: '실제 기록으로 저장' });
-      if (!accepted) return;
+    // One record per day: a save from a draft that is not today's record replaces today's text and
+    // its analysis, so it is confirmed (2026-11-24). Editing today's record itself needs no dialog.
+    if (a === "save") {
+      if (rollDate()) { render(); return; } // the day changed under the editor; the notice explains
+      const kind = saveKind(), today = todayRealRecord();
+      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 감정 분석도 다시 기다려요. 이전 내용은 되돌릴 수 없어요.` : "";
+      if (state.mode === "example") {
+        // Saving writes the real draft, so leaving example mode must be explicit.
+        const accepted = await confirmAction(`예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.${replace ? " " + replace : ""}`, opener, { title: '실제 기록으로 저장', accept: replace ? '바꿔서 저장' : '실제 기록으로 저장' });
+        if (!accepted) return;
+      } else if (replace) {
+        const accepted = await confirmAction(replace, opener, { title: '오늘 기록 바꾸기', accept: '바꿔서 저장' });
+        if (!accepted) return;
+      }
+      savedAs = kind;
     }
     if (["delete-example", "clear-draft", "delete-all"].includes(a)) {
-      const accepted = await confirmAction(a === 'delete-all' ? '실제 기록 전체와 초안을 삭제합니다. 표시 설정과 예시 기록은 유지됩니다.' : a === 'clear-draft' ? '초안만 지웁니다. 저장된 기록은 유지됩니다.' : '이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.', opener);
+      const count = state.sessions.length;
+      const accepted = await confirmAction(
+        a === 'delete-all' ? `이 브라우저의 실제 기록 ${count}편과 작성 중인 초안을 모두 삭제해요. 되돌릴 수 없어요. 테마·프로필 설정과 시연 데이터는 그대로예요.`
+          : a === 'clear-draft' ? '작성 중인 초안만 지워요. 저장된 기록은 그대로예요.' : '이 기록을 삭제합니다. 통계와 도감에도 반영됩니다.',
+        opener,
+        a === 'delete-all' ? { title: '모든 기록 삭제', accept: '모두 삭제' } : a === 'clear-draft' ? { title: '초안 지우기', accept: '지우기' } : undefined);
       if (!accepted) return;
       if (a === 'delete-example') state.deleteConfirm = true;
       if (a === 'clear-draft') state.clearDraftConfirm = true;
@@ -414,11 +461,13 @@
     }
     if (a === "retry-save") { if (!storeReady) { await restore(); return; } savingRetry=true;syncWriteControls();try{await persist();}finally{savingRetry=false;render();}return; }
     if (a === "clear-draft" || a === "delete-all") {
+      // The dialog above is the only confirmation (the old "한 번 더 누르면" second press was unreachable).
       const key = a === "clear-draft" ? "clearDraftConfirm" : "clearAllConfirm";
-      if (!state[key]) { state[key] = true; state.status = a === "clear-draft" ? "한 번 더 누르면 초안을 지워요." : "한 번 더 누르면 모든 실제 기록과 초안을 지워요."; render(); return; }
       state.text = ""; state.savedText = null; state.currentEntryId = null; state[key] = false;
       if (a === "delete-all") { state.sessions = []; state.selected = null; }
-      markChanged(); await persist(); render(); return;
+      markChanged();
+      if (await persist()) state.status = a === "delete-all" ? "모든 기록과 초안을 삭제했어요." : "초안을 지웠어요.";
+      render(); return;
     }
     if (a === "archive-records") { state.archiveTab = "records"; state.dateFilter = ""; state.cardFilter = null; state.view = "history"; render(true); return; }
     if (a === "favorite-records") { state.archiveTab = "records"; state.dateFilter = ""; state.cardFilter = null; state.favoritesOnly = true; state.page = 0; state.view = "history"; render(true); return; }
@@ -427,7 +476,7 @@
       state.editing = false;
       state.view = a;
       state.deleteConfirm = false;
-      if (a === "write") state.date = localDate();
+      if (a === "write") rollDate();
       render(true);
       return;
     }
@@ -586,7 +635,8 @@
       // Message per action: a delete must never read as "saved".
       const stored = await persist();
       if (stored) state.status = a === "delete-example" ? "기록을 삭제했어요."
-        : a === "save-example" ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
+        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
+        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
         : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
       if (stored && state.status && a !== "new-entry") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
@@ -736,13 +786,15 @@
   window.matchMedia?.("(max-width: 959px)").addEventListener?.("change", () => {
     if (state.view === "history" && state.archiveTab === "stats") render();
   });
-  window.addEventListener("focus", () => {
-    syncMobileInput();
-    if (state.view === "write" && state.date !== localDate()) {
-      state.date = localDate();
-      render();
-    }
-  });
+  // Coming back to the app after midnight moves the editor to the new day (rollDate); phones that resume a
+  // tab without a window focus event report it through visibilitychange.
+  const resumeDay = () => {
+    if (loading || state.view !== "write" || state.date === localDate()) return;
+    rollDate();
+    render();
+  };
+  window.addEventListener("focus", () => { syncMobileInput(); resumeDay(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") resumeDay(); });
   window.addEventListener("hashchange", () =>
     history.replaceState(null, "", location.pathname + location.search),
   );
