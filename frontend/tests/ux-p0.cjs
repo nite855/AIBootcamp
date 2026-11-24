@@ -37,7 +37,7 @@ const { executablePath, reveal, unseal } = require('./browser-runtime.cjs');
     await page.keyboard.press('Escape');
     assert.equal(Array.from(await field.inputValue()).length, 10001, 'draft kept, not truncated');
     await field.fill('줄인 초안');
-    await page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
+    await page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
     assert.equal(await counter.getAttribute('data-level'), 'ok');
 
     // Example mode: saving asks before switching to real mode; cancel keeps example mode and saves nothing.

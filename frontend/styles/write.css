@@ -186,7 +186,9 @@
 .rail-date, .cell-date { font-family: var(--font-display); color: var(--ink); text-align: center; }
 .rail-date { font-size: 13px; }
 :is(.rail-date, .cell-date).is-today { font-weight: 700; }
-:is(.rail-date, .cell-date).is-future { color: var(--subtle, var(--muted)); }
+/* Future dates were --subtle (1.97:1, 2026-11-24 critique 3). They now use --muted with a lighter weight;
+   the dashed empty frame already marks the day as not yet here. */
+:is(.rail-date, .cell-date).is-future { color: var(--muted); font-weight: 400; }
 .day-card { position: relative; display: block; width: 100%; min-height: 0; padding: 0; border: 0; border-radius: 10% / 7.14%; background: transparent; box-shadow: none; }
 button.day-card { cursor: pointer; transition: transform .18s ease; }
 button.day-card:hover { transform: translateY(-2px); }
@@ -355,8 +357,11 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 /* ── Accessibility pass (2026-11-24 묶음 C) ──
    Touch targets reach 44×44 through an invisible ::after, so the drawn controls keep their Figma size.
    inset = min(0, (100% - 44px) / 2) grows only the axis that is short (percentages follow each axis). */
-:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close) { position: relative; }
-:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close, .write-prompt .text-link) { position: relative; }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close, .write-prompt .text-link)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+/* Week-rail day cards are about 37px wide on phones; ::after draws today's outline, so ::before widens the
+   touch area to 44px (the 10px rail gap keeps neighbours apart, 2026-11-24 critique 3). */
+.week-rail button.day-card::before { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
 /* Text that carries meaning uses --muted (AA) instead of the decorative --subtle (about 2:1).
    Future dates and the empty-slot dashes stay --subtle: they mark inactive days. */
 .write-panel textarea::placeholder, .rail-day, .month-cards .weekday, .cm-foil, .cm-label, .cm-actions small, .card-modal .cm-nav .nav-arrow, .month-summary-row .entry-arrow { color: var(--muted); }

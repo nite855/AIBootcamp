@@ -17,7 +17,7 @@ const stored = p => p.evaluate(async () => {
     tx.oncomplete = () => resolve(r.result); tx.onabort = () => reject(tx.error);
   }); } finally { db.close(); }
 });
-const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
+const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
 
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: require('./browser-runtime.cjs').executablePath });

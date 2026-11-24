@@ -30,7 +30,8 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     await wait.waitFor();
     assert.equal(await page.locator('.mystery-card, .grade-burst, .seal-hint').count(), 0, 'no draw for a pending card');
     assert.match(await wait.innerText(), /기록은 잘 저장됐어요/);
-    assert.match(await wait.innerText(), /감정 분석이 끝나면 카드가 열려요/);
+    // 2026-11-24 critique 3: the sealed-card line replaced the development wording.
+    assert.match(await wait.innerText(), /감정 읽기가 준비되면 열어 드릴게요/);
     assert.deepEqual(await wait.locator('.wait-steps li').evaluateAll(xs => xs.map(x => x.className)), ['is-done', 'is-current', '']);
     assert.match(await wait.locator('[aria-current=step]').innerText().then(t => t.trim()), /^감정 읽기\s*대기$/);
     assert.equal(await page.locator('.card-box').getAttribute('data-reveal'), 'pending');

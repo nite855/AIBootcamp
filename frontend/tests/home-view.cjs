@@ -28,7 +28,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     await reveal(page, 'write');
     for (const text of ['첫 기록', '두 번째 기록', '<script>window.injected=1</script>']) {
       await page.locator('#diary-text').fill(text); await reveal(page, 'save');
-      await page.waitForFunction(() => document.querySelector('#save-status').textContent === '초안 저장됨');
+      await page.waitForFunction(() => document.querySelector('#save-status').textContent === '임시 보관됨');
       assert.equal(await page.evaluate(() => DiaryReview.getState().view), 'write');
       assert.equal(await page.locator('[data-action=new-entry]').count(), 0);
     }

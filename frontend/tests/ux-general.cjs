@@ -9,7 +9,7 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     const ready = () => page.waitForFunction(() => DiaryReview.isReady());
-    const saved = () => page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
+    const saved = () => page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
     // Views without the editor have no save status, so read the stored snapshot directly.
     const storedCount = n => page.waitForFunction(n => new Promise(resolve => {
       const open = indexedDB.open('moment-diary-main', 1);

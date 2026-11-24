@@ -47,7 +47,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++;};
     check(await p.locator('#diary-text').inputValue()==='','prompt never edits draft');
     await click('save'); check(await p.locator('#feedback').innerText()!=='','empty validation');
     await p.locator('#diary-text').fill('오늘의 한 줄 🌿\n<script>window.injected=1</script>');
-    await p.waitForFunction(()=>document.querySelector('#save-status').textContent==='초안 저장됨');
+    await p.waitForFunction(()=>document.querySelector('#save-status').textContent==='임시 보관됨');
     await p.reload(); await ready(); check((await p.locator('#diary-text').inputValue()).includes('오늘의 한 줄'),'draft reload');
     await click('save'); await p.waitForFunction(()=>DiaryReview.getState().view==='write');
     // Phones show no recent tiles (Figma); the record opens from the full archive.
@@ -97,13 +97,13 @@ const check=(value,message)=>{assert.ok(value,message);checks++;};
     await p.locator('#card-modal[open] [data-modal=open]').click();
     check(await p.locator('.flip-scene').count()===1,'calendar day opens its card, then the record');
     await click('write'); await p.locator('#diary-text').fill('저장 실패에도 남는 원문');
-    await p.waitForFunction(()=>document.querySelector('#save-status')?.textContent==='초안 저장됨');
+    await p.waitForFunction(()=>document.querySelector('#save-status')?.textContent==='임시 보관됨');
     await p.evaluate(()=>{const original=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...args){IDBObjectStore.prototype.put=original;throw new DOMException('검증용 저장 실패','QuotaExceededError');};});
     await click('save'); await p.waitForFunction(()=>DiaryReview.getState().error);
     check(await p.locator('[data-action=storage-details]').isVisible() && await p.locator('.mystery-card').count()===0,'save failure never announces success');
     check(!(await p.locator('#moment-toast.show').count()),'no "saved" toast after a failed save');
     check(await p.locator('.write-editor[data-storage-error=true] .save-error').isVisible() && await p.locator('.save-note').isVisible(),'save failure bar and draft note');
-    await click('retry-save'); await p.waitForFunction(()=>!DiaryReview.getState().error && document.querySelector('#save-status')?.textContent==='초안 저장됨');
+    await click('retry-save'); await p.waitForFunction(()=>!DiaryReview.getState().error && document.querySelector('#save-status')?.textContent==='임시 보관됨');
     check(!(await p.locator('[data-action=storage-details]').isVisible()) && await p.locator('[data-action=retry-save]').count()===0,'save retry');
     check(await p.evaluate(()=>localStorage.getItem('moment-card:diary-benchmark-v1:appearance'))==='main-sentinel','prototype settings isolated');
     check(await p.evaluate(async()=>{

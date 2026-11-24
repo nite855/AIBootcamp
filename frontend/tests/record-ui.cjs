@@ -29,7 +29,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     }
     await p.setViewportSize({ width:390, height:844 });
     await p.locator('#diary-text').fill('검증용 가상 기록: 오늘은 산책을 했다.');
-    await p.waitForFunction(() => document.querySelector('#save-status').textContent === '초안 저장됨');
+    await p.waitForFunction(() => document.querySelector('#save-status').textContent === '임시 보관됨');
     // A failed record transaction must never be presented as a successful save.
     await p.evaluate(() => {
       const original = IDBObjectStore.prototype.put;
@@ -50,7 +50,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     await p.screenshot({ path:path.join(output,'save-failed-mobile.png') });
     await click('retry-save');
     // state.error clears when the action starts; wait for the save itself to finish.
-    await p.waitForFunction(() => !DiaryReview.getState().error && document.querySelector('#save-status')?.textContent === '초안 저장됨');
+    await p.waitForFunction(() => !DiaryReview.getState().error && document.querySelector('#save-status')?.textContent === '임시 보관됨');
     assert.equal(await p.locator('[data-action=storage-details]').isVisible(), false, 'failure note clears after retry');
     assert.equal(await p.locator('[data-action=retry-save]').count(), 0);
     // Phones show no recent tiles (Figma); "카드 보기" in the saved bar opens the record.

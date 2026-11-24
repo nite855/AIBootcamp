@@ -30,7 +30,7 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
 
       // Limit guidance: seed N real records into the stored snapshot, then reload so the app validates and restores them.
       assert.ok((await page.locator('#privacy').innerText()).includes('최대 30편'));
-      await page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
+      await page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
       for (const [n, text, level] of [[24, '최대 30편', null], [25, '5편 남았어요', 'near'], [29, '1편 남았어요', 'near'], [30, '보관 한도 30편에 도달했어요', 'full']]) {
         await page.evaluate(n => new Promise((resolve, reject) => {
           const now = new Date().toISOString();

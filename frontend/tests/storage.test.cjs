@@ -59,13 +59,13 @@ test('an older save completion cannot mark a newer draft as saved', async () => 
   h.state.text = 'latest'; h.api.markChanged(); const latest = h.api.persist();
   h.saves[0].resolve(); await first;
   assert.equal(h.api.status().savedGeneration, 1);
-  assert.notEqual(h.api.status().storageMessage, '초안 저장됨');
+  assert.notEqual(h.api.status().storageMessage, '임시 보관됨');
   let warned = false;
   h.events.beforeunload({ preventDefault() { warned = true; } }); assert.equal(warned, true);
   h.saves[1].resolve(); await latest;
   assert.equal(h.api.status().savedGeneration, 2);
   assert.equal(h.saves[1].snapshot.text, 'latest');
-  assert.equal(h.api.status().storageMessage, '초안 저장됨');
+  assert.equal(h.api.status().storageMessage, '임시 보관됨');
   warned = false; h.events.beforeunload({ preventDefault() { warned = true; } }); assert.equal(warned, false);
 });
 test('failed writes preserve the draft and successful retry clears the storage error', async () => {
@@ -74,5 +74,5 @@ test('failed writes preserve the draft and successful retry clears the storage e
   h.saves[0].reject(Error('quota exceeded')); assert.equal(await failed, false);
   assert.equal(h.state.text, 'keep me'); assert.equal(h.state.error, true);
   const retry = h.api.persist(); h.saves[1].resolve(); assert.equal(await retry, true);
-  assert.equal(h.state.error, false); assert.equal(h.api.status().storageMessage, '초안 저장됨');
+  assert.equal(h.state.error, false); assert.equal(h.api.status().storageMessage, '임시 보관됨');
 });

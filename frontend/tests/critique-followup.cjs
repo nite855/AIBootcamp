@@ -27,11 +27,17 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
       const prompt = page.locator('.write-prompt');
       assert.ok(await prompt.isVisible(), `${tag}: prompt line on an empty editor`);
       assert.ok((await prompt.locator('.prompt-text').innerText()).trim().length > 0, `${tag}: a question is shown`);
+      // "다른 질문" reaches 44px through ::after (critique 3 P2): the point 6px above its box still hits it.
+      const ask = await page.locator('[data-action=help-write-inline]').boundingBox();
+      assert.ok(ask.height < 44, `${tag}: drawn link stays small`);
+      assert.equal(await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('[data-action=help-write-inline]') !== null, [ask.x + ask.width / 2, ask.y - 5]), true, `${tag}: 44px hit area`);
       await page.locator('[data-action=help-write-inline]').click();
       await page.locator('[data-next-prompt]').waitFor();
       await page.keyboard.press('Escape');
       assert.equal(await editor.inputValue(), '', `${tag}: the question is never inserted into the draft`);
       await editor.fill('오늘');
+      // Draft autosave speaks of 임시 보관, never of saving the record (critique 3 P2).
+      await page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
       await page.waitForFunction(() => !document.querySelector('.write-prompt') || getComputedStyle(document.querySelector('.write-prompt')).display === 'none');
 
       // 2) Ctrl+Enter on an empty draft does not save; with text it saves and shows the quote.
@@ -48,6 +54,12 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
       assert.doesNotMatch(quote, /라면/, `${tag}: only the first sentence`);
       assert.match(quote, /\d+월 \d+일 .요일의 기록/, `${tag}: long date, not ISO`);
       assert.equal(await page.locator('.record-top [data-action=history]').isVisible(), false, `${tag}: one way back while waiting`);
+      // Critique 3 P2: the panel says it once, without development wording.
+      const waitText = await page.locator('.wait-panel').innerText();
+      assert.doesNotMatch(waitText, /연결 전|AI 감정 분석/, `${tag}: no development wording`);
+      assert.match(waitText, /봉인해 두었다가/, `${tag}: the sealed-card line`);
+      assert.equal(await page.locator('.record-layout.is-waiting .card-area > .caption').isVisible(), false, `${tag}: no repeated caption under the card`);
+      assert.equal(await page.locator('#feedback').isVisible(), false, `${tag}: no floating #feedback copy`);
       assert.match(await page.locator('.record-date').innerText(), /\d+월 \d+일 .요일/, `${tag}: card page date is the long form`);
 
       // 3) Done bar and streak.
@@ -84,6 +96,11 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
         const small = await page.evaluate(() => [...document.querySelectorAll('.write-main > #privacy, .streak-chip, .rail-day, .rail-date, .calendar-switch button, .tabs .tab')]
           .filter(el => el.offsetParent).map(el => parseFloat(getComputedStyle(el).fontSize)).filter(s => s < 12));
         assert.deepEqual(small, [], `${tag}: no meaningful text under 12px`);
+        // Rail day cards reach 44px wide; future dates use --muted, not --subtle (critique 3 P2).
+        const rail = await page.locator('.week-rail button.day-card').first().evaluate(el => { const r = el.getBoundingClientRect(), b = getComputedStyle(el, '::before'); return { w: r.width, before: b.content !== 'none' ? parseFloat(b.left) : null }; });
+        assert.ok(rail.w >= 44 || (rail.before !== null && rail.w - 2 * rail.before >= 44 - 0.5), `${tag}: rail day card hit area ${JSON.stringify(rail)}`);
+        const future = await page.evaluate(() => { const el = document.querySelector('.rail-date.is-future'); return el && [getComputedStyle(el).color, getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()]; });
+        if (future) assert.equal(future[0], await page.evaluate(c => { const s = document.createElement('span'); s.style.color = c; document.body.append(s); const v = getComputedStyle(s).color; s.remove(); return v; }, future[1]), `${tag}: future dates use --muted`);
       }
 
       // 4) Demo mode.

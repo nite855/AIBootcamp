@@ -2354,7 +2354,9 @@ footer { display: none; }
 .rail-date, .cell-date { font-family: var(--font-display); color: var(--ink); text-align: center; }
 .rail-date { font-size: 13px; }
 :is(.rail-date, .cell-date).is-today { font-weight: 700; }
-:is(.rail-date, .cell-date).is-future { color: var(--subtle, var(--muted)); }
+/* Future dates were --subtle (1.97:1, 2026-11-24 critique 3). They now use --muted with a lighter weight;
+   the dashed empty frame already marks the day as not yet here. */
+:is(.rail-date, .cell-date).is-future { color: var(--muted); font-weight: 400; }
 .day-card { position: relative; display: block; width: 100%; min-height: 0; padding: 0; border: 0; border-radius: 10% / 7.14%; background: transparent; box-shadow: none; }
 button.day-card { cursor: pointer; transition: transform .18s ease; }
 button.day-card:hover { transform: translateY(-2px); }
@@ -2523,8 +2525,11 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 /* ── Accessibility pass (2026-11-24 묶음 C) ──
    Touch targets reach 44×44 through an invisible ::after, so the drawn controls keep their Figma size.
    inset = min(0, (100% - 44px) / 2) grows only the axis that is short (percentages follow each axis). */
-:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close) { position: relative; }
-:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close, .write-prompt .text-link) { position: relative; }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close, .write-prompt .text-link)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+/* Week-rail day cards are about 37px wide on phones; ::after draws today's outline, so ::before widens the
+   touch area to 44px (the 10px rail gap keeps neighbours apart, 2026-11-24 critique 3). */
+.week-rail button.day-card::before { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
 /* Text that carries meaning uses --muted (AA) instead of the decorative --subtle (about 2:1).
    Future dates and the empty-slot dashes stay --subtle: they mark inactive days. */
 .write-panel textarea::placeholder, .rail-day, .month-cards .weekday, .cm-foil, .cm-label, .cm-actions small, .card-modal .cm-nav .nav-arrow, .month-summary-row .entry-arrow { color: var(--muted); }
@@ -3403,7 +3408,7 @@ html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; 
 html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2; }
 .wait-panel { align-self: center; display: grid; gap: 14px; padding: clamp(22px, 3vw, 34px); border-radius: var(--soft-radius, 32px); background: var(--surface); box-shadow: var(--soft-shadow); animation: seal-hint-in .45s var(--soft-ease, ease-out) both; }
 .wait-panel h2 { margin: 0; font-size: clamp(22px, 2.4vw, 30px); }
-.wait-panel p { margin: 0; }
+.wait-panel p { margin: 0; word-break: keep-all; text-wrap: pretty; } /* whole Korean words per line */
 .wait-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .wait-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 13px; font-weight: 600; }
 .wait-steps li.is-done { background: color-mix(in srgb, #2fb67c 16%, var(--surface)); color: #1d7a52; }
@@ -3555,6 +3560,10 @@ html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6p
 .wait-quote blockquote { margin: 0; }
 .wait-quote p { margin: 0; color: var(--ink); font-size: 17px; font-weight: 500; line-height: 1.55; letter-spacing: -.01em; word-break: keep-all; text-wrap: balance; }
 .wait-quote figcaption { color: var(--muted); font-size: 13px; }
+/* The panel says it once (2026-11-24 critique 3): the caption under the card ("카드를 눌러 뒤집어 보세요 · 기록을
+   보관했어요") and the visible #feedback copy repeated the title, so both stay hidden while the panel shows.
+   Screen readers still hear the status once from #announcer. */
+.record-layout.is-waiting .card-area > .caption, body:has(.record-layout.is-waiting) #feedback { display: none; }
 /* One way back: the panel's "기록으로 돌아가기" replaces the page's "← 홈으로" while the panel shows. */
 .record-panel:has(.record-layout.is-waiting) .record-top [data-action="history"] { visibility: hidden; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
@@ -4798,7 +4807,9 @@ function syncWriteControls() {
 }
 function markChanged() {
   generation++;
-  showStorage('아직 저장되지 않은 변경이 있어요.');
+  // Draft autosave says 임시 보관, so it never reads like the record itself being saved (2026-11-24 critique);
+  // right after typing it stays calm instead of warning about unsaved changes.
+  showStorage('쓰는 중');
 }
 function schedulePersist() {
   markChanged();
@@ -4808,7 +4819,7 @@ function schedulePersist() {
 async function persist() {
   clearTimeout(persistTimer);
   const savingGeneration = generation;
-  showStorage('초안 저장 중');
+  showStorage('임시 보관 중');
   try {
     if (!storeReady) throw Error('저장소를 사용할 수 없어요. 재시도하거나 내용을 복사해 주세요.');
     await storage.save(snapshot());
@@ -4821,7 +4832,7 @@ async function persist() {
       speak();
     }
     lastStorageError = null;
-    showStorage(generation === savedGeneration ? '초안 저장됨' : '최근 변경을 저장 중이에요.');
+    showStorage(generation === savedGeneration ? '임시 보관됨' : '임시 보관 중');
     return true;
   } catch (error) {
     lastStorageError = error.message;
@@ -4849,7 +4860,7 @@ async function restore() {
       const { text, date, sessions, currentEntryId, savedText } = data;
       Object.assign(state, { text, date, sessions, policy: "single", currentEntryId, savedText });
     }
-    showStorage('자동 저장 준비됨');
+    showStorage('자동 임시 보관');
     if (generation !== savedGeneration) await persist();
   } catch (error) {
     storeReady = false;
@@ -6096,7 +6107,7 @@ function sealHint() {
 function waitPanel(record) {
   const line = record ? MomentShare.firstSentence(record.text) : "";
   const quote = line ? `<figure class="wait-quote"><blockquote><p>“${E(line)}”</p></blockquote><figcaption>${E(longDate(record.recordDate))}의 기록</figcaption></figure>` : "";
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 카드는 봉인해 두었다가, 감정 읽기가 준비되면 열어 드릴게요.</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 let waitFocus = false; // set by openSavedCard() (app.js), used once by showWait()
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }

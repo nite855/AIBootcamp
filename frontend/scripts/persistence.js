@@ -24,7 +24,9 @@ function syncWriteControls() {
 }
 function markChanged() {
   generation++;
-  showStorage('아직 저장되지 않은 변경이 있어요.');
+  // Draft autosave says 임시 보관, so it never reads like the record itself being saved (2026-11-24 critique);
+  // right after typing it stays calm instead of warning about unsaved changes.
+  showStorage('쓰는 중');
 }
 function schedulePersist() {
   markChanged();
@@ -34,7 +36,7 @@ function schedulePersist() {
 async function persist() {
   clearTimeout(persistTimer);
   const savingGeneration = generation;
-  showStorage('초안 저장 중');
+  showStorage('임시 보관 중');
   try {
     if (!storeReady) throw Error('저장소를 사용할 수 없어요. 재시도하거나 내용을 복사해 주세요.');
     await storage.save(snapshot());
@@ -47,7 +49,7 @@ async function persist() {
       speak();
     }
     lastStorageError = null;
-    showStorage(generation === savedGeneration ? '초안 저장됨' : '최근 변경을 저장 중이에요.');
+    showStorage(generation === savedGeneration ? '임시 보관됨' : '임시 보관 중');
     return true;
   } catch (error) {
     lastStorageError = error.message;
@@ -75,7 +77,7 @@ async function restore() {
       const { text, date, sessions, currentEntryId, savedText } = data;
       Object.assign(state, { text, date, sessions, policy: "single", currentEntryId, savedText });
     }
-    showStorage('자동 저장 준비됨');
+    showStorage('자동 임시 보관');
     if (generation !== savedGeneration) await persist();
   } catch (error) {
     storeReady = false;

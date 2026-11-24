@@ -74,7 +74,7 @@ function sealHint() {
 function waitPanel(record) {
   const line = record ? MomentShare.firstSentence(record.text) : "";
   const quote = line ? `<figure class="wait-quote"><blockquote><p>“${E(line)}”</p></blockquote><figcaption>${E(longDate(record.recordDate))}의 기록</figcaption></figure>` : "";
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 카드는 봉인해 두었다가, 감정 읽기가 준비되면 열어 드릴게요.</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 let waitFocus = false; // set by openSavedCard() (app.js), used once by showWait()
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }

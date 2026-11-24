@@ -22,7 +22,7 @@ const DAY1 = new Date('2026-11-24T23:50:00'), DAY2 = new Date('2026-11-25T00:10:
       await page.waitForFunction(() => DiaryReview.isReady());
       const st = () => page.evaluate(() => { const s = DiaryReview.getState(); return { date: s.date, text: s.text, sessions: s.sessions.map(r => [r.recordDate, r.text, r.version]), status: s.status }; });
       const label = () => page.locator('.write-actions [data-action=save]').innerText();
-      const saved = () => page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
+      const saved = () => page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '임시 보관됨');
       const dialog = page.locator('#confirm-dialog[open]');
 
       // New record: "기록 남기기" on every width (no card promise until the model is connected).

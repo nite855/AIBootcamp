@@ -171,7 +171,7 @@ html .record-layout.is-sealed > :is(.card-info, .seal-hint) { grid-area: 1 / 2; 
 html .record-layout.is-waiting > :is(.card-info, .wait-panel) { grid-area: 1 / 2; }
 .wait-panel { align-self: center; display: grid; gap: 14px; padding: clamp(22px, 3vw, 34px); border-radius: var(--soft-radius, 32px); background: var(--surface); box-shadow: var(--soft-shadow); animation: seal-hint-in .45s var(--soft-ease, ease-out) both; }
 .wait-panel h2 { margin: 0; font-size: clamp(22px, 2.4vw, 30px); }
-.wait-panel p { margin: 0; }
+.wait-panel p { margin: 0; word-break: keep-all; text-wrap: pretty; } /* whole Korean words per line */
 .wait-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .wait-steps li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--muted); font-size: 13px; font-weight: 600; }
 .wait-steps li.is-done { background: color-mix(in srgb, #2fb67c 16%, var(--surface)); color: #1d7a52; }
@@ -323,6 +323,10 @@ html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6p
 .wait-quote blockquote { margin: 0; }
 .wait-quote p { margin: 0; color: var(--ink); font-size: 17px; font-weight: 500; line-height: 1.55; letter-spacing: -.01em; word-break: keep-all; text-wrap: balance; }
 .wait-quote figcaption { color: var(--muted); font-size: 13px; }
+/* The panel says it once (2026-11-24 critique 3): the caption under the card ("카드를 눌러 뒤집어 보세요 · 기록을
+   보관했어요") and the visible #feedback copy repeated the title, so both stay hidden while the panel shows.
+   Screen readers still hear the status once from #announcer. */
+.record-layout.is-waiting .card-area > .caption, body:has(.record-layout.is-waiting) #feedback { display: none; }
 /* One way back: the panel's "기록으로 돌아가기" replaces the page's "← 홈으로" while the panel shows. */
 .record-panel:has(.record-layout.is-waiting) .record-top [data-action="history"] { visibility: hidden; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
