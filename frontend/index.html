@@ -2469,6 +2469,15 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 .cm-light { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--shine,0); transition: opacity .2s ease; mix-blend-mode: screen;
   background: radial-gradient(circle at var(--light-x,50%) var(--light-y,50%), #ffffffb3, #ffffff26 23%, transparent 58%), conic-gradient(from 115deg at var(--light-x,50%) var(--light-y,50%), transparent, #c4eaff66, #ffc4ea66, #fff5b866, transparent); }
 
+/* ── Accessibility pass (2026-11-24 묶음 C) ──
+   Touch targets reach 44×44 through an invisible ::after, so the drawn controls keep their Figma size.
+   inset = min(0, (100% - 44px) / 2) grows only the axis that is short (percentages follow each axis). */
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close) { position: relative; }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+/* Text that carries meaning uses --muted (AA) instead of the decorative --subtle (about 2:1).
+   Future dates and the empty-slot dashes stay --subtle: they mark inactive days. */
+.write-panel textarea::placeholder, .rail-day, .month-cards .weekday, .cm-foil, .cm-label, .cm-actions small, .card-modal .cm-nav .nav-arrow, .month-summary-row .entry-arrow { color: var(--muted); }
+
 /* Soft UI v1.1 card collection, second pass (Figma 06 "도감 · 전체", "도감 · 첫 실행", "도감 · 카드 상세",
    "M · 도감 · 전체", 2026-11-21 F4). No board panel: 44px Light title, 22px text tabs with superscript
    counts, a 320×112 progress card, six 192×268.8 cards (gap 36/32) without captions, a bottom scroll fade.
@@ -2500,6 +2509,9 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 .catalog-page .catalog-filters .chip { min-height: 32px; padding: 4px 10px; border: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 13px; }
 .catalog-page .catalog-filters .chip[aria-pressed="true"] { background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-weight: 600; }
 .catalog-page .catalog-filters .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+/* 44px touch height (2026-11-24 a11y) without changing the drawn 32px chip. */
+.catalog-page .catalog-filters .chip { position: relative; }
+.catalog-page .catalog-filters .chip::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
 
 /* Grid without a panel. */
 .catalog-page .catalog-board { position: relative; display: grid; gap: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -2578,7 +2590,8 @@ dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; he
   .catalog-page .catalog-title { order: -3; }
   .catalog-page .catalog-tabs { order: -1; }
   .catalog-page .collect-card { order: -2; }
-  .catalog-page .catalog-filters { margin-left: 0; }
+  /* The row scrolls sideways (overflow clips), so it keeps room for the chips' 44px touch area. */
+  .catalog-page .catalog-filters { margin-left: 0; padding-top: 6px; padding-bottom: 8px; }
   .catalog-page .collection-grid, .catalog-page .collection-grid.is-type { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 16px; }
   .catalog-page .collection-empty { top: 110px; }
   /* Detail as a full page ("← 도감"). */
@@ -2771,7 +2784,7 @@ button.emo-day:hover { transform: translateY(-2px); }
   .trend-dots { margin-right: 40px; }
   .trend-dot { width: 9px; height: 9px; }
   /* Narrow columns: the tap area grows vertically only, so neighbours never overlap. */
-  button.trend-dot::after { inset: -12px -2px; }
+  button.trend-dot::after { inset: -18px -2px; } /* 9px dot → 45px tall target (2026-11-24) */
   /* Phones list the top three emotions ("많이 받은 감정"). */
   .dist-row:nth-child(n + 4) { display: none; }
   .dist-row { grid-template-columns: 124px minmax(0, 1fr) 20px; gap: 10px; }
@@ -2782,11 +2795,12 @@ button.emo-day:hover { transform: translateY(-2px); }
   .emo-stage { right: 5px; bottom: 4px; }
   /* Weekday: the same bars as horizontal rows. */
   .weekday-rows { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .weekday-row { grid-template-columns: 22px minmax(0, 1fr) 30px; justify-items: stretch; align-items: center; gap: 10px; }
-  .weekday-row .weekday-pct { display: none; }
+  /* The positive share stays as text next to each bar (2026-11-24), so pastel segments never carry it alone. */
+  .weekday-row { grid-template-columns: 22px minmax(0, 1fr) 40px 30px; justify-items: stretch; align-items: center; gap: 10px; }
+  .weekday-row .weekday-pct { grid-column: 3; grid-row: 1; margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
   .weekday-name { grid-column: 1; grid-row: 1; margin: 0; color: var(--ink); font-size: 13px; }
   .weekday-bar { grid-column: 2; grid-row: 1; flex-direction: row; width: auto; height: 12px; border-radius: 6px; }
-  .weekday-row small { grid-column: 3; grid-row: 1; text-align: right; }
+  .weekday-row small { grid-column: 4; grid-row: 1; text-align: right; }
 }
 @media (max-width: 380px) {
   .ratio-values { gap: 6px; }
@@ -2910,7 +2924,9 @@ button.emo-day:hover { transform: translateY(-2px); }
 
 /* One prefs panel: rows with a hairline above (except the first). */
 .profile-page .prefs-panel { display: grid; padding: 12px 36px; border-radius: 32px; }
-.pref-group { scroll-margin-top: 16px; }
+.pref-group { scroll-margin-top: 16px; border-radius: 12px; }
+.pref-group:focus { outline: none; }
+.pref-group:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
 .pref-group + .pref-group { border-top: 1px solid var(--line); }
 .profile-page .pref-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 0; margin: 0; padding: 18px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-weight: 400; }
 .profile-page .pref-row + .pref-row { border-top: 1px solid var(--line); }
@@ -3651,6 +3667,8 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
   <body>
     <div id="app"></div>
     <div id="announcer" class="sr-only" aria-live="polite"></div>
+    <!-- Errors are spoken from here; both regions stay outside #app so re-renders never recreate them. -->
+    <div id="alerter" class="sr-only" role="alert"></div>
     <!-- Outside #app so re-renders never remove a pending undo. -->
     <div id="toast" class="toast" role="status" hidden><span id="toast-copy"></span><button type="button" data-toast-undo>되돌리기</button></div>
     <noscript>기록을 작성하려면 JavaScript를 켜 주세요.</noscript>
@@ -4681,6 +4699,8 @@ let savingRetry = false;
 let persistTimer, lastStorageError, storageMessage = '기록을 불러오는 중…';
 const snapshot = () => ({ text: state.text, date: state.date, sessions: state.sessions,
   policy: "single", currentEntryId: state.currentEntryId || null, savedText: state.savedText ?? null });
+// app.js speakStatus() voices state.status from the live regions; storage.test.cjs loads this file alone.
+const speak = () => { if (typeof speakStatus === 'function') speakStatus(); };
 function showStorage(message) {
   storageMessage = message;
   const el = app.querySelector('#save-status');
@@ -4718,7 +4738,8 @@ async function persist() {
       state.error = false;
       state.status = '';
       const feedback = app.querySelector('#feedback');
-      if (feedback) { feedback.textContent = ''; feedback.setAttribute('role', 'status'); }
+      if (feedback) { feedback.textContent = ''; feedback.classList.remove('error'); }
+      speak();
     }
     lastStorageError = null;
     showStorage(generation === savedGeneration ? '초안 저장됨' : '최근 변경을 저장 중이에요.');
@@ -4729,7 +4750,8 @@ async function persist() {
     state.status = error.message;
     showStorage(error.message);
     const feedback = app.querySelector('#feedback');
-    if (feedback) { feedback.textContent = error.message; feedback.setAttribute('role', 'alert'); }
+    if (feedback) { feedback.textContent = error.message; feedback.classList.add('error'); }
+    speak(); // #alerter, once per new message
     return false;
   }
 }
@@ -5177,7 +5199,7 @@ function homeView() {
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}">
       <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
-      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status" role="status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : SAVE_LABEL, "primary")}</div></div>
+      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : SAVE_LABEL, "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
     ${limitNotice()}
@@ -5715,6 +5737,9 @@ function bindCatalog() {
     state.catalogStage = c.stage;
     state.catalogDetail = c.status === "ready" ? { type: c.type, stage: c.stage } : null;
     showToast("도감에 담겼어요");
+    // The toast is hidden from assistive tech; the status line (spoken once) says the same.
+    state.error = false;
+    state.status = c.status === "ready" ? "도감에 담겼어요. 카드 상세를 열었어요." : "도감을 열었어요. 분석이 끝나면 카드가 담겨요.";
     state.view = "history";
     state.archiveTab = "catalog";
     state.cardFilter = null;
@@ -5923,8 +5948,9 @@ function sealHint() {
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
 function waitPanel() {
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
+let waitFocus = false; // set by openSavedCard() (app.js), used once by showWait()
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }
 function revealCard() {
   const box = app.querySelector(".record-panel .card-box"), record = state.view === "entry" ? currentRecord() : null;
@@ -5951,6 +5977,9 @@ function showWait(box) {
   info.inert = true; info.setAttribute("aria-hidden", "true");
   info.insertAdjacentHTML("afterend", waitPanel());
   layout.querySelectorAll("[data-wait-action]").forEach(b => b.onclick = () => action(b.dataset.waitAction));
+  // Right after a save the editor that had focus is gone; move focus to the panel title once
+  // (later re-renders of the same page keep whatever the writer focused).
+  if (waitFocus) { waitFocus = false; layout.querySelector("#wait-title")?.focus({ preventScroll: true }); }
 }
 function sealCard(box, key, grade) {
   const layout = box.closest(".record-layout");
@@ -6255,7 +6284,8 @@ function profilePanel() {
   // Figma prefs panel: one row per setting, a hairline between rows.
   const pref = (title, sub, control, extra = "") => `<div class="pref-row"${extra}><span class="pref-text"><strong>${title}</strong><small>${sub}</small></span>${control}</div>`;
   const notice = (key, title, sub) => `<label class="switch-row pref-row notice-row"><span class="pref-text"><strong>${title} <em class="soon-badge">준비 중</em></strong><small>${sub}</small></span><input type="checkbox" role="switch" data-notice="${key}" ${profile[key] ? "checked" : ""}></label>`;
-  const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group"><h2 id="${id}-title" class="sr-only" tabindex="-1">${title}</h2>${body}</div>`;
+  // The group (not its hidden heading) takes focus from the menu, so the focus ring lands on what is visible.
+  const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group" tabindex="-1"><h2 id="${id}-title" class="sr-only">${title}</h2>${body}</div>`;
   const card = `<section class="panel profile-card" aria-labelledby="profile-name"><span class="profile-avatar" style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(profile.icon)}</span><div class="profile-who"><h3 id="profile-name">${E(profile.name)}</h3><p class="profile-days">${s.days ? `moment와 함께한 지 ${s.days}일째` : "첫 기록을 남기면 함께한 날을 세어 드려요"}</p></div><dl class="profile-stats"><div><dt>기록</dt><dd>${s.records}</dd></div><div><dt>카드</dt><dd>${s.cards}</dd></div><div><dt>연속</dt><dd>${s.streak}일</dd></div></dl><button type="button" class="secondary" data-profile-edit aria-haspopup="dialog" aria-label="프로필 편집"><span class="wide-only">프로필 편집</span><span class="narrow-only" aria-hidden="true">편집 ›</span></button></section>`;
   const nav = `<nav class="profile-nav" aria-labelledby="profile-nav-label"><p class="profile-nav-label" id="profile-nav-label">설정</p>${PROFILE_SECTIONS.map(([id, label]) => `<button type="button" class="profile-jump" data-profile-jump="${id}"${id === profileSection ? ' aria-current="true"' : ""}>${label}</button>`).join("")}</nav>`;
   const deleteLabel = state.clearAllConfirm ? "정말 삭제" : "삭제";
@@ -6279,7 +6309,8 @@ function bindProfile() {
     b.setAttribute("aria-current", "true");
     const section = app.querySelector(`#settings-${b.dataset.profileJump}`);
     section?.scrollIntoView({ block: "start" });
-    section?.querySelector("h2")?.focus({ preventScroll: true });
+    // Theme has a visible focusable heading; the other groups focus themselves (their headings are sr-only).
+    (section?.querySelector("h2[tabindex]") || section)?.focus({ preventScroll: true });
   });
   app.querySelectorAll("[data-notice]").forEach(input => input.onchange = () => {
     const result = MomentProfile.save(profileStorage, { ...profile, [input.dataset.notice]: input.checked });
@@ -6333,6 +6364,16 @@ function bindProfile() {
     return `<section class="panel record-panel"><div class="row record-top">${btn("history", state.entryFrom === "write" ? "홈으로" : "목록으로")}<span class="record-date muted">${x.recordDate}${state.mode === "example" ? " · 시연 모드" : ""}</span></div><div class="record-layout show-record-card ${state.editing ? "is-editing" : ""}"><div class="record-copy" ${state.editing ? "" : "hidden"}>${state.editing ? `<label for="sample-text">기록 수정</label><textarea class="read-text" id="sample-text">${E(x.text)}</textarea>` : `<div class="read-text">${E(x.text)}</div>`}<div class="row">${state.editing ? btn("save-example", "수정 완료", "primary") + btn("cancel-edit", "취소") : ""}</div></div><div class="card-stage"><span class="stage-glow" aria-hidden="true"></span>${state.editing ? "" : stageChip(x)}${cardArea()}</div>${state.editing ? "" : cardInfo(x)}</div></section>`;
   }
 
+  // #feedback is redrawn on every render, so it is only the visible copy. A new status is spoken once from
+  // the live regions outside #app (#announcer polite, #alerter for errors), which re-renders never recreate.
+  let spokenStatus = "";
+  function speakStatus() {
+    if (!state.status) { spokenStatus = ""; return; }
+    if (state.status === spokenStatus) return;
+    spokenStatus = state.status;
+    const region = document.getElementById(state.error ? "alerter" : "announcer");
+    if (region) region.textContent = state.status;
+  }
   function render(focus = false) {
     // The "분석 대기" panel after a save only lives on that card page (share-view.js showWait).
     if (state.view !== "entry") state.pendingReveal = null;
@@ -6342,7 +6383,8 @@ function bindProfile() {
     const focusedId = document.activeElement?.id;
     const selection = ["record-search", "diary-text"].includes(focusedId) ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
     const openDetails = new Set([...app.querySelectorAll("details[open] > summary")].map(el => el.textContent));
-    app.innerHTML = `<div class="shell"><div class="app-scenery" aria-hidden="true"></div><header>${mainNavigation()}</header><main id="main-content" class="workspace ${state.view === "write" ? "write-workspace" : ""}" data-view="${state.view}" data-tab="${currentTab()}">${state.view === "write" ? homeView() : panel()}</main><dialog id="card-modal" class="card-modal" aria-labelledby="card-modal-title"></dialog><dialog id="info-dialog" class="read-dialog" aria-labelledby="info-title"><h2 id="info-title"></h2><p id="info-copy"></p><div class="row"><button type="button" class="quiet" data-next-prompt hidden>다른 질문</button><button type="button" class="quiet" data-close-info>닫기</button></div></dialog><dialog id="confirm-dialog" class="read-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title">삭제 확인</h2><p id="confirm-copy"></p><div class="row"><button type="button" class="quiet" data-confirm="cancel" autofocus>취소</button><button type="button" class="primary" data-confirm="accept">삭제</button></div></dialog><dialog id="read-full-dialog" class="read-dialog" aria-labelledby="full-title"><div class="full-heading"><div><p class="full-date muted"></p><h2 id="full-title">그날의 기록</h2></div><form method="dialog"><button type="submit" class="quiet">닫기</button></form></div><div class="full-text" tabindex="0"></div></dialog><div><p id="feedback" class="status ${state.error ? "error" : ""}" role="${state.error ? "alert" : "status"}">${E(state.status)}</p><footer><span>EVERY DAY IS A LITTLE ART.</span><span>나만의 속도로 기록해요 ✧</span></footer></div></div>`;
+    app.innerHTML = `<div class="shell"><div class="app-scenery" aria-hidden="true"></div><header>${mainNavigation()}</header><main id="main-content" class="workspace ${state.view === "write" ? "write-workspace" : ""}" data-view="${state.view}" data-tab="${currentTab()}">${state.view === "write" ? homeView() : panel()}</main><dialog id="card-modal" class="card-modal" aria-labelledby="card-modal-title"></dialog><dialog id="info-dialog" class="read-dialog" aria-labelledby="info-title"><h2 id="info-title"></h2><p id="info-copy"></p><div class="row"><button type="button" class="quiet" data-next-prompt hidden>다른 질문</button><button type="button" class="quiet" data-close-info>닫기</button></div></dialog><dialog id="confirm-dialog" class="read-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title">삭제 확인</h2><p id="confirm-copy"></p><div class="row"><button type="button" class="quiet" data-confirm="cancel" autofocus>취소</button><button type="button" class="primary" data-confirm="accept">삭제</button></div></dialog><dialog id="read-full-dialog" class="read-dialog" aria-labelledby="full-title"><div class="full-heading"><div><p class="full-date muted"></p><h2 id="full-title">그날의 기록</h2></div><form method="dialog"><button type="submit" class="quiet">닫기</button></form></div><div class="full-text" tabindex="0"></div></dialog><div><p id="feedback" class="status ${state.error ? "error" : ""}">${E(state.status)}</p><footer><span>EVERY DAY IS A LITTLE ART.</span><span>나만의 속도로 기록해요 ✧</span></footer></div></div>`;
+    speakStatus();
     app.querySelectorAll("[popover]").forEach(el => el.addEventListener("toggle", e => { if (e.newState === "closed") app.querySelector(`[popovertarget="${el.id}"]`)?.focus(); }));
     app
       .querySelectorAll("[data-action]")
@@ -6432,6 +6474,7 @@ function bindProfile() {
     state.deleteConfirm = false;
     state.catalogDetail = null;
     state.view = "entry";
+    waitFocus = true;
   }
   async function action(a) {
     if (loading) return;
@@ -6680,8 +6723,7 @@ function bindProfile() {
       state.error = false;
       state.status = "삭제한 기록을 되돌렸어요.";
       if (deleted.mode === "real") { markChanged(); if (!await persist()) state.status = "되돌린 기록을 저장하지 못했어요. 저장 재시도를 눌러 주세요."; }
-      render();
-      document.getElementById("announcer").textContent = state.status;
+      render(); // speakStatus() announces the result
       app.querySelector("h1,h2")?.focus?.();
     };
   }

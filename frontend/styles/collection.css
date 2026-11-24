@@ -29,6 +29,9 @@
 .catalog-page .catalog-filters .chip { min-height: 32px; padding: 4px 10px; border: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 13px; }
 .catalog-page .catalog-filters .chip[aria-pressed="true"] { background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-weight: 600; }
 .catalog-page .catalog-filters .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+/* 44px touch height (2026-11-24 a11y) without changing the drawn 32px chip. */
+.catalog-page .catalog-filters .chip { position: relative; }
+.catalog-page .catalog-filters .chip::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
 
 /* Grid without a panel. */
 .catalog-page .catalog-board { position: relative; display: grid; gap: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -107,7 +110,8 @@ dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; he
   .catalog-page .catalog-title { order: -3; }
   .catalog-page .catalog-tabs { order: -1; }
   .catalog-page .collect-card { order: -2; }
-  .catalog-page .catalog-filters { margin-left: 0; }
+  /* The row scrolls sideways (overflow clips), so it keeps room for the chips' 44px touch area. */
+  .catalog-page .catalog-filters { margin-left: 0; padding-top: 6px; padding-bottom: 8px; }
   .catalog-page .collection-grid, .catalog-page .collection-grid.is-type { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 16px; }
   .catalog-page .collection-empty { top: 110px; }
   /* Detail as a full page ("← 도감"). */

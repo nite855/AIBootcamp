@@ -4,6 +4,8 @@ let savingRetry = false;
 let persistTimer, lastStorageError, storageMessage = '기록을 불러오는 중…';
 const snapshot = () => ({ text: state.text, date: state.date, sessions: state.sessions,
   policy: "single", currentEntryId: state.currentEntryId || null, savedText: state.savedText ?? null });
+// app.js speakStatus() voices state.status from the live regions; storage.test.cjs loads this file alone.
+const speak = () => { if (typeof speakStatus === 'function') speakStatus(); };
 function showStorage(message) {
   storageMessage = message;
   const el = app.querySelector('#save-status');
@@ -41,7 +43,8 @@ async function persist() {
       state.error = false;
       state.status = '';
       const feedback = app.querySelector('#feedback');
-      if (feedback) { feedback.textContent = ''; feedback.setAttribute('role', 'status'); }
+      if (feedback) { feedback.textContent = ''; feedback.classList.remove('error'); }
+      speak();
     }
     lastStorageError = null;
     showStorage(generation === savedGeneration ? '초안 저장됨' : '최근 변경을 저장 중이에요.');
@@ -52,7 +55,8 @@ async function persist() {
     state.status = error.message;
     showStorage(error.message);
     const feedback = app.querySelector('#feedback');
-    if (feedback) { feedback.textContent = error.message; feedback.setAttribute('role', 'alert'); }
+    if (feedback) { feedback.textContent = error.message; feedback.classList.add('error'); }
+    speak(); // #alerter, once per new message
     return false;
   }
 }

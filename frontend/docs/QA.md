@@ -338,3 +338,10 @@ UX 리뷰 반영 회귀 검사(2026-11-16): `node frontend/tests/ux-review.cjs`.
 - 범위: 도감 빈 상태 2종(첫 실행·분석 대기)과 제자리 시연 모드 버튼(`preview-catalog`), 통계 분석 대기 배너·요일 라벨, 분석 대기 패널 정지 칩, 공유 "앱 주소 복사"와 안내, 알림 스위치 "준비 중".
 - 자동 검사: 공식 빌드, 단위 100/100, 신규 `pending-ux.cjs`(1440·390·320px: 문구·44px 버튼·대기 패널 애니메이션 0개·실제 저장 후 도감 기록 버튼 없음·통계 배너 1개·요일 "분석 대기/기록 없음"·도감에 머무는 시연 전환·시연 통계 배너 없음·공유 안내 연결·준비 중 배지·가로 넘침 없음), `card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`profile`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view` 통과.
 - 수동 확인 필요: 스크린리더에서 통계 배너(`role="note"`)와 공유 안내(`aria-describedby`) 낭독.
+
+## 접근성 보완 검증 (2026-11-24 묶음 C)
+
+- 범위: `#app` 밖 고정 라이브 리전(`#announcer`·`#alerter`)과 `speakStatus()`(새 상태만 한 번), `#feedback`·`#save-status` 역할 제거, 저장 직후 `#wait-title` 초점, "도감에 넣기" 상태 문구, 작은 버튼 44px 터치 영역(투명 `::after`), `--muted` 글자, 모바일 요일 긍정 비율 표시, 프로필 메뉴 그룹 초점.
+- 자동 검사: 공식 빌드, 단위 100/100, 신규 `a11y-pass.cjs`(1440·390px) 통과, `profile.cjs`는 초점 대상 변경(`about-title` → `settings-about`)에 맞춰 단언 갱신 후 통과. `pending-ux`·`card-grade`·`collection`·`stats-layout`·`stats-motion`·`share-reveal`·`celebrate-popup`·`ux-review`·`browser`(46)·`themes`·`simplification`·`home-view`·`record-ui`·`ux`·`ux-p0`·`ux-general`·`ux-retro`·`ux-writing`·`week-calendar`·`modal-foil`·`gesture-return`·`all-card-effects`·`layout-stage`·`benchmark-browser`(52)·`mobile-input`·`keyboard-close` 통과.
+- `profile.cjs`는 한 번 122행(시연 모드 전환 직후 `reveal(page, 'settings')`)에서 시간 초과가 났고, 이후 5회 연속 통과해 카드 획득 팝업 타이밍에 따른 간헐 실패로 기록합니다.
+- 수동 확인 필요: NVDA·VoiceOver에서 저장·오류·"도감에 넣기" 낭독이 한 번씩만 나오는지, 실기기 손가락으로 작은 버튼 터치.

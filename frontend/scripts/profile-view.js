@@ -25,7 +25,8 @@ function profilePanel() {
   // Figma prefs panel: one row per setting, a hairline between rows.
   const pref = (title, sub, control, extra = "") => `<div class="pref-row"${extra}><span class="pref-text"><strong>${title}</strong><small>${sub}</small></span>${control}</div>`;
   const notice = (key, title, sub) => `<label class="switch-row pref-row notice-row"><span class="pref-text"><strong>${title} <em class="soon-badge">준비 중</em></strong><small>${sub}</small></span><input type="checkbox" role="switch" data-notice="${key}" ${profile[key] ? "checked" : ""}></label>`;
-  const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group"><h2 id="${id}-title" class="sr-only" tabindex="-1">${title}</h2>${body}</div>`;
+  // The group (not its hidden heading) takes focus from the menu, so the focus ring lands on what is visible.
+  const group = (id, title, body) => `<div class="pref-group" id="settings-${id}" aria-labelledby="${id}-title" role="group" tabindex="-1"><h2 id="${id}-title" class="sr-only">${title}</h2>${body}</div>`;
   const card = `<section class="panel profile-card" aria-labelledby="profile-name"><span class="profile-avatar" style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(profile.icon)}</span><div class="profile-who"><h3 id="profile-name">${E(profile.name)}</h3><p class="profile-days">${s.days ? `moment와 함께한 지 ${s.days}일째` : "첫 기록을 남기면 함께한 날을 세어 드려요"}</p></div><dl class="profile-stats"><div><dt>기록</dt><dd>${s.records}</dd></div><div><dt>카드</dt><dd>${s.cards}</dd></div><div><dt>연속</dt><dd>${s.streak}일</dd></div></dl><button type="button" class="secondary" data-profile-edit aria-haspopup="dialog" aria-label="프로필 편집"><span class="wide-only">프로필 편집</span><span class="narrow-only" aria-hidden="true">편집 ›</span></button></section>`;
   const nav = `<nav class="profile-nav" aria-labelledby="profile-nav-label"><p class="profile-nav-label" id="profile-nav-label">설정</p>${PROFILE_SECTIONS.map(([id, label]) => `<button type="button" class="profile-jump" data-profile-jump="${id}"${id === profileSection ? ' aria-current="true"' : ""}>${label}</button>`).join("")}</nav>`;
   const deleteLabel = state.clearAllConfirm ? "정말 삭제" : "삭제";
@@ -49,7 +50,8 @@ function bindProfile() {
     b.setAttribute("aria-current", "true");
     const section = app.querySelector(`#settings-${b.dataset.profileJump}`);
     section?.scrollIntoView({ block: "start" });
-    section?.querySelector("h2")?.focus({ preventScroll: true });
+    // Theme has a visible focusable heading; the other groups focus themselves (their headings are sr-only).
+    (section?.querySelector("h2[tabindex]") || section)?.focus({ preventScroll: true });
   });
   app.querySelectorAll("[data-notice]").forEach(input => input.onchange = () => {
     const result = MomentProfile.save(profileStorage, { ...profile, [input.dataset.notice]: input.checked });

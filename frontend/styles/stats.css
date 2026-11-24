@@ -174,7 +174,7 @@ button.emo-day:hover { transform: translateY(-2px); }
   .trend-dots { margin-right: 40px; }
   .trend-dot { width: 9px; height: 9px; }
   /* Narrow columns: the tap area grows vertically only, so neighbours never overlap. */
-  button.trend-dot::after { inset: -12px -2px; }
+  button.trend-dot::after { inset: -18px -2px; } /* 9px dot → 45px tall target (2026-11-24) */
   /* Phones list the top three emotions ("많이 받은 감정"). */
   .dist-row:nth-child(n + 4) { display: none; }
   .dist-row { grid-template-columns: 124px minmax(0, 1fr) 20px; gap: 10px; }
@@ -185,11 +185,12 @@ button.emo-day:hover { transform: translateY(-2px); }
   .emo-stage { right: 5px; bottom: 4px; }
   /* Weekday: the same bars as horizontal rows. */
   .weekday-rows { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .weekday-row { grid-template-columns: 22px minmax(0, 1fr) 30px; justify-items: stretch; align-items: center; gap: 10px; }
-  .weekday-row .weekday-pct { display: none; }
+  /* The positive share stays as text next to each bar (2026-11-24), so pastel segments never carry it alone. */
+  .weekday-row { grid-template-columns: 22px minmax(0, 1fr) 40px 30px; justify-items: stretch; align-items: center; gap: 10px; }
+  .weekday-row .weekday-pct { grid-column: 3; grid-row: 1; margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
   .weekday-name { grid-column: 1; grid-row: 1; margin: 0; color: var(--ink); font-size: 13px; }
   .weekday-bar { grid-column: 2; grid-row: 1; flex-direction: row; width: auto; height: 12px; border-radius: 6px; }
-  .weekday-row small { grid-column: 3; grid-row: 1; text-align: right; }
+  .weekday-row small { grid-column: 4; grid-row: 1; text-align: right; }
 }
 @media (max-width: 380px) {
   .ratio-values { gap: 6px; }

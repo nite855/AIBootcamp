@@ -122,7 +122,7 @@ const KEY = 'moment-card:profile-v1';
     await reveal(page, 'settings');
     assert.equal(await page.locator('[data-profile-action=export]').count(), 0);
 
-    // Section menu moves focus to the section heading; the license opens in the info dialog.
+    // Section menu moves focus to the visible section; the license opens in the info dialog.
     // Figma F7: one prefs panel holds notices, demo mode, delete-all and app info; the menu has no panel.
     assert.equal(await page.locator('.prefs-panel').count(), 1);
     assert.equal(await page.locator('.prefs-panel :is(#settings-notice, #settings-records, #settings-data, #settings-about)').count(), 4);
@@ -131,7 +131,8 @@ const KEY = 'moment-card:profile-v1';
     assert.equal(await page.locator('.profile-card').evaluate(el => Math.round(el.getBoundingClientRect().width)), 240, 'profile card 240 wide');
     assert.equal(await page.locator('[data-action=delete-all]').getAttribute('aria-label'), '모든 기록 삭제');
     await page.locator('[data-profile-jump=about]').click();
-    assert.equal(await page.evaluate(() => document.activeElement?.id), 'about-title');
+    // 2026-11-24: groups with an sr-only heading take focus themselves (visible focus ring).
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'settings-about');
     assert.deepEqual(await page.locator('[data-profile-jump][aria-current=true]').evaluateAll(xs => xs.map(x => x.dataset.profileJump)), ['about'], 'one current menu item');
     await page.locator('[data-profile-action=license]').click();
     assert.match(await page.locator('#info-dialog[open] #info-copy').innerText(), /Bricolage Grotesque Project Authors/);

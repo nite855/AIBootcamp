@@ -307,3 +307,12 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
 .cm-tilt .art-card { border-radius: inherit; }
 .cm-light { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: var(--shine,0); transition: opacity .2s ease; mix-blend-mode: screen;
   background: radial-gradient(circle at var(--light-x,50%) var(--light-y,50%), #ffffffb3, #ffffff26 23%, transparent 58%), conic-gradient(from 115deg at var(--light-x,50%) var(--light-y,50%), transparent, #c4eaff66, #ffc4ea66, #fff5b866, transparent); }
+
+/* ── Accessibility pass (2026-11-24 묶음 C) ──
+   Touch targets reach 44×44 through an invisible ::after, so the drawn controls keep their Figma size.
+   inset = min(0, (100% - 44px) / 2) grows only the axis that is short (percentages follow each axis). */
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close) { position: relative; }
+:is(.write-calendar .nav-arrow, .write-calendar .calendar-switch button, .recent-tools .text-link, .card-modal .cm-nav .nav-arrow, .cm-close)::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+/* Text that carries meaning uses --muted (AA) instead of the decorative --subtle (about 2:1).
+   Future dates and the empty-slot dashes stay --subtle: they mark inactive days. */
+.write-panel textarea::placeholder, .rail-day, .month-cards .weekday, .cm-foil, .cm-label, .cm-actions small, .card-modal .cm-nav .nav-arrow, .month-summary-row .entry-arrow { color: var(--muted); }

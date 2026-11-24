@@ -138,6 +138,9 @@ function bindCatalog() {
     state.catalogStage = c.stage;
     state.catalogDetail = c.status === "ready" ? { type: c.type, stage: c.stage } : null;
     showToast("도감에 담겼어요");
+    // The toast is hidden from assistive tech; the status line (spoken once) says the same.
+    state.error = false;
+    state.status = c.status === "ready" ? "도감에 담겼어요. 카드 상세를 열었어요." : "도감을 열었어요. 분석이 끝나면 카드가 담겨요.";
     state.view = "history";
     state.archiveTab = "catalog";
     state.cardFilter = null;
