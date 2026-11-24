@@ -54,6 +54,15 @@
 .write-actions .primary { min-height: 44px; padding: 12px 24px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 /* Empty draft: the save button reads as inactive (it still explains why when pressed). */
 .write-editor[data-empty="true"] .write-actions .primary { background: color-mix(in srgb, var(--line) 70%, var(--surface)); color: var(--muted); font-weight: 500; }
+/* Save validation error (2026-11-24): the message takes the status line inside the bar, where the writer is
+   looking, and may wrap; the bar turns the same pale pink as a storage failure. Typing clears it. */
+.write-error { display: none; }
+.write-editor[data-write-error] .write-bar { background: color-mix(in srgb, var(--error, #d64561) 12%, var(--surface)); }
+.write-editor[data-write-error] .status-dot,
+.write-editor[data-write-error] .write-status > :not(.write-error),
+.write-editor[data-write-error] .write-status > #save-status { display: none; }
+.write-editor[data-write-error] .write-status { white-space: normal; }
+.write-editor[data-write-error] .write-error { display: flex; align-items: center; gap: 10px; color: var(--ink); line-height: 1.45; }
 /* Today written: "○○ 카드를 받았어요" + 수정하기 / 카드 보기 replace the save controls. */
 .done-status, .done-actions { display: none; }
 .write-editor[data-done="true"] :is(.status-dot, .write-status, .write-actions > .primary) { display: none; }
@@ -243,6 +252,13 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .save-long { display: none; }
   .write-actions .primary { padding: 11px 20px; }
   .done-actions :is(.primary, .secondary) { padding: 11px 18px; }
+  /* Today written (2026-11-24 critique): the status sentence was cut to "기록을 :" beside three controls.
+     It now takes its own line and the buttons share the row below, so the bar becomes a rounded block. */
+  .write-editor:is([data-done="true"], [data-write-error]) .write-bar { border-radius: 24px; padding: 12px 6px 6px 18px; }
+  .write-editor[data-write-error] .write-status { flex: 1 1 100%; }
+  .write-editor[data-done="true"] .done-status { flex: 1 1 100%; white-space: normal; line-height: 1.45; }
+  .write-editor[data-done="true"] .done-actions { flex: 1; margin-left: 0; }
+  .write-editor[data-done="true"] .done-actions > * { flex: 1; }
   /* Figma shows no today panel or recent tiles on phones; the archive stays one tap away. */
   .write-side .today-panel, .recent-list { display: none; }
   .recent-panel { margin-top: 2px; }

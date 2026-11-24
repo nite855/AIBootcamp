@@ -54,13 +54,14 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
         await page.locator('.flip-scene').waitFor();
         assert.equal(await page.locator('.entry-list').count(), 0, 'no one-item list');
       }
-      // Toast appears after a save; emotion filter with pending-only records yields an empty list.
+      // A save from the editor opens the wait panel, which confirms the save itself: no toast over it
+      // (2026-11-24 critique, tests/save-feedback.cjs). Emotion filter with pending-only records yields an empty list.
       await reveal(page, 'write');
       await page.locator('#diary-text').fill('토스트 검증');
       await reveal(page, 'save', { stay: true });
-      await page.locator('#moment-toast.show').waitFor({ state: 'attached' });
-      // The toast shows just before the card page renders; wait for that switch before navigating.
       await page.waitForFunction(() => DiaryReview.getState().view === 'entry');
+      await page.locator('#wait-title').waitFor();
+      assert.equal(await page.locator('#moment-toast.show').count(), 0, 'the wait panel replaces the save toast');
       await reveal(page, 'archive-records');
       await page.locator('.record-filters summary').click();
       await page.selectOption('#emotion-filter', 'neg_1');

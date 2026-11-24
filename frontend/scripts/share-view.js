@@ -97,7 +97,12 @@ function showWait(box) {
   layout.classList.add("is-waiting");
   box.dataset.reveal = "pending";
   info.inert = true; info.setAttribute("aria-hidden", "true");
-  info.insertAdjacentHTML("afterend", waitPanel());
+  // 2026-11-24 critique: the panel used to sit under the stage, so "기록은 잘 저장됐어요" fell below the fold
+  // (1440×900 and phones) and the save toast covered it. It now comes first; the card follows. The foil hint
+  // does not belong on a card that is still waiting (flip.js leaves .is-waiting pages alone).
+  const stage = layout.querySelector(".card-stage");
+  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel());
+  layout.closest(".record-panel")?.querySelector(".record-top .card-effect-hint")?.remove();
   layout.querySelectorAll("[data-wait-action]").forEach(b => b.onclick = () => action(b.dataset.waitAction));
   // Right after a save the editor that had focus is gone; move focus to the panel title once
   // (later re-renders of the same page keep whatever the writer focused).

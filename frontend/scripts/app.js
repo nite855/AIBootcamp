@@ -327,6 +327,12 @@
     app.querySelector("#diary-text")?.addEventListener("input", (e) => {
       state.text = e.target.value;
       state.clearDraftConfirm = false;
+      // Typing answers the inline save error; the bar returns to the counter and save status.
+      if (state.writeError) {
+        state.writeError = null; state.error = false; state.status = "";
+        app.querySelector(".write-editor")?.removeAttribute("data-write-error");
+        app.querySelector("#write-error")?.remove();
+      }
       schedulePersist();
       // "오늘 작성 완료" ends as soon as the text changes (or comes back): re-render the bar and heading.
       const editor = app.querySelector(".write-editor");
@@ -401,6 +407,18 @@
     if (storeReady) schedulePersist();
     return true;
   }
+  // Validation errors from DiaryCore are written for the analysis API ("비어 있는 기록이 있습니다…삭제해 주세요");
+  // the editor shows what the writer can do next instead. Unknown messages pass through unchanged.
+  const SAVE_ERROR_TEXT = [
+    [/^비어 있는 기록|^입력 내용이 없습니다/, "한 줄만 적어도 저장할 수 있어요. 오늘 있었던 일을 적어 주세요."],
+    [/^분석 가능한 텍스트가 없습니다/, "글자나 숫자를 한 자 이상 적어 주세요."],
+    [/읽을 수 없는 문자/, "읽을 수 없는 문자가 섞여 있어요. 그 부분을 지우고 다시 저장해 주세요."],
+    [/10,000자를 초과/, "10,000자를 넘었어요. 넘친 부분을 줄이면 저장할 수 있어요."],
+  ];
+  function saveErrorText(message) {
+    const hit = SAVE_ERROR_TEXT.find(([pattern]) => pattern.test(String(message || "")));
+    return hit ? hit[1] : String(message || "저장하지 못했어요. 다시 시도해 주세요.");
+  }
   // A failed save stays on the editor so the error and "다시 시도" remain in place.
   function openSavedCard() {
     const record = state.sessions.find((x) => x.id === state.currentEntryId);
@@ -459,6 +477,7 @@
     if (a === 'cancel-edit') { state.editing = false; render(true); return; }
     state.error = false;
     state.status = "";
+    state.writeError = null;
     if (a !== "delete-all") state.clearAllConfirm = false;
     if (a !== "clear-draft") state.clearDraftConfirm = false;
     if (a === "read-full") {
@@ -588,8 +607,10 @@
         state.preview = false;
         state.view = "write";
       } catch (e) {
+        // The validation error shows inside the write bar, where the writer is looking (2026-11-24 critique:
+        // it used to appear only in #feedback below the fold, worded as a domain exception).
         state.error = true;
-        state.status = e.message;
+        state.status = state.writeError = saveErrorText(e.message);
         render();
         document.getElementById("diary-text")?.focus();
         return;
@@ -651,7 +672,9 @@
         : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
         : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
-      if (stored && state.status && a !== "new-entry") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
+      // A new/edited record opens the wait panel, which is the confirmation itself: the toast used to cover
+      // its title on phones (2026-11-24 critique), so saves from the editor skip it.
+      if (stored && state.status && a !== "new-entry" && a !== "save") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
       if (a === "save" && stored && !state.error) openSavedCard();
     }
     render();

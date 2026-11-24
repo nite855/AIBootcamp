@@ -25,9 +25,9 @@ const DAY1 = new Date('2026-11-24T23:50:00'), DAY2 = new Date('2026-11-25T00:10:
       const saved = () => page.waitForFunction(() => document.querySelector('#save-status')?.textContent === '초안 저장됨');
       const dialog = page.locator('#confirm-dialog[open]');
 
-      // New record: "카드 받기" (phones drop "기록하고").
+      // New record: "기록 남기기" on every width (no card promise until the model is connected).
       await page.locator('#diary-text').fill('첫 번째 오늘 기록');
-      assert.equal(await label(), mobile ? '카드 받기' : '기록하고 카드 받기');
+      assert.equal(await label(), '기록 남기기');
       await reveal(page, 'save');
       assert.deepEqual((await st()).sessions, [['2026-11-24', '첫 번째 오늘 기록', 1]]);
 
@@ -68,7 +68,7 @@ const DAY1 = new Date('2026-11-24T23:50:00'), DAY2 = new Date('2026-11-25T00:10:
       await page.waitForFunction(() => DiaryReview.getState().date === '2026-11-25');
       assert.equal((await st()).text, '');
       assert.match(await page.locator('#feedback').innerText(), /날짜가 바뀌었어요\. 지난 기록은 저장돼 있고/);
-      assert.equal(await label(), mobile ? '카드 받기' : '기록하고 카드 받기');
+      assert.equal(await label(), '기록 남기기');
 
       // Midnight with unsaved text, no focus event: the first save stops with a notice, the second saves on the new day.
       await page.locator('#diary-text').fill('자정 직전에 쓰던 글');

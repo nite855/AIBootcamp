@@ -310,7 +310,10 @@ html .mystery-back em { position: absolute; top: 16px; right: 16px; padding: 4px
 /* Wait (Figma "분석 대기"): the step chips sit in the stage's top-left corner. */
 .record-layout.is-waiting { position: relative; }
 html .record-layout.show-record-card > .wait-panel { position: static; transform: none; animation: none; }
-html .record-layout > .wait-panel > .wait-steps { position: absolute; top: 28px; left: 28px; margin: 0; }
+/* 2026-11-24: the panel comes before the stage (share-view.js showWait), so the step chips lead it in the flow
+   instead of floating in the stage corner, and the confirmation is read before the card. */
+html .record-layout > .wait-panel > .wait-steps { position: static; justify-content: center; margin: 0 0 6px; }
+html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6px; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
 html .flip-back { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; border: 3px solid var(--back-base, var(--line)); background: var(--surface); }
 .flip-back .back-band { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2px 8px; padding: 16px 20px 14px; background: var(--back-mix, color-mix(in srgb, var(--tint) 60%, var(--surface))); }
@@ -328,7 +331,7 @@ html .flip-back .flip-text { margin: 10px 20px 0; padding: 0 2px 0 0; font-size:
   .card-stage { height: clamp(420px, calc(100svh - 360px), 470px); border-radius: 32px; }
   .card-stage > .stage-glow { width: 320px; height: 320px; }
   .card-stage .card-box { width: min(300px, 100%); }
-  .stage-chip, html .record-layout > .wait-panel > .wait-steps { top: 18px; left: 18px; }
+  .stage-chip { top: 18px; left: 18px; }
   :is(.card-info, .seal-hint, .wait-panel) h2 { font-size: 20px; }
   html .record-layout .card-info-actions { flex-direction: column; align-items: stretch; width: 100%; }
   html .record-layout .card-info-actions > button { width: 100%; }

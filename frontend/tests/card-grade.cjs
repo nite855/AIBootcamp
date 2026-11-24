@@ -38,9 +38,11 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     assert.equal(await page.locator('.card-info').evaluate(el => el.inert), true);
     assert.equal(await page.locator('.flip-scene').isVisible(), true, 'the locked pending card stays visible');
     const waitBox = await wait.boundingBox(), cardBox = await page.locator('.flip-scene').boundingBox();
-    assert.ok(waitBox.y >= cardBox.y + cardBox.height, 'copy sits under the stage (Figma second pass)');
+    // 2026-11-24 critique: the panel (step chips, title, actions) comes before the stage so it is on the first
+    // screen; before that it sat under the card with the chips in the stage corner (Figma second pass).
+    assert.ok(waitBox.y + waitBox.height <= cardBox.y, 'copy sits above the card');
     const stageBox = await page.locator('.card-stage').boundingBox(), stepsBox = await wait.locator('.wait-steps').boundingBox();
-    assert.ok(stepsBox.y < stageBox.y + 80 && stepsBox.x < stageBox.x + 80, 'step chips in the stage corner');
+    assert.ok(stepsBox.y + stepsBox.height <= stageBox.y, 'step chips lead the panel, outside the stage');
     await page.screenshot({path: path.join(evidence, 'wait-1366.png')});
     // A re-render keeps the panel while the writer stays on the page.
     await page.evaluate(() => window.dispatchEvent(new Event('resize')));

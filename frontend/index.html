@@ -2215,6 +2215,15 @@ footer { display: none; }
 .write-actions .primary { min-height: 44px; padding: 12px 24px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 /* Empty draft: the save button reads as inactive (it still explains why when pressed). */
 .write-editor[data-empty="true"] .write-actions .primary { background: color-mix(in srgb, var(--line) 70%, var(--surface)); color: var(--muted); font-weight: 500; }
+/* Save validation error (2026-11-24): the message takes the status line inside the bar, where the writer is
+   looking, and may wrap; the bar turns the same pale pink as a storage failure. Typing clears it. */
+.write-error { display: none; }
+.write-editor[data-write-error] .write-bar { background: color-mix(in srgb, var(--error, #d64561) 12%, var(--surface)); }
+.write-editor[data-write-error] .status-dot,
+.write-editor[data-write-error] .write-status > :not(.write-error),
+.write-editor[data-write-error] .write-status > #save-status { display: none; }
+.write-editor[data-write-error] .write-status { white-space: normal; }
+.write-editor[data-write-error] .write-error { display: flex; align-items: center; gap: 10px; color: var(--ink); line-height: 1.45; }
 /* Today written: "○○ 카드를 받았어요" + 수정하기 / 카드 보기 replace the save controls. */
 .done-status, .done-actions { display: none; }
 .write-editor[data-done="true"] :is(.status-dot, .write-status, .write-actions > .primary) { display: none; }
@@ -2404,6 +2413,13 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .save-long { display: none; }
   .write-actions .primary { padding: 11px 20px; }
   .done-actions :is(.primary, .secondary) { padding: 11px 18px; }
+  /* Today written (2026-11-24 critique): the status sentence was cut to "기록을 :" beside three controls.
+     It now takes its own line and the buttons share the row below, so the bar becomes a rounded block. */
+  .write-editor:is([data-done="true"], [data-write-error]) .write-bar { border-radius: 24px; padding: 12px 6px 6px 18px; }
+  .write-editor[data-write-error] .write-status { flex: 1 1 100%; }
+  .write-editor[data-done="true"] .done-status { flex: 1 1 100%; white-space: normal; line-height: 1.45; }
+  .write-editor[data-done="true"] .done-actions { flex: 1; margin-left: 0; }
+  .write-editor[data-done="true"] .done-actions > * { flex: 1; }
   /* Figma shows no today panel or recent tiles on phones; the archive stays one tap away. */
   .write-side .today-panel, .recent-list { display: none; }
   .recent-panel { margin-top: 2px; }
@@ -3496,7 +3512,10 @@ html .mystery-back em { position: absolute; top: 16px; right: 16px; padding: 4px
 /* Wait (Figma "분석 대기"): the step chips sit in the stage's top-left corner. */
 .record-layout.is-waiting { position: relative; }
 html .record-layout.show-record-card > .wait-panel { position: static; transform: none; animation: none; }
-html .record-layout > .wait-panel > .wait-steps { position: absolute; top: 28px; left: 28px; margin: 0; }
+/* 2026-11-24: the panel comes before the stage (share-view.js showWait), so the step chips lead it in the flow
+   instead of floating in the stage corner, and the confirmation is read before the card. */
+html .record-layout > .wait-panel > .wait-steps { position: static; justify-content: center; margin: 0 0 6px; }
+html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6px; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
 html .flip-back { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; border: 3px solid var(--back-base, var(--line)); background: var(--surface); }
 .flip-back .back-band { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2px 8px; padding: 16px 20px 14px; background: var(--back-mix, color-mix(in srgb, var(--tint) 60%, var(--surface))); }
@@ -3514,7 +3533,7 @@ html .flip-back .flip-text { margin: 10px 20px 0; padding: 0 2px 0 0; font-size:
   .card-stage { height: clamp(420px, calc(100svh - 360px), 470px); border-radius: 32px; }
   .card-stage > .stage-glow { width: 320px; height: 320px; }
   .card-stage .card-box { width: min(300px, 100%); }
-  .stage-chip, html .record-layout > .wait-panel > .wait-steps { top: 18px; left: 18px; }
+  .stage-chip { top: 18px; left: 18px; }
   :is(.card-info, .seal-hint, .wait-panel) h2 { font-size: 20px; }
   html .record-layout .card-info-actions { flex-direction: column; align-items: stretch; width: 100%; }
   html .record-layout .card-info-actions > button { width: 100%; }
@@ -4536,6 +4555,8 @@ function syncCardEffects() {
     // Lists without a single open card (first-run catalog, empty or pending months) get no foil hint (2026-11-24).
     const list = region.closest('.catalog-page, .stats-page');
     if (list && !list.querySelector('.mini-card:not(.is-locked)')) { region.querySelector('.card-effect-hint')?.remove(); return; }
+    // The "분석 대기" panel right after a save has no foil to point at (2026-11-24).
+    if (region.matches('.record-top') && region.closest('.record-panel')?.querySelector('.record-layout.is-waiting')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     if (region.querySelector('.card-effect-hint')) return;
     const hint = document.createElement('p'); hint.className = 'card-effect-hint'; region.append(hint);
   });
@@ -5128,8 +5149,10 @@ function recordDays() {
 }
 // Save button label by what the save does (2026-11-24): a new record, an edit of today's record, or a
 // draft that replaces today's record (one per day). ".save-long" is hidden on phones.
+// A new record reads "기록 남기기" until the emotion model is connected (2026-11-24 critique): "카드 받기"
+// promised a card that every real save answers with an "분석 대기" card.
 const SAVE_LABELS = {
-  new: '<span class="save-long">기록하고 </span>카드 받기',
+  new: '기록 남기기',
   edit: '<span class="save-long">수정한 내용 </span>저장하기',
   replace: '<span class="save-long">오늘 </span>기록 바꾸기',
 };
@@ -5220,9 +5243,9 @@ function homeView() {
   const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="primary" data-open="${E(done.id)}">카드 보기</button></div>` : "";
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
-    <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}">
+    <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>
       <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
-      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
+      <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${state.writeError ? `<span id="write-error" class="write-error"><span class="error-mark" aria-hidden="true">!</span>${E(state.writeError)}</span>` : ""}${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
     ${limitNotice()}
@@ -5999,7 +6022,12 @@ function showWait(box) {
   layout.classList.add("is-waiting");
   box.dataset.reveal = "pending";
   info.inert = true; info.setAttribute("aria-hidden", "true");
-  info.insertAdjacentHTML("afterend", waitPanel());
+  // 2026-11-24 critique: the panel used to sit under the stage, so "기록은 잘 저장됐어요" fell below the fold
+  // (1440×900 and phones) and the save toast covered it. It now comes first; the card follows. The foil hint
+  // does not belong on a card that is still waiting (flip.js leaves .is-waiting pages alone).
+  const stage = layout.querySelector(".card-stage");
+  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel());
+  layout.closest(".record-panel")?.querySelector(".record-top .card-effect-hint")?.remove();
   layout.querySelectorAll("[data-wait-action]").forEach(b => b.onclick = () => action(b.dataset.waitAction));
   // Right after a save the editor that had focus is gone; move focus to the panel title once
   // (later re-renders of the same page keep whatever the writer focused).
@@ -6469,6 +6497,12 @@ function bindProfile() {
     app.querySelector("#diary-text")?.addEventListener("input", (e) => {
       state.text = e.target.value;
       state.clearDraftConfirm = false;
+      // Typing answers the inline save error; the bar returns to the counter and save status.
+      if (state.writeError) {
+        state.writeError = null; state.error = false; state.status = "";
+        app.querySelector(".write-editor")?.removeAttribute("data-write-error");
+        app.querySelector("#write-error")?.remove();
+      }
       schedulePersist();
       // "오늘 작성 완료" ends as soon as the text changes (or comes back): re-render the bar and heading.
       const editor = app.querySelector(".write-editor");
@@ -6543,6 +6577,18 @@ function bindProfile() {
     if (storeReady) schedulePersist();
     return true;
   }
+  // Validation errors from DiaryCore are written for the analysis API ("비어 있는 기록이 있습니다…삭제해 주세요");
+  // the editor shows what the writer can do next instead. Unknown messages pass through unchanged.
+  const SAVE_ERROR_TEXT = [
+    [/^비어 있는 기록|^입력 내용이 없습니다/, "한 줄만 적어도 저장할 수 있어요. 오늘 있었던 일을 적어 주세요."],
+    [/^분석 가능한 텍스트가 없습니다/, "글자나 숫자를 한 자 이상 적어 주세요."],
+    [/읽을 수 없는 문자/, "읽을 수 없는 문자가 섞여 있어요. 그 부분을 지우고 다시 저장해 주세요."],
+    [/10,000자를 초과/, "10,000자를 넘었어요. 넘친 부분을 줄이면 저장할 수 있어요."],
+  ];
+  function saveErrorText(message) {
+    const hit = SAVE_ERROR_TEXT.find(([pattern]) => pattern.test(String(message || "")));
+    return hit ? hit[1] : String(message || "저장하지 못했어요. 다시 시도해 주세요.");
+  }
   // A failed save stays on the editor so the error and "다시 시도" remain in place.
   function openSavedCard() {
     const record = state.sessions.find((x) => x.id === state.currentEntryId);
@@ -6601,6 +6647,7 @@ function bindProfile() {
     if (a === 'cancel-edit') { state.editing = false; render(true); return; }
     state.error = false;
     state.status = "";
+    state.writeError = null;
     if (a !== "delete-all") state.clearAllConfirm = false;
     if (a !== "clear-draft") state.clearDraftConfirm = false;
     if (a === "read-full") {
@@ -6730,8 +6777,10 @@ function bindProfile() {
         state.preview = false;
         state.view = "write";
       } catch (e) {
+        // The validation error shows inside the write bar, where the writer is looking (2026-11-24 critique:
+        // it used to appear only in #feedback below the fold, worded as a domain exception).
         state.error = true;
-        state.status = e.message;
+        state.status = state.writeError = saveErrorText(e.message);
         render();
         document.getElementById("diary-text")?.focus();
         return;
@@ -6793,7 +6842,9 @@ function bindProfile() {
         : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
         : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
-      if (stored && state.status && a !== "new-entry") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
+      // A new/edited record opens the wait panel, which is the confirmation itself: the toast used to cover
+      // its title on phones (2026-11-24 critique), so saves from the editor skip it.
+      if (stored && state.status && a !== "new-entry" && a !== "save") showToast(a === "delete-example" ? "삭제했어요" : "저장했어요");
       if (a === "save" && stored && !state.error) openSavedCard();
     }
     render();
