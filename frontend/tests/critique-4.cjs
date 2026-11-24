@@ -100,6 +100,14 @@ const OLD = /분석 대기|분석을 기다|감정 분석이 끝나면/;
       const scope = page.locator('.editor-scope');
       assert.ok(await scope.isVisible(), `${tag}: demo editor scope line`);
       assert.match(await scope.innerText(), /내 기록장/);
+      // Demo tiles (analyzed cards): the mini card sits left of the text on every width, phones show one tile
+      // (screens.css legacy "html .recent-list .entry" rules used to win, 2026-11-25).
+      const tiles = await page.evaluate(() => [...document.querySelectorAll('.recent-list .recent-tile')].filter(t => getComputedStyle(t).display !== 'none').map(t => {
+        const c = t.querySelector('.tile-card').getBoundingClientRect(), x = t.querySelector('.entry-preview').getBoundingClientRect(), r = t.getBoundingClientRect();
+        return { cardRight: c.right, textLeft: x.left, inside: c.top >= r.top - .5 && c.bottom <= r.bottom + .5 };
+      }));
+      assert.ok(tiles.length >= 1 && (!mobile || tiles.length === 1), `${tag}: demo tiles shown (${tiles.length})`);
+      for (const t of tiles) assert.ok(t.cardRight <= t.textLeft && t.inside, `${tag}: demo tile card beside the text ${JSON.stringify(t)}`);
 
       assert.deepEqual(errors, [], `${tag}: no page errors`);
       await context.close();

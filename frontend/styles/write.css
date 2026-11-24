@@ -205,14 +205,22 @@ button.day-card:hover { transform: translateY(-2px); }
 .day-card.is-future .day-slot { background: transparent; border: 1px dashed color-mix(in srgb, var(--subtle, #b8b8c0) 55%, transparent); }
 /* Tiny cards in the calendars keep the color, dots and character but drop unreadable text. */
 @container (max-width: 90px) {
-  .mini-card .mc-head { padding: 7cqw 7cqw 0; font-size: 0; }
-  .mini-card .mc-head .mc-dots { margin-left: auto; padding: 3cqw 5cqw; gap: 4cqw; }
-  .mini-card .mc-head .mc-dots b { width: 5cqw; height: 5cqw; }
-  .mini-card .mc-window { margin: 5cqw 7cqw 0; border-radius: 9cqw; }
-  .mini-card .mc-character { width: 80%; }
-  .mini-card .mc-band { min-height: 14cqw; margin-top: 6cqw; padding: 0; }
-  .mini-card .mc-band > * { display: none; }
+  .mini-card:not(.card-fx) .mc-head { padding: 7cqw 7cqw 0; font-size: 0; }
+  .mini-card:not(.card-fx) .mc-head .mc-dots { margin-left: auto; padding: 3cqw 5cqw; gap: 4cqw; }
+  .mini-card:not(.card-fx) .mc-head .mc-dots b { width: 5cqw; height: 5cqw; }
+  .mini-card:not(.card-fx) .mc-window { margin: 5cqw 7cqw 0; border-radius: 9cqw; }
+  .mini-card:not(.card-fx) .mc-character { width: 80%; }
+  .mini-card:not(.card-fx) .mc-band { min-height: 14cqw; margin-top: 6cqw; padding: 0; }
+  .mini-card:not(.card-fx) .mc-band > * { display: none; }
 }
+/* Bound cards are not containers (soft.css --mcu); flip.js marks the same ≤ 90px cards with .mc-tiny. */
+.mini-card.mc-tiny .mc-head { padding: calc(7 * var(--mcu)) calc(7 * var(--mcu)) 0; font-size: 0; }
+.mini-card.mc-tiny .mc-head .mc-dots { margin-left: auto; padding: calc(3 * var(--mcu)) calc(5 * var(--mcu)); gap: calc(4 * var(--mcu)); }
+.mini-card.mc-tiny .mc-head .mc-dots b { width: calc(5 * var(--mcu)); height: calc(5 * var(--mcu)); }
+.mini-card.mc-tiny .mc-window { margin: calc(5 * var(--mcu)) calc(7 * var(--mcu)) 0; border-radius: calc(9 * var(--mcu)); }
+.mini-card.mc-tiny .mc-character { width: 80%; }
+.mini-card.mc-tiny .mc-band { min-height: calc(14 * var(--mcu)); margin-top: calc(6 * var(--mcu)); padding: 0; }
+.mini-card.mc-tiny .mc-band > * { display: none; }
 .month-count, .month-hint { display: none; }
 .write-side[data-view="month"] { align-content: stretch; }
 .write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(736px, calc(var(--stage-vh, 100vh) - 164px)); padding: 26px 36px 24px; } /* summary row stays on a 900px screen (2026-11-24) */
@@ -290,7 +298,10 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .recent-panel { margin-top: 10px; }
   .recent-head { padding-left: 8px; }
   .recent-list { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
-  .recent-list .recent-tile:nth-child(n + 2) { display: none; }
+  /* screens.css keeps legacy "html .recent-list .entry" phone rules (10px padding, every entry shown) that outrank
+     plain selectors, so the tile rules carry html too (2026-11-25: the mini card covered the text in demo mode). */
+  html .write-workspace .recent-list .recent-tile { min-height: 100px; padding: 12px 16px 12px 96px; border: 0; }
+  html .write-workspace .recent-list .recent-tile:nth-child(n + 2) { display: none; }
   /* Today written (2026-11-24 critique 3): today's tile repeated the editor just above and pushed the week rail
      under the tab bar. Phones then show the newest earlier record instead, or only the heading and links. */
   .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today { display: none; }
@@ -301,7 +312,6 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-main:has(.write-editor[data-done="true"]) .recent-panel[data-only-today] .rh-recent { display: none; }
   .write-main:has(.write-editor[data-done="true"]) .recent-panel[data-only-today] .rh-past { display: inline; }
   .tile-card { left: 22px; width: 56px; }
-  .recent-list .recent-tile { padding-left: 96px; }
   .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
   .editor-scope { margin: 0 24px; padding-top: 18px; font-size: 12px; }
   /* critique 4: on a first run the empty "최근 기록" tile pushed the how-cards-work guide below the fold. The tile goes;

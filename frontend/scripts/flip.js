@@ -54,15 +54,21 @@ function bindCardFoil(scene) {
   }
   let active = null, suppressTap = false;
   const listen = (type, fn, capture = false) => scene.addEventListener(type, fn, { signal, capture });
-  const size = () => {
-    tilt.style.setProperty('--fx-unit', scene.clientWidth / 100 + 'px');
-    tilt.style.setProperty('--card-r', scene.clientWidth * 96 / 1080 + 'px');
+  const size = width => {
+    tilt.style.setProperty('--fx-unit', width / 100 + 'px');
+    tilt.style.setProperty('--card-r', width * 96 / 1080 + 'px');
+    // Bound mini cards are not query containers (soft.css --mcu), so the calendar-size rules key off this class.
+    if (scene.matches('.mini-card')) scene.classList.toggle('mc-tiny', width <= 90);
   };
-  size();
-  let geometry = [scene.clientWidth, scene.clientHeight];
-  const resize = new ResizeObserver(() => {
-    const next = [scene.clientWidth, scene.clientHeight];
-    if (next.some((value, i) => value !== geometry[i])) { if (active?.moved) suppressTap = true; stop(); geometry = next; size(); }
+  // Sizes come from the observer entry (card scenes have no padding or border, so the border box is the old
+  // clientWidth). Reading clientWidth while binding, or inside the callbacks after the previous card's write,
+  // forced a fresh layout per card: a catalog of 27 mini cards stalled phones 0.5–1.2 s per screen change (2026-11-25).
+  let geometry = null;
+  const resize = new ResizeObserver(([entry]) => {
+    const box = entry.borderBoxSize?.[0], next = box ? [box.inlineSize, box.blockSize] : [entry.contentRect.width, entry.contentRect.height];
+    if (geometry && next.every((value, i) => Math.abs(value - geometry[i]) < .5)) return;
+    if (geometry) { if (active?.moved) suppressTap = true; stop(); }
+    geometry = next; size(next[0]);
   }); resize.observe(scene);
   listen('pointerdown', e => {
     if (e.pointerType !== 'touch' || !e.isPrimary) return;
