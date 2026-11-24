@@ -111,6 +111,9 @@ function syncCardEffects() {
     // Lists without a single open card (first-run catalog, empty or pending months) get no foil hint (2026-11-24).
     const list = region.closest('.catalog-page, .stats-page');
     if (list && !list.querySelector('.mini-card:not(.is-locked)')) { region.querySelector('.card-effect-hint')?.remove(); return; }
+    // The record screen only has foil once an analyzed card shows there (today's card or the calendar);
+    // a first run or pending-only week got a hint over locked "?" cards (2026-11-24 critique).
+    if (region.matches('.recent-panel') && !region.closest('.write-workspace')?.querySelector('.mini-card:not(.is-locked), .today-card:not([data-grade="pending"])')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     // The "분석 대기" panel right after a save has no foil to point at (2026-11-24).
     if (region.matches('.record-top') && region.closest('.record-panel')?.querySelector('.record-layout.is-waiting')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     if (region.querySelector('.card-effect-hint')) return;

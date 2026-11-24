@@ -2142,7 +2142,7 @@ footer { display: none; }
     background: var(--surface);
     box-shadow: var(--soft-shadow);
   }
-  .tabs .tab { flex-direction: column; justify-content: center; gap: 2px; min-height: 50px; padding: 4px; font-size: 11px; border-radius: var(--soft-pill); }
+  .tabs .tab { flex-direction: column; justify-content: center; gap: 2px; min-height: 50px; padding: 4px; font-size: 12px; border-radius: var(--soft-pill); } /* 12px floor, 2026-11-24 */
   .tabs .tab-icon { display: block; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
   .tabs .tab[aria-current="page"] { background: var(--tint); color: var(--ink); }
   .tabs .tab[aria-current="page"] .tab-icon { stroke-width: 2; transform: none; }
@@ -2204,7 +2204,17 @@ footer { display: none; }
 .write-panel textarea:focus-visible { outline: none; }
 .write-panel textarea::placeholder { color: var(--subtle, var(--muted)); opacity: 1; }
 .write-bar { display: flex; align-items: center; gap: 10px; min-height: 56px; margin: 0 24px; padding: 6px 6px 6px 20px; border: 0; border-radius: var(--soft-pill); background: var(--tint); }
-.status-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--card-base-neg-2, #a6ebd6); }
+/* Neutral ink dot (2026-11-24): the mint used before was an emotion card color ("The Color Lives in the Card"). */
+.status-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 28%, var(--surface)); }
+/* Today's question under an empty editor (2026-11-24 critique): the help used to hide in "⋯". It is never
+   inserted into the draft; "다른 질문" opens the rotating prompt dialog. Gone as soon as there is text. */
+.write-prompt { display: none; }
+.write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 40px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.write-prompt .prompt-label { color: var(--ink); font-weight: 600; font-size: 13px; }
+.write-prompt .prompt-text { word-break: keep-all; }
+.write-prompt .text-link { min-height: 32px; padding: 4px 2px; font-size: 13px; }
+/* Today written: the editor shrinks to its text instead of leaving 264px of empty page under a short entry. */
+.write-editor[data-done="true"] textarea { min-height: 120px; field-sizing: content; }
 .write-editor[data-empty="true"] .status-dot { display: none; }
 .write-status { flex: 1; min-width: 0; margin: 0; overflow: hidden; color: var(--muted); font-size: 13px; white-space: nowrap; text-overflow: ellipsis; }
 .write-status > #save-status, .write-status > .char-count { display: inline; min-width: 0; font-size: inherit; font-weight: 400; }
@@ -2357,7 +2367,7 @@ button.day-card:hover { transform: translateY(-2px); }
 }
 .month-count, .month-hint { display: none; }
 .write-side[data-view="month"] { align-content: stretch; }
-.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(756px, calc(var(--stage-vh, 100vh) - 136px)); padding: 26px 36px 24px; }
+.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(736px, calc(var(--stage-vh, 100vh) - 164px)); padding: 26px 36px 24px; } /* summary row stays on a 900px screen (2026-11-24) */
 .write-side[data-view="month"] .calendar-head { margin-left: -8px; margin-right: -12px; }
 .write-side[data-view="month"] .calendar-title { font-size: 17px; }
 .month-cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px 12px; align-content: start; }
@@ -2420,13 +2430,17 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-editor[data-done="true"] .done-status { flex: 1 1 100%; white-space: normal; line-height: 1.45; }
   .write-editor[data-done="true"] .done-actions { flex: 1; margin-left: 0; }
   .write-editor[data-done="true"] .done-actions > * { flex: 1; }
-  /* Figma shows no today panel or recent tiles on phones; the archive stays one tap away. */
-  .write-side .today-panel, .recent-list { display: none; }
-  .recent-panel { margin-top: 2px; }
-  .recent-head { justify-content: flex-end; padding-left: 4px; }
-  .recent-head h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  /* Figma shows no today panel on phones. 2026-11-24 critique: hiding the recent tiles too left "☆ 즐겨찾기 ·
+     전체 보기" without context, so phones keep the heading and the latest record as one full-width tile. */
+  .write-side .today-panel { display: none; }
+  .recent-panel { margin-top: 10px; }
+  .recent-head { padding-left: 8px; }
+  .recent-list { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+  .recent-list .recent-tile:nth-child(n + 2) { display: none; }
+  .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
   /* Phones keep the storage warning too (2026-11-24), as one small line. */
-  .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 11px; }
+  /* 12px floor for meaningful text and whole words per line ("최대 30편" no longer splits into "30 / 편"). */
+  .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 12px; line-height: 1.5; word-break: keep-all; }
   .write-side[data-view="month"] .streak-chip { display: none; }
   .how-panel { min-height: 0; padding: 28px 24px; }
   .how-stage { height: 200px; }
@@ -2435,11 +2449,14 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-workspace .write-calendar { gap: 12px; padding: 16px 18px 18px; }
   .write-calendar .nav-arrow { width: 26px; height: 26px; min-height: 26px; }
   .write-calendar .calendar-title { font-size: 14px; }
-  .streak-chip { font-size: 11px; }
-  .write-calendar .calendar-switch button { padding: 5px 12px; font-size: 11px; }
+  /* 12px floor for text that carries information (2026-11-24 critique; DESIGN.md "The Muted Floor Rule"). */
+  .streak-chip { font-size: 12px; }
+  .write-calendar .calendar-switch button { padding: 5px 12px; font-size: 12px; }
   .week-rail { gap: 10.33px; }
-  .rail-day { font-size: 10px; }
-  .rail-date { font-size: 11px; }
+  .rail-day { font-size: 12px; }
+  .rail-date { font-size: 12px; }
+  .how-steps { gap: 22px; }
+  .how-steps small { margin-bottom: 2px; }
   /* Month view replaces the whole record screen (Figma "M · 기록 · 월간 달력"). */
   .write-workspace:has(.write-side[data-view="month"]) .write-main { display: none; }
   .write-side[data-view="month"] .write-calendar { min-height: 0; padding: 18px 18px 20px; }
@@ -3516,6 +3533,14 @@ html .record-layout.show-record-card > .wait-panel { position: static; transform
    instead of floating in the stage corner, and the confirmation is read before the card. */
 html .record-layout > .wait-panel > .wait-steps { position: static; justify-content: center; margin: 0 0 6px; }
 html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6px; }
+/* The writer's own first sentence, given back with the day (2026-11-24 "다정한 마무리"). Plain type, no box:
+   the words are the reward. */
+.wait-quote { display: grid; gap: 6px; justify-items: center; max-width: 34em; margin: 4px auto 2px; }
+.wait-quote blockquote { margin: 0; }
+.wait-quote p { margin: 0; color: var(--ink); font-size: 17px; font-weight: 500; line-height: 1.55; letter-spacing: -.01em; word-break: keep-all; text-wrap: balance; }
+.wait-quote figcaption { color: var(--muted); font-size: 13px; }
+/* One way back: the panel's "기록으로 돌아가기" replaces the page's "← 홈으로" while the panel shows. */
+.record-panel:has(.record-layout.is-waiting) .record-top [data-action="history"] { visibility: hidden; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
 html .flip-back { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; border: 3px solid var(--back-base, var(--line)); background: var(--surface); }
 .flip-back .back-band { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2px 8px; padding: 16px 20px 14px; background: var(--back-mix, color-mix(in srgb, var(--tint) 60%, var(--surface))); }
@@ -3685,6 +3710,10 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
 @keyframes rm-fade-out { to { opacity: 0; } }
 @keyframes rm-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rm-glow { 0% { opacity: 0; } 35%, 70% { opacity: .85; } 100% { opacity: 0; } }
+/* Dark themes (night, tearoom): the white "분석 대기"/locked card glared on the dark stage (2026-11-24 critique).
+   It keeps its shape and drop shadow but sits a step lower in light. */
+html[data-theme="dark"] :is([data-grade="pending"] .art-card, .card-box[data-reveal="pending"] .art-card) { filter: brightness(.8) drop-shadow(0 18px 28px rgb(0 0 0 / .3)); }
+html[data-theme="dark"] .mini-card.is-locked { filter: brightness(.8); }
 
     </style>
   </head>
@@ -4555,6 +4584,9 @@ function syncCardEffects() {
     // Lists without a single open card (first-run catalog, empty or pending months) get no foil hint (2026-11-24).
     const list = region.closest('.catalog-page, .stats-page');
     if (list && !list.querySelector('.mini-card:not(.is-locked)')) { region.querySelector('.card-effect-hint')?.remove(); return; }
+    // The record screen only has foil once an analyzed card shows there (today's card or the calendar);
+    // a first run or pending-only week got a hint over locked "?" cards (2026-11-24 critique).
+    if (region.matches('.recent-panel') && !region.closest('.write-workspace')?.querySelector('.mini-card:not(.is-locked), .today-card:not([data-grade="pending"])')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     // The "분석 대기" panel right after a save has no foil to point at (2026-11-24).
     if (region.matches('.record-top') && region.closest('.record-panel')?.querySelector('.record-layout.is-waiting')) { region.querySelector('.card-effect-hint')?.remove(); return; }
     if (region.querySelector('.card-effect-hint')) return;
@@ -4843,11 +4875,12 @@ function bindBenchmark() {
   if (filter) filter.onchange = () => { state.favoritesOnly = filter.checked; state.page = 0; render(); app.querySelector('#favorites-only').focus(); };
 }
 async function benchmarkAction(a) {
-  if (a === 'help-write') {
+  if (a === 'help-write' || a === 'help-write-inline') {
     // Day-based prompt with an optional "other question"; the draft text is never changed.
-    let offset = 0;
+    // "help-write-inline" is the "다른 질문" link under an empty editor (2026-11-24); focus returns to it.
+    let offset = a === 'help-write-inline' ? 1 : 0;
     const copy = () => DiaryCore.writingPrompt(state.date, offset) + '\n\n질문은 참고용이에요. 떠오르는 대로 자유롭게 적어 보세요.';
-    openInfo('무엇을 쓸까요?', copy(), app.querySelector('[popovertarget=draft-more]'));
+    openInfo('무엇을 쓸까요?', copy(), a === 'help-write-inline' ? app.querySelector('[data-action=help-write-inline]') : app.querySelector('[popovertarget=draft-more]'));
     const next = app.querySelector('[data-next-prompt]');
     next.hidden = false;
     next.onclick = () => {
@@ -4874,9 +4907,14 @@ async function benchmarkAction(a) {
   return false;
 }
 
-  const examples = Array.from({ length: 65 }, (_, i) => {
+  // Demo records follow the product's own rules (2026-11-24 critique): one record per day and no more than
+  // the 30-record limit, so the month header never reads "기록 48편" under a "최대 30편" warning.
+  // Day 0 (today) is pending, days 1-27 open every catalog slot (9 types × 3 stages), day 28 is a blank card
+  // and day 29 a tie. Failed/stale analyses stay covered by the unit tests (cards.test.cjs).
+  const EXAMPLE_COUNT = 30, EXAMPLE_BLANK = 28, EXAMPLE_TIE = 29;
+  const examples = Array.from({ length: EXAMPLE_COUNT }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - Math.floor(i / 2));
+    d.setDate(d.getDate() - i);
     return {
       id: "sample-" + i,
       text: [
@@ -4889,14 +4927,13 @@ async function benchmarkAction(a) {
       updatedAt: d.toISOString(),
       version: 1,
       analysis: i === 0 ? { status: "pending" }
-        : i === 63 ? { status: "error" }
         : {
             status: "valid",
-            version: i === 64 ? 0 : 1,
+            version: 1,
             taxonomy_version: CardexCore.TAXONOMY,
             probabilities: Object.fromEntries(CardexCore.IDS.map((id, j) => {
-              if (i === 62) return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
-              const score = i === 61 ? 0.2 : [0.45, 0.75, 0.95][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
+              if (i === EXAMPLE_TIE) return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
+              const score = i === EXAMPLE_BLANK ? 0.2 : [0.45, 0.75, 0.95][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
               return [id, j === (i - 1) % CardexCore.IDS.length ? score : (1 - score) / (CardexCore.IDS.length - 1)];
             })),
           },
@@ -5010,7 +5047,7 @@ async function benchmarkAction(a) {
         + '<text x="96" y="1366" font-weight="600" font-size="40" fill="#111114" fill-opacity=".72">' + E(snippet ? firstLine(record?.text, 14) : "") + '</text>'
         + '<text x="984" y="1300" text-anchor="end" ' + CARD_FONT + ' font-weight="800" font-size="62" fill="#111114">' + cardNumber(card.type, card.stage) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".6">' + E(date) + '</text>'
-      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">Locked</text>'
+      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">잠긴 카드</text>'
         + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
@@ -5034,7 +5071,7 @@ async function benchmarkAction(a) {
   }
   // HTML mini card for week rails, calendars, the catalog and stats (CSS scales it with its width).
   function lockedMiniCard(label, grade = "") {
-    return '<span class="mini-card is-locked"' + (grade ? ' data-grade="' + grade + '"' : "") + ' aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-q">?</span></span><span class="mc-band"><small>Locked</small><strong>' + E(label) + '</strong></span></span>';
+    return '<span class="mini-card is-locked"' + (grade ? ' data-grade="' + grade + '"' : "") + ' aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-q">?</span></span><span class="mc-band"><small>잠긴 카드</small><strong>' + E(label) + '</strong></span></span>';
   }
   function miniCard(record, characterClass = "mc-character") {
     const card = DiaryCards.resolve(record), grade = DiaryCards.grade(card);
@@ -5084,6 +5121,8 @@ function charCount() {
 }
 // Warns from 25 real records so the 30-record limit never arrives as a save error first.
 function limitNotice() {
+  // Demo mode: the editor below the example cards still writes the real diary (2026-11-24 critique).
+  if (state.mode === "example") return `<p id="privacy" class="muted privacy-note example-note">시연 모드예요 · 여기에 쓰는 글은 예시가 아니라 이 브라우저의 실제 기록장에 저장돼요</p>`;
   const s = DiaryCore.recordLimitState(state.mode === "real" ? state.sessions.length : 0);
   if (s.level === "full") return `<p id="privacy" class="privacy-note limit-note" data-level="full">보관 한도 30편에 도달했어요. 새 기록은 정리한 뒤에 남길 수 있어요. ${btn("archive-records", "지난 기록 정리하기")}</p>`;
   if (s.level === "near") return `<p id="privacy" class="privacy-note limit-note" data-level="near">이 브라우저에만 보관돼요 · <strong>${s.remaining}편 남았어요</strong> (최대 30편)</p>`;
@@ -5096,8 +5135,10 @@ function limitNotice() {
 function firstRunGuide() {
   const steps = [
     ["하루를 기록해요", "짧아도 괜찮아요. 하루 한 편만 남길 수 있어요."],
-    ["감정을 읽어요", "감정 분석 모델이 기록에서 가장 가까운 감정 하나를 찾아요. 지금은 분석 준비 중이에요."],
-    ["카드를 모아요", "분석된 감정이 카드가 되어 도감에 모여요. 분류 확률은 감정의 강도가 아니에요."],
+    // 2026-11-24 critique: reflective wording before the first record; the probability note lives in the
+    // catalog legend, where cards exist to explain it.
+    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 분석을 준비하고 있어요."],
+    ["카드를 모아요", "그날의 카드가 도감에 모여요. 모은 카드는 언제든 다시 볼 수 있어요."],
   ];
   return `<section class="panel how-panel" aria-labelledby="how-title"><div class="how-stage" aria-hidden="true"><span class="stage-glow"></span>${lockedMiniCard("첫 번째 카드")}</div><h2 id="how-title">카드는 이렇게 모여요</h2><ol class="first-run how-steps">${steps.map(([t, d], i) => `<li><b aria-hidden="true">${i + 1}</b><span><strong>${t}</strong><small>${d}</small></span></li>`).join("")}</ol></section>`;
 }
@@ -5138,7 +5179,7 @@ function navArrow(dir, attrs, label, disabled = false) {
 // ── Soft UI v1.1 record screen (Figma "기록 · 입력됨", "월간 달력", "카드 모달") ──
 const weekdayName = date => WEEKDAYS[new Date(date + "T12:00:00").getDay()] + "요일";
 const longDate = date => `${shortDate(date)} ${weekdayName(date)}`;
-// The day's latest record (real records are one per day; the example set has two on some days).
+// The day's latest record (real and example records are both one per day since 2026-11-24).
 // Reads activeRecords() directly so an archive card filter never hides a calendar day.
 function dayRecord(date) {
   return activeRecords().filter(r => r.recordDate === date).sort(compareRecords)[0] || null;
@@ -5156,7 +5197,9 @@ const SAVE_LABELS = {
   edit: '<span class="save-long">수정한 내용 </span>저장하기',
   replace: '<span class="save-long">오늘 </span>기록 바꾸기',
 };
-const saveLabel = () => SAVE_LABELS[saveKind()];
+// In demo mode the editor still writes the real diary (saving asks to leave demo mode first), so the button
+// says so instead of reading like an edit of the example on screen (2026-11-24 critique).
+const saveLabel = () => state.mode === "example" ? "실제 기록으로 저장" : SAVE_LABELS[saveKind()];
 // One calendar slot: the day's mini card (opens the card modal) or an empty frame.
 // Today has an ink outline; days after today are dashed and never clickable.
 function dayCard(date, today) {
@@ -5204,7 +5247,7 @@ function writeCalendar() {
     : `${navArrow(-1, 'data-week-step="-1"', "이전 주")}<h2 class="calendar-title">${label.month}월 ${label.week}주<span class="sr-only"> (${E(weekTitle(state.calendarWeek))})</span></h2>${navArrow(1, 'data-week-step="1"', "다음 주", state.calendarWeek >= DiaryStatistics.weekStart(today))}`;
   const toggle = `<div class="calendar-switch" role="group" aria-label="달력 보기">${[["week", "주간"], ["month", "월간"]].map(([id, text]) => `<button type="button" data-write-calendar="${id}" aria-pressed="${(state.writeCalendar || "week") === id}">${text}</button>`).join("")}</div>`;
   const monthCount = activeRecords().filter(r => r.recordDate.startsWith(month)).length;
-  return `<section class="panel write-calendar" aria-label="나의 카드 달력">${monthView ? `<p class="month-count">${monthTitle(month)} · 기록 ${monthCount}편</p>` : ""}<div class="calendar-head"><div class="calendar-nav">${nav}</div>${streak ? `<span class="streak-chip">${streak}일 연속</span>` : ""}${toggle}</div>${monthView ? monthCards(month) : weekRail()}</section>`;
+  return `<section class="panel write-calendar" aria-label="나의 카드 달력">${monthView ? `<p class="month-count">${monthTitle(month)} · 기록 ${monthCount}편</p>` : ""}<div class="calendar-head"><div class="calendar-nav">${nav}</div>${streak > 1 ? `<span class="streak-chip">${streak}일 연속</span>` : ""}${toggle}</div>${monthView ? monthCards(month) : weekRail()}</section>`;
 }
 // Today's card: the saved record's mini card, or a fan of locked cards until today is written.
 // Figma "today-card" (480×508): a glow, two fanned pastel cards and today's card in the middle,
@@ -5240,11 +5283,12 @@ function homeView() {
   const options = more("draft-more", btn("help-write", "무엇을 쓸까요?", "quiet", 'aria-haspopup="dialog"') + btn("clear-draft", "초안 지우기") + '<p class="menu-note">기록은 다른 기기와 동기화되지 않아요. 브라우저 데이터를 삭제하면 기록도 사라져요.</p>', '<span aria-hidden="true">⋯</span><span class="sr-only">작성 옵션</span>');
   // Today written: the bar reports the card and offers 수정하기 / 카드 보기 (typing switches back to save).
   const doneCard = done ? DiaryCards.resolve(done) : null;
-  const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="primary" data-open="${E(done.id)}">카드 보기</button></div>` : "";
+  const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="${doneCard.status === "pending" ? "secondary" : "primary"}" data-open="${E(done.id)}">카드 보기</button></div>` : "";
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>
-      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      <p class="write-prompt"><span class="prompt-label">오늘의 질문</span><span class="prompt-text">${E(DiaryCore.writingPrompt(state.date, 0))}</span>${btn("help-write-inline", "다른 질문", "text-link", 'aria-haspopup="dialog"')}</p>
       <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${state.writeError ? `<span id="write-error" class="write-error"><span class="error-mark" aria-hidden="true">!</span>${E(state.writeError)}</span>` : ""}${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
@@ -5994,8 +6038,12 @@ function sealHint() {
   return `<section class="seal-hint" aria-labelledby="seal-hint-title"><h2 id="seal-hint-title" aria-live="polite">오늘의 마음을 카드로 만들고 있어요</h2><p class="seal-sub muted">기록 속 감정을 읽는 중이에요</p><div class="draw-progress" aria-hidden="true"><i></i></div><p class="draw-caption" aria-hidden="true">감정 읽는 중 · <span class="draw-pct">0</span>%</p><ul class="seal-legend" aria-label="빛의 색은 감정, 공개 효과는 등급에 따라 달라요">${legend}</ul>${note}<button type="button" class="secondary seal-skip" data-reveal-skip>건너뛰기</button></section>`;
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
-function waitPanel() {
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+// 2026-11-24 critique ("다정한 마무리"): the save is the peak of the day, so the panel gives the writer's own
+// first sentence back with the day, and one warm line. No numbers, no streaks, and no invented emotion.
+function waitPanel(record) {
+  const line = record ? MomentShare.firstSentence(record.text) : "";
+  const quote = line ? `<figure class="wait-quote"><blockquote><p>“${E(line)}”</p></blockquote><figcaption>${E(longDate(record.recordDate))}의 기록</figcaption></figure>` : "";
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 let waitFocus = false; // set by openSavedCard() (app.js), used once by showWait()
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }
@@ -6026,7 +6074,7 @@ function showWait(box) {
   // (1440×900 and phones) and the save toast covered it. It now comes first; the card follows. The foil hint
   // does not belong on a card that is still waiting (flip.js leaves .is-waiting pages alone).
   const stage = layout.querySelector(".card-stage");
-  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel());
+  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel(currentRecord()));
   layout.closest(".record-panel")?.querySelector(".record-top .card-effect-hint")?.remove();
   layout.querySelectorAll("[data-wait-action]").forEach(b => b.onclick = () => action(b.dataset.waitAction));
   // Right after a save the editor that had focus is gone; move focus to the panel title once
@@ -6427,7 +6475,7 @@ function bindProfile() {
     }
     // Figma "카드 공개": one centered column — a small back link, the white stage (chip, card, hint),
     // then the copy and actions under it (card-info; the draw hint and wait panel share its slot).
-    return `<section class="panel record-panel"><div class="row record-top">${btn("history", state.entryFrom === "write" ? "홈으로" : "목록으로")}<span class="record-date muted">${x.recordDate}${state.mode === "example" ? " · 시연 모드" : ""}</span></div><div class="record-layout show-record-card ${state.editing ? "is-editing" : ""}"><div class="record-copy" ${state.editing ? "" : "hidden"}>${state.editing ? `<label for="sample-text">기록 수정</label><textarea class="read-text" id="sample-text">${E(x.text)}</textarea>` : `<div class="read-text">${E(x.text)}</div>`}<div class="row">${state.editing ? btn("save-example", "수정 완료", "primary") + btn("cancel-edit", "취소") : ""}</div></div><div class="card-stage"><span class="stage-glow" aria-hidden="true"></span>${state.editing ? "" : stageChip(x)}${cardArea()}</div>${state.editing ? "" : cardInfo(x)}</div></section>`;
+    return `<section class="panel record-panel"><div class="row record-top">${btn("history", state.entryFrom === "write" ? "홈으로" : "목록으로")}<span class="record-date muted">${longDate(x.recordDate)}${state.mode === "example" ? " · 시연 모드" : ""}</span></div><div class="record-layout show-record-card ${state.editing ? "is-editing" : ""}"><div class="record-copy" ${state.editing ? "" : "hidden"}>${state.editing ? `<label for="sample-text">기록 수정</label><textarea class="read-text" id="sample-text">${E(x.text)}</textarea>` : `<div class="read-text">${E(x.text)}</div>`}<div class="row">${state.editing ? btn("save-example", "수정 완료", "primary") + btn("cancel-edit", "취소") : ""}</div></div><div class="card-stage"><span class="stage-glow" aria-hidden="true"></span>${state.editing ? "" : stageChip(x)}${cardArea()}</div>${state.editing ? "" : cardInfo(x)}</div></section>`;
   }
 
   // #feedback is redrawn on every render, so it is only the visible copy. A new status is spoken once from
@@ -6493,6 +6541,15 @@ function bindProfile() {
       render();
       app.querySelector(`[data-theme-id="${b.dataset.themeId}"]`)?.focus();
       document.getElementById("announcer").textContent = "선택한 테마를 적용했어요.";
+    });
+    // Ctrl/⌘+Enter saves from the editor (2026-11-24 critique); it runs the bar's current action, so a failed
+    // save retries and today's written state (no save button) does nothing.
+    app.querySelector("#diary-text")?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || !(e.ctrlKey || e.metaKey) || e.isComposing) return;
+      const button = app.querySelector(".write-actions > .primary");
+      if (!button || button.disabled || getComputedStyle(button).display === "none") return;
+      e.preventDefault();
+      action(button.dataset.action);
     });
     app.querySelector("#diary-text")?.addEventListener("input", (e) => {
       state.text = e.target.value;

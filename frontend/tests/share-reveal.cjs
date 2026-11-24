@@ -25,7 +25,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     await page.locator('.wait-panel').waitFor();
     assert.equal(await page.locator('.mystery-card').count(), 0, 'pending cards never play the draw');
     assert.equal(await page.locator('.card-info').isVisible(), false, 'card info replaced by the wait panel');
-    await page.locator('.record-panel [data-action=history]').click();
+    await page.locator('[data-wait-action=write]').click(); // the one way back while waiting (2026-11-24)
     await page.locator('.recent-list [data-open]').first().click();
     assert.equal(await page.locator('.card-box[data-grade="pending"]').count(), 1);
     assert.match(await page.locator('.stage-chip').innerText(), /분석 대기/);

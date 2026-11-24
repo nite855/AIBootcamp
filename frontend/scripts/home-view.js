@@ -16,6 +16,8 @@ function charCount() {
 }
 // Warns from 25 real records so the 30-record limit never arrives as a save error first.
 function limitNotice() {
+  // Demo mode: the editor below the example cards still writes the real diary (2026-11-24 critique).
+  if (state.mode === "example") return `<p id="privacy" class="muted privacy-note example-note">시연 모드예요 · 여기에 쓰는 글은 예시가 아니라 이 브라우저의 실제 기록장에 저장돼요</p>`;
   const s = DiaryCore.recordLimitState(state.mode === "real" ? state.sessions.length : 0);
   if (s.level === "full") return `<p id="privacy" class="privacy-note limit-note" data-level="full">보관 한도 30편에 도달했어요. 새 기록은 정리한 뒤에 남길 수 있어요. ${btn("archive-records", "지난 기록 정리하기")}</p>`;
   if (s.level === "near") return `<p id="privacy" class="privacy-note limit-note" data-level="near">이 브라우저에만 보관돼요 · <strong>${s.remaining}편 남았어요</strong> (최대 30편)</p>`;
@@ -28,8 +30,10 @@ function limitNotice() {
 function firstRunGuide() {
   const steps = [
     ["하루를 기록해요", "짧아도 괜찮아요. 하루 한 편만 남길 수 있어요."],
-    ["감정을 읽어요", "감정 분석 모델이 기록에서 가장 가까운 감정 하나를 찾아요. 지금은 분석 준비 중이에요."],
-    ["카드를 모아요", "분석된 감정이 카드가 되어 도감에 모여요. 분류 확률은 감정의 강도가 아니에요."],
+    // 2026-11-24 critique: reflective wording before the first record; the probability note lives in the
+    // catalog legend, where cards exist to explain it.
+    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 분석을 준비하고 있어요."],
+    ["카드를 모아요", "그날의 카드가 도감에 모여요. 모은 카드는 언제든 다시 볼 수 있어요."],
   ];
   return `<section class="panel how-panel" aria-labelledby="how-title"><div class="how-stage" aria-hidden="true"><span class="stage-glow"></span>${lockedMiniCard("첫 번째 카드")}</div><h2 id="how-title">카드는 이렇게 모여요</h2><ol class="first-run how-steps">${steps.map(([t, d], i) => `<li><b aria-hidden="true">${i + 1}</b><span><strong>${t}</strong><small>${d}</small></span></li>`).join("")}</ol></section>`;
 }
@@ -70,7 +74,7 @@ function navArrow(dir, attrs, label, disabled = false) {
 // ── Soft UI v1.1 record screen (Figma "기록 · 입력됨", "월간 달력", "카드 모달") ──
 const weekdayName = date => WEEKDAYS[new Date(date + "T12:00:00").getDay()] + "요일";
 const longDate = date => `${shortDate(date)} ${weekdayName(date)}`;
-// The day's latest record (real records are one per day; the example set has two on some days).
+// The day's latest record (real and example records are both one per day since 2026-11-24).
 // Reads activeRecords() directly so an archive card filter never hides a calendar day.
 function dayRecord(date) {
   return activeRecords().filter(r => r.recordDate === date).sort(compareRecords)[0] || null;
@@ -88,7 +92,9 @@ const SAVE_LABELS = {
   edit: '<span class="save-long">수정한 내용 </span>저장하기',
   replace: '<span class="save-long">오늘 </span>기록 바꾸기',
 };
-const saveLabel = () => SAVE_LABELS[saveKind()];
+// In demo mode the editor still writes the real diary (saving asks to leave demo mode first), so the button
+// says so instead of reading like an edit of the example on screen (2026-11-24 critique).
+const saveLabel = () => state.mode === "example" ? "실제 기록으로 저장" : SAVE_LABELS[saveKind()];
 // One calendar slot: the day's mini card (opens the card modal) or an empty frame.
 // Today has an ink outline; days after today are dashed and never clickable.
 function dayCard(date, today) {
@@ -136,7 +142,7 @@ function writeCalendar() {
     : `${navArrow(-1, 'data-week-step="-1"', "이전 주")}<h2 class="calendar-title">${label.month}월 ${label.week}주<span class="sr-only"> (${E(weekTitle(state.calendarWeek))})</span></h2>${navArrow(1, 'data-week-step="1"', "다음 주", state.calendarWeek >= DiaryStatistics.weekStart(today))}`;
   const toggle = `<div class="calendar-switch" role="group" aria-label="달력 보기">${[["week", "주간"], ["month", "월간"]].map(([id, text]) => `<button type="button" data-write-calendar="${id}" aria-pressed="${(state.writeCalendar || "week") === id}">${text}</button>`).join("")}</div>`;
   const monthCount = activeRecords().filter(r => r.recordDate.startsWith(month)).length;
-  return `<section class="panel write-calendar" aria-label="나의 카드 달력">${monthView ? `<p class="month-count">${monthTitle(month)} · 기록 ${monthCount}편</p>` : ""}<div class="calendar-head"><div class="calendar-nav">${nav}</div>${streak ? `<span class="streak-chip">${streak}일 연속</span>` : ""}${toggle}</div>${monthView ? monthCards(month) : weekRail()}</section>`;
+  return `<section class="panel write-calendar" aria-label="나의 카드 달력">${monthView ? `<p class="month-count">${monthTitle(month)} · 기록 ${monthCount}편</p>` : ""}<div class="calendar-head"><div class="calendar-nav">${nav}</div>${streak > 1 ? `<span class="streak-chip">${streak}일 연속</span>` : ""}${toggle}</div>${monthView ? monthCards(month) : weekRail()}</section>`;
 }
 // Today's card: the saved record's mini card, or a fan of locked cards until today is written.
 // Figma "today-card" (480×508): a glow, two fanned pastel cards and today's card in the middle,
@@ -172,11 +178,12 @@ function homeView() {
   const options = more("draft-more", btn("help-write", "무엇을 쓸까요?", "quiet", 'aria-haspopup="dialog"') + btn("clear-draft", "초안 지우기") + '<p class="menu-note">기록은 다른 기기와 동기화되지 않아요. 브라우저 데이터를 삭제하면 기록도 사라져요.</p>', '<span aria-hidden="true">⋯</span><span class="sr-only">작성 옵션</span>');
   // Today written: the bar reports the card and offers 수정하기 / 카드 보기 (typing switches back to save).
   const doneCard = done ? DiaryCards.resolve(done) : null;
-  const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="primary" data-open="${E(done.id)}">카드 보기</button></div>` : "";
+  const doneBar = done ? `<p class="done-status"><span class="done-dot" aria-hidden="true"${doneCard.status === "ready" ? ` style="--dot:var(--card-base-${doneCard.type.replace("_", "-")})"` : ""}></span>${E(doneMessage(done))}</p><div class="done-actions"><button type="button" class="secondary" data-write-edit>수정하기</button><button type="button" class="${doneCard.status === "pending" ? "secondary" : "primary"}" data-open="${E(done.id)}">카드 보기</button></div>` : "";
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>
-      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      <p class="write-prompt"><span class="prompt-label">오늘의 질문</span><span class="prompt-text">${E(DiaryCore.writingPrompt(state.date, 0))}</span>${btn("help-write-inline", "다른 질문", "text-link", 'aria-haspopup="dialog"')}</p>
       <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${state.writeError ? `<span id="write-error" class="write-error"><span class="error-mark" aria-hidden="true">!</span>${E(state.writeError)}</span>` : ""}${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>

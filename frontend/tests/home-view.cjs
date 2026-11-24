@@ -14,7 +14,8 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     // Calendar day cards are excluded; today's card button counts as 'card'.
     const homeActions = () => page.locator('button:visible:not(.day-card)').evaluateAll(bs => bs.map(b => b.dataset.action || b.dataset.open && 'open' || b.hasAttribute('data-write-edit') && 'edit' || b.dataset.cardDay && 'card' || b.getAttribute('popovertarget') || (b.dataset.writeCalendar?'view-'+b.dataset.writeCalendar:b.dataset.weekStep?'week'+b.dataset.weekStep:'month'+b.dataset.homeMonth)));
     // First run: no calendar yet (the side column shows "카드는 이렇게 모여요").
-    assert.deepEqual(await homeActions(), ['write','write','review-month','catalog','settings','draft-more','save','favorite-records','archive-records']);
+    // "다른 질문" under the empty editor's question line (2026-11-24); it hides once today is written.
+    assert.deepEqual(await homeActions(), ['write','write','review-month','catalog','settings','help-write-inline','draft-more','save','favorite-records','archive-records']);
     await reveal(page, 'archive-records');
     assert.equal(await page.locator('[popovertarget=main-menu]').count(), 0, 'no overflow menu in the top bar');
     await page.setViewportSize({width:1000,height:768});

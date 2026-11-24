@@ -75,7 +75,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     await page.locator(`[data-open="${pendingId}"]`).click(); await unseal(page);
     const pending = await page.locator('.flip-trigger .art-card').evaluate(el => ({status: el.dataset.cardStatus, text: [...el.querySelectorAll('text')].map(t => t.textContent)}));
     assert.equal(pending.status, 'pending');
-    assert.ok(pending.text.includes('Locked') && pending.text.includes('분석 대기 중') && pending.text.includes('?'));
+    assert.ok(pending.text.includes('잠긴 카드') && pending.text.includes('분석 대기 중') && pending.text.includes('?'));
     assert.ok(!pending.text.some(t => t.startsWith('No.')));
     await page.screenshot({path: path.join(evidence, 'card-pending.png')});
 

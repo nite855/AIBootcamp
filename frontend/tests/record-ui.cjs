@@ -104,7 +104,8 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
     await p.waitForFunction(() => DiaryReview.getState().mode === 'real');
     // The stored record opens the card page with the "분석 대기" panel; go back home.
     await p.locator('.wait-panel').waitFor();
-    await click('history');
+    // While the panel shows, its "기록으로 돌아가기" is the one way back (the page's "← 홈으로" is hidden, 2026-11-24).
+    await p.locator('[data-wait-action=write]').click();
     await p.locator('.recent-list [data-open]').first().click();
     await click('read-full');
     assert.equal(await p.locator('.full-text').textContent(),longText.trim());

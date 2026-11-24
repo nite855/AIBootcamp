@@ -314,6 +314,14 @@ html .record-layout.show-record-card > .wait-panel { position: static; transform
    instead of floating in the stage corner, and the confirmation is read before the card. */
 html .record-layout > .wait-panel > .wait-steps { position: static; justify-content: center; margin: 0 0 6px; }
 html .record-layout.is-waiting > .wait-panel .card-info-actions { margin-top: 6px; }
+/* The writer's own first sentence, given back with the day (2026-11-24 "다정한 마무리"). Plain type, no box:
+   the words are the reward. */
+.wait-quote { display: grid; gap: 6px; justify-items: center; max-width: 34em; margin: 4px auto 2px; }
+.wait-quote blockquote { margin: 0; }
+.wait-quote p { margin: 0; color: var(--ink); font-size: 17px; font-weight: 500; line-height: 1.55; letter-spacing: -.01em; word-break: keep-all; text-wrap: balance; }
+.wait-quote figcaption { color: var(--muted); font-size: 13px; }
+/* One way back: the panel's "기록으로 돌아가기" replaces the page's "← 홈으로" while the panel shows. */
+.record-panel:has(.record-layout.is-waiting) .record-top [data-action="history"] { visibility: hidden; }
 /* Back face (Figma "공개 · 뒷면"): color band, date and stage, rule, text, footer. */
 html .flip-back { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; border: 3px solid var(--back-base, var(--line)); background: var(--surface); }
 .flip-back .back-band { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2px 8px; padding: 16px 20px 14px; background: var(--back-mix, color-mix(in srgb, var(--tint) 60%, var(--surface))); }
@@ -483,3 +491,7 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
 @keyframes rm-fade-out { to { opacity: 0; } }
 @keyframes rm-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rm-glow { 0% { opacity: 0; } 35%, 70% { opacity: .85; } 100% { opacity: 0; } }
+/* Dark themes (night, tearoom): the white "분석 대기"/locked card glared on the dark stage (2026-11-24 critique).
+   It keeps its shape and drop shadow but sits a step lower in light. */
+html[data-theme="dark"] :is([data-grade="pending"] .art-card, .card-box[data-reveal="pending"] .art-card) { filter: brightness(.8) drop-shadow(0 18px 28px rgb(0 0 0 / .3)); }
+html[data-theme="dark"] .mini-card.is-locked { filter: brightness(.8); }

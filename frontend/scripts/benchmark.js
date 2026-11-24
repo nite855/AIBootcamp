@@ -19,11 +19,12 @@ function bindBenchmark() {
   if (filter) filter.onchange = () => { state.favoritesOnly = filter.checked; state.page = 0; render(); app.querySelector('#favorites-only').focus(); };
 }
 async function benchmarkAction(a) {
-  if (a === 'help-write') {
+  if (a === 'help-write' || a === 'help-write-inline') {
     // Day-based prompt with an optional "other question"; the draft text is never changed.
-    let offset = 0;
+    // "help-write-inline" is the "다른 질문" link under an empty editor (2026-11-24); focus returns to it.
+    let offset = a === 'help-write-inline' ? 1 : 0;
     const copy = () => DiaryCore.writingPrompt(state.date, offset) + '\n\n질문은 참고용이에요. 떠오르는 대로 자유롭게 적어 보세요.';
-    openInfo('무엇을 쓸까요?', copy(), app.querySelector('[popovertarget=draft-more]'));
+    openInfo('무엇을 쓸까요?', copy(), a === 'help-write-inline' ? app.querySelector('[data-action=help-write-inline]') : app.querySelector('[popovertarget=draft-more]'));
     const next = app.querySelector('[data-next-prompt]');
     next.hidden = false;
     next.onclick = () => {

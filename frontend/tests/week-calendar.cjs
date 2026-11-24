@@ -49,7 +49,8 @@ const LONG = '<b>굵게</b> 아주아주 긴 첫 줄 미리보기 문장이 계�
       const label = await todayCard.getAttribute('aria-label');
       assert.ok(label.includes('오늘') && label.includes('분석 대기') && label.includes('<b>굵게</b>'), 'label: ' + label);
       assert.equal(await panel.locator('.day-card b').count(), 0, 'record text never becomes markup');
-      assert.equal(await panel.locator('.streak-chip').innerText(), '1일 연속');
+      // A first day is not a streak (2026-11-24 critique: no number pressure on day one); it shows from day 2.
+      assert.equal(await panel.locator('.streak-chip').count(), 0, 'no "1일 연속" chip');
       assert.equal(await page.locator('.today-panel.has-card .today-card').count(), 1);
 
       // Week navigation: no future weeks, focus stays on the pressed (or remaining) arrow.

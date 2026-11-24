@@ -69,8 +69,12 @@ function sealHint() {
   return `<section class="seal-hint" aria-labelledby="seal-hint-title"><h2 id="seal-hint-title" aria-live="polite">오늘의 마음을 카드로 만들고 있어요</h2><p class="seal-sub muted">기록 속 감정을 읽는 중이에요</p><div class="draw-progress" aria-hidden="true"><i></i></div><p class="draw-caption" aria-hidden="true">감정 읽는 중 · <span class="draw-pct">0</span>%</p><ul class="seal-legend" aria-label="빛의 색은 감정, 공개 효과는 등급에 따라 달라요">${legend}</ul>${note}<button type="button" class="secondary seal-skip" data-reveal-skip>건너뛰기</button></section>`;
 }
 // Real records stay "분석 대기" until the model is connected: no draw, just this panel (Figma "카드 등장 · 분석 대기").
-function waitPanel() {
-  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2><p class="muted">감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
+// 2026-11-24 critique ("다정한 마무리"): the save is the peak of the day, so the panel gives the writer's own
+// first sentence back with the day, and one warm line. No numbers, no streaks, and no invented emotion.
+function waitPanel(record) {
+  const line = record ? MomentShare.firstSentence(record.text) : "";
+  const quote = line ? `<figure class="wait-quote"><blockquote><p>“${E(line)}”</p></blockquote><figcaption>${E(longDate(record.recordDate))}의 기록</figcaption></figure>` : "";
+  return `<section class="wait-panel" aria-labelledby="wait-title"><ol class="wait-steps" aria-label="진행 단계"><li class="is-done">저장 <span aria-hidden="true">✓</span></li><li class="is-current" aria-current="step">감정 읽기 <small>대기</small></li><li>카드 공개</li></ol><h2 id="wait-title" tabindex="-1">기록은 잘 저장됐어요</h2>${quote}<p class="muted">오늘도 하루를 남겼어요. 감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이라 "분석 대기" 카드로 보여요</p><div class="card-info-actions"><button type="button" class="primary" data-wait-action="write">기록으로 돌아가기</button><button type="button" class="secondary" data-wait-action="catalog">도감 보기</button></div></section>`;
 }
 let waitFocus = false; // set by openSavedCard() (app.js), used once by showWait()
 function revealKey(record) { return state.mode === "example" ? `example:${record.id}` : `real:${record.id}:${record.version}`; }
@@ -101,7 +105,7 @@ function showWait(box) {
   // (1440×900 and phones) and the save toast covered it. It now comes first; the card follows. The foil hint
   // does not belong on a card that is still waiting (flip.js leaves .is-waiting pages alone).
   const stage = layout.querySelector(".card-stage");
-  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel());
+  (stage || info).insertAdjacentHTML(stage ? "beforebegin" : "afterend", waitPanel(currentRecord()));
   layout.closest(".record-panel")?.querySelector(".record-top .card-effect-hint")?.remove();
   layout.querySelectorAll("[data-wait-action]").forEach(b => b.onclick = () => action(b.dataset.waitAction));
   // Right after a save the editor that had focus is gone; move focus to the panel title once

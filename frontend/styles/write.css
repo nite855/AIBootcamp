@@ -43,7 +43,17 @@
 .write-panel textarea:focus-visible { outline: none; }
 .write-panel textarea::placeholder { color: var(--subtle, var(--muted)); opacity: 1; }
 .write-bar { display: flex; align-items: center; gap: 10px; min-height: 56px; margin: 0 24px; padding: 6px 6px 6px 20px; border: 0; border-radius: var(--soft-pill); background: var(--tint); }
-.status-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--card-base-neg-2, #a6ebd6); }
+/* Neutral ink dot (2026-11-24): the mint used before was an emotion card color ("The Color Lives in the Card"). */
+.status-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 28%, var(--surface)); }
+/* Today's question under an empty editor (2026-11-24 critique): the help used to hide in "⋯". It is never
+   inserted into the draft; "다른 질문" opens the rotating prompt dialog. Gone as soon as there is text. */
+.write-prompt { display: none; }
+.write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 40px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.write-prompt .prompt-label { color: var(--ink); font-weight: 600; font-size: 13px; }
+.write-prompt .prompt-text { word-break: keep-all; }
+.write-prompt .text-link { min-height: 32px; padding: 4px 2px; font-size: 13px; }
+/* Today written: the editor shrinks to its text instead of leaving 264px of empty page under a short entry. */
+.write-editor[data-done="true"] textarea { min-height: 120px; field-sizing: content; }
 .write-editor[data-empty="true"] .status-dot { display: none; }
 .write-status { flex: 1; min-width: 0; margin: 0; overflow: hidden; color: var(--muted); font-size: 13px; white-space: nowrap; text-overflow: ellipsis; }
 .write-status > #save-status, .write-status > .char-count { display: inline; min-width: 0; font-size: inherit; font-weight: 400; }
@@ -196,7 +206,7 @@ button.day-card:hover { transform: translateY(-2px); }
 }
 .month-count, .month-hint { display: none; }
 .write-side[data-view="month"] { align-content: stretch; }
-.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(756px, calc(var(--stage-vh, 100vh) - 136px)); padding: 26px 36px 24px; }
+.write-side[data-view="month"] .write-calendar { align-content: start; grid-template-rows: auto auto 1fr; min-height: min(736px, calc(var(--stage-vh, 100vh) - 164px)); padding: 26px 36px 24px; } /* summary row stays on a 900px screen (2026-11-24) */
 .write-side[data-view="month"] .calendar-head { margin-left: -8px; margin-right: -12px; }
 .write-side[data-view="month"] .calendar-title { font-size: 17px; }
 .month-cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px 12px; align-content: start; }
@@ -259,13 +269,17 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-editor[data-done="true"] .done-status { flex: 1 1 100%; white-space: normal; line-height: 1.45; }
   .write-editor[data-done="true"] .done-actions { flex: 1; margin-left: 0; }
   .write-editor[data-done="true"] .done-actions > * { flex: 1; }
-  /* Figma shows no today panel or recent tiles on phones; the archive stays one tap away. */
-  .write-side .today-panel, .recent-list { display: none; }
-  .recent-panel { margin-top: 2px; }
-  .recent-head { justify-content: flex-end; padding-left: 4px; }
-  .recent-head h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  /* Figma shows no today panel on phones. 2026-11-24 critique: hiding the recent tiles too left "☆ 즐겨찾기 ·
+     전체 보기" without context, so phones keep the heading and the latest record as one full-width tile. */
+  .write-side .today-panel { display: none; }
+  .recent-panel { margin-top: 10px; }
+  .recent-head { padding-left: 8px; }
+  .recent-list { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+  .recent-list .recent-tile:nth-child(n + 2) { display: none; }
+  .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
   /* Phones keep the storage warning too (2026-11-24), as one small line. */
-  .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 11px; }
+  /* 12px floor for meaningful text and whole words per line ("최대 30편" no longer splits into "30 / 편"). */
+  .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 12px; line-height: 1.5; word-break: keep-all; }
   .write-side[data-view="month"] .streak-chip { display: none; }
   .how-panel { min-height: 0; padding: 28px 24px; }
   .how-stage { height: 200px; }
@@ -274,11 +288,14 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .write-workspace .write-calendar { gap: 12px; padding: 16px 18px 18px; }
   .write-calendar .nav-arrow { width: 26px; height: 26px; min-height: 26px; }
   .write-calendar .calendar-title { font-size: 14px; }
-  .streak-chip { font-size: 11px; }
-  .write-calendar .calendar-switch button { padding: 5px 12px; font-size: 11px; }
+  /* 12px floor for text that carries information (2026-11-24 critique; DESIGN.md "The Muted Floor Rule"). */
+  .streak-chip { font-size: 12px; }
+  .write-calendar .calendar-switch button { padding: 5px 12px; font-size: 12px; }
   .week-rail { gap: 10.33px; }
-  .rail-day { font-size: 10px; }
-  .rail-date { font-size: 11px; }
+  .rail-day { font-size: 12px; }
+  .rail-date { font-size: 12px; }
+  .how-steps { gap: 22px; }
+  .how-steps small { margin-bottom: 2px; }
   /* Month view replaces the whole record screen (Figma "M · 기록 · 월간 달력"). */
   .write-workspace:has(.write-side[data-view="month"]) .write-main { display: none; }
   .write-side[data-view="month"] .write-calendar { min-height: 0; padding: 18px 18px 20px; }

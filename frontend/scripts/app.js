@@ -52,9 +52,14 @@
   };
   const objectAssets = /*__OBJECT_ASSETS__*/;
   /*__PERSISTENCE__*/
-  const examples = Array.from({ length: 65 }, (_, i) => {
+  // Demo records follow the product's own rules (2026-11-24 critique): one record per day and no more than
+  // the 30-record limit, so the month header never reads "기록 48편" under a "최대 30편" warning.
+  // Day 0 (today) is pending, days 1-27 open every catalog slot (9 types × 3 stages), day 28 is a blank card
+  // and day 29 a tie. Failed/stale analyses stay covered by the unit tests (cards.test.cjs).
+  const EXAMPLE_COUNT = 30, EXAMPLE_BLANK = 28, EXAMPLE_TIE = 29;
+  const examples = Array.from({ length: EXAMPLE_COUNT }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - Math.floor(i / 2));
+    d.setDate(d.getDate() - i);
     return {
       id: "sample-" + i,
       text: [
@@ -67,14 +72,13 @@
       updatedAt: d.toISOString(),
       version: 1,
       analysis: i === 0 ? { status: "pending" }
-        : i === 63 ? { status: "error" }
         : {
             status: "valid",
-            version: i === 64 ? 0 : 1,
+            version: 1,
             taxonomy_version: CardexCore.TAXONOMY,
             probabilities: Object.fromEntries(CardexCore.IDS.map((id, j) => {
-              if (i === 62) return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
-              const score = i === 61 ? 0.2 : [0.45, 0.75, 0.95][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
+              if (i === EXAMPLE_TIE) return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
+              const score = i === EXAMPLE_BLANK ? 0.2 : [0.45, 0.75, 0.95][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
               return [id, j === (i - 1) % CardexCore.IDS.length ? score : (1 - score) / (CardexCore.IDS.length - 1)];
             })),
           },
@@ -188,7 +192,7 @@
         + '<text x="96" y="1366" font-weight="600" font-size="40" fill="#111114" fill-opacity=".72">' + E(snippet ? firstLine(record?.text, 14) : "") + '</text>'
         + '<text x="984" y="1300" text-anchor="end" ' + CARD_FONT + ' font-weight="800" font-size="62" fill="#111114">' + cardNumber(card.type, card.stage) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".6">' + E(date) + '</text>'
-      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">Locked</text>'
+      : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">잠긴 카드</text>'
         + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
@@ -212,7 +216,7 @@
   }
   // HTML mini card for week rails, calendars, the catalog and stats (CSS scales it with its width).
   function lockedMiniCard(label, grade = "") {
-    return '<span class="mini-card is-locked"' + (grade ? ' data-grade="' + grade + '"' : "") + ' aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-q">?</span></span><span class="mc-band"><small>Locked</small><strong>' + E(label) + '</strong></span></span>';
+    return '<span class="mini-card is-locked"' + (grade ? ' data-grade="' + grade + '"' : "") + ' aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-q">?</span></span><span class="mc-band"><small>잠긴 카드</small><strong>' + E(label) + '</strong></span></span>';
   }
   function miniCard(record, characterClass = "mc-character") {
     const card = DiaryCards.resolve(record), grade = DiaryCards.grade(card);
@@ -257,7 +261,7 @@
     }
     // Figma "카드 공개": one centered column — a small back link, the white stage (chip, card, hint),
     // then the copy and actions under it (card-info; the draw hint and wait panel share its slot).
-    return `<section class="panel record-panel"><div class="row record-top">${btn("history", state.entryFrom === "write" ? "홈으로" : "목록으로")}<span class="record-date muted">${x.recordDate}${state.mode === "example" ? " · 시연 모드" : ""}</span></div><div class="record-layout show-record-card ${state.editing ? "is-editing" : ""}"><div class="record-copy" ${state.editing ? "" : "hidden"}>${state.editing ? `<label for="sample-text">기록 수정</label><textarea class="read-text" id="sample-text">${E(x.text)}</textarea>` : `<div class="read-text">${E(x.text)}</div>`}<div class="row">${state.editing ? btn("save-example", "수정 완료", "primary") + btn("cancel-edit", "취소") : ""}</div></div><div class="card-stage"><span class="stage-glow" aria-hidden="true"></span>${state.editing ? "" : stageChip(x)}${cardArea()}</div>${state.editing ? "" : cardInfo(x)}</div></section>`;
+    return `<section class="panel record-panel"><div class="row record-top">${btn("history", state.entryFrom === "write" ? "홈으로" : "목록으로")}<span class="record-date muted">${longDate(x.recordDate)}${state.mode === "example" ? " · 시연 모드" : ""}</span></div><div class="record-layout show-record-card ${state.editing ? "is-editing" : ""}"><div class="record-copy" ${state.editing ? "" : "hidden"}>${state.editing ? `<label for="sample-text">기록 수정</label><textarea class="read-text" id="sample-text">${E(x.text)}</textarea>` : `<div class="read-text">${E(x.text)}</div>`}<div class="row">${state.editing ? btn("save-example", "수정 완료", "primary") + btn("cancel-edit", "취소") : ""}</div></div><div class="card-stage"><span class="stage-glow" aria-hidden="true"></span>${state.editing ? "" : stageChip(x)}${cardArea()}</div>${state.editing ? "" : cardInfo(x)}</div></section>`;
   }
 
   // #feedback is redrawn on every render, so it is only the visible copy. A new status is spoken once from
@@ -323,6 +327,15 @@
       render();
       app.querySelector(`[data-theme-id="${b.dataset.themeId}"]`)?.focus();
       document.getElementById("announcer").textContent = "선택한 테마를 적용했어요.";
+    });
+    // Ctrl/⌘+Enter saves from the editor (2026-11-24 critique); it runs the bar's current action, so a failed
+    // save retries and today's written state (no save button) does nothing.
+    app.querySelector("#diary-text")?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || !(e.ctrlKey || e.metaKey) || e.isComposing) return;
+      const button = app.querySelector(".write-actions > .primary");
+      if (!button || button.disabled || getComputedStyle(button).display === "none") return;
+      e.preventDefault();
+      action(button.dataset.action);
     });
     app.querySelector("#diary-text")?.addEventListener("input", (e) => {
       state.text = e.target.value;

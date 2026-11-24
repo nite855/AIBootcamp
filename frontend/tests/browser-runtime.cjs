@@ -7,6 +7,12 @@ const RECORD_TAB_ACTIONS = new Set(['archive-records', 'favorite-records']);
 // Saving opens the sealed card page (2026-11-19). Tests written for the editor flow get the card unsealed
 // and are taken back to the editor; pass {stay: true} to inspect the sealed card page instead.
 async function reveal(page, action, {stay = false} = {}) {
+  // While the "분석 대기" panel shows, the page's "← 홈으로" is hidden and the panel's "기록으로 돌아가기"
+  // is the one way back (2026-11-24).
+  if (action === 'history' && await page.locator('.wait-panel [data-wait-action="write"]').count()) {
+    await page.locator('.wait-panel [data-wait-action="write"]').click();
+    return;
+  }
   if (action !== 'save') await unseal(page);
   if (RECORD_TAB_ACTIONS.has(action) && !await page.locator(`[data-action="${action}"]:visible`).count()) {
     if (await page.locator('dialog[open]').count()) await page.keyboard.press('Escape');
@@ -28,7 +34,10 @@ async function reveal(page, action, {stay = false} = {}) {
     const opened = await page.locator('.wait-panel, .card-box.is-sealed .mystery-card').first().waitFor({timeout: 1500}).then(() => true, () => false);
     if (opened) {
       await unseal(page);
-      await page.locator('.record-panel [data-action="history"]').click();
+      // The wait panel's "기록으로 돌아가기" is the one way back while it shows (2026-11-24, the page's
+      // "← 홈으로" is hidden then); after an analyzed draw the page button is used.
+      const back = page.locator('[data-wait-action="write"]');
+      await ((await back.count()) ? back : page.locator('.record-panel [data-action="history"]')).click();
       await page.locator('#diary-text').waitFor();
     }
   }

@@ -65,7 +65,9 @@ async function arrowsCentred(page, where) {
       assert.equal(await chart.locator('.chart-line[data-series=positive]').count() >= 1, true);
       assert.equal(await chart.locator('.chart-line:not([data-series=positive])').count(), 0, 'single series');
       assert.equal(await chart.locator('.chart-mean').count(), 1);
-      assert.match(await chart.locator('.chart-today text').textContent(), /^오늘 긍정 \d/);
+      // The tooltip is for an analyzed today only. Demo data is one record per day since 2026-11-24 and
+      // today's demo record is the pending one, so no "오늘 긍정" tooltip is drawn.
+      assert.equal(await chart.locator('.chart-today').count(), 0, 'no today tooltip over a pending today');
       assert.equal(Number(await chart.getAttribute('data-days')), Number(today.slice(8)));
       assert.equal(await page.locator('.trend-dots li').count(), Number(today.slice(8)));
       assert.equal(await page.locator('.trend-dots .is-today').count(), 1);

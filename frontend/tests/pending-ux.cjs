@@ -31,7 +31,8 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       const wait = page.locator('.wait-panel');
       await wait.waitFor();
       assert.match(await wait.locator('[aria-current=step]').innerText(), /^감정 읽기\s*대기$/);
-      assert.equal(await wait.evaluate(el => el.getAnimations({ subtree: true }).length), 0, 'the wait panel does not pulse');
+      // CSS animations only: a hover transition on a button that lands under the pointer is not a pulse.
+      assert.deepEqual(await wait.evaluate(el => el.getAnimations({ subtree: true }).filter(a => a.animationName).map(a => a.animationName)), [], 'the wait panel does not pulse');
 
       // Catalog with saved-but-waiting records: the count, no write call to action, the demo button stays on the catalog.
       await page.locator('[data-wait-action=catalog]').click();
