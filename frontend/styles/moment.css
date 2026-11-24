@@ -1,6 +1,7 @@
 /* Moment refresh: messenger-style top bar + bottom tabs, softer surfaces, trend chart and
    the "new card" celebration. Loaded last so it can settle earlier layout rules. */
-:root { --spring: cubic-bezier(.34, 1.56, .64, 1); --soft-ease: cubic-bezier(.22, .8, .3, 1); --tabbar-h: 0px; }
+/* 2026-11-24 critique 4: the 56% overshoot bounced like a toy; a gentle 12% settle keeps the lift without the wobble. */
+:root { --spring: cubic-bezier(.3, 1.12, .5, 1); --soft-ease: cubic-bezier(.22, .8, .3, 1); --tabbar-h: 0px; }
 
 /* ── Top bar: big screen title on the left, tabs on the right (desktop) ── */
 header { flex-wrap: nowrap; gap: 16px; align-items: center; position: relative; z-index: 3; }

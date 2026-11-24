@@ -28,10 +28,10 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     await page.locator('[data-wait-action=write]').click(); // the one way back while waiting (2026-11-24)
     await page.locator('.recent-list [data-open]').first().click();
     assert.equal(await page.locator('.card-box[data-grade="pending"]').count(), 1);
-    assert.match(await page.locator('.stage-chip').innerText(), /분석 대기/);
+    assert.match(await page.locator('.stage-chip').innerText(), /봉인된 카드/);
     assert.match(await page.locator('#card-info-title').innerText(), /기록은 잘 저장됐어요/);
     assert.equal(await page.locator('[data-action=share]').count(), 0, 'pending cards cannot be shared');
-    assert.match(await page.locator('.card-info').innerText(), /AI 감정 분석은 아직 연결 전/);
+    assert.match(await page.locator('.card-info').innerText(), /AI 감정 읽기는 아직 연결 전/);
     assert.equal(await page.locator('.card-info :is(select, input[type=radio], [data-emotion-pick])').count(), 0, 'no manual emotion choice');
 
     // Example mode: the first open seals the card; tapping flips it with the grade effect, geometry stays fixed.

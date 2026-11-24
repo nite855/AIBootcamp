@@ -146,7 +146,7 @@ function weekdayMood(month) {
   const top = insight && insight.positive !== null ? insight.positive : -1;
   const rows = summary.map((d, i) => {
     const p = d.parents, seg = (key, cls) => p && p[key] > 0 ? `<b class="${cls}" style="--p:${p[key]}"></b>` : "";
-    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : d.count ? "분석 대기" : "기록 없음";
+    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : d.count ? "봉인된 카드" : "기록 없음";
     return `<li class="weekday-row${d.weekday === top ? " is-top" : ""}" style="--i:${i}"><span class="weekday-pct" aria-hidden="true">${p ? Math.round(p.positive * 100) + "%" : "—"}</span><span class="weekday-bar" role="img" aria-label="${WEEKDAYS[d.weekday]}요일, ${text}, ${d.count}편">${seg("positive", "seg-pos")}${seg("neutral", "seg-neu")}${seg("negative", "seg-neg")}</span><span class="weekday-name">${WEEKDAYS[d.weekday]}</span><small>${d.count}편</small></li>`;
   }).join("");
   const parts = insight ? [insight.positive !== null ? `${WEEKDAYS[insight.positive]}요일엔 긍정이` : "", insight.negative !== null ? `${WEEKDAYS[insight.negative]}요일엔 부정이` : ""].filter(Boolean) : [];
@@ -181,10 +181,10 @@ function statisticsPanel() {
   // The explanatory note and the insight (not in Figma) stay as one small caption line.
   const trendBody = stats.valid
     ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">아래 점은 그날 받은 카드의 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
-    : `<div class="stats-empty"><p>감정 분석은 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
+    : `<div class="stats-empty"><p>감정 읽기는 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
   // Records exist but none is analyzed (real records until the model is connected): one page-level
   // banner says why the ratio, distribution and weekday panels are empty, so writing more never looks like the fix.
-  const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>분석 대기</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 분석이 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
+  const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>감정 읽기 전</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 읽기가 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
   return `${head}${waiting}${summary}<div class="stats-sections">
     <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균</small></div>${trendBody}${insightLine(stats)}</section>
     <section class="panel stats-dist" aria-labelledby="dist-title"><div class="row"><h3 id="dist-title"><span class="wide-only">감정 분포</span><span class="narrow-only">많이 받은 감정</span></h3><small>9종 · 받은 카드 수</small></div>${distributionRows(state.month)}</section>

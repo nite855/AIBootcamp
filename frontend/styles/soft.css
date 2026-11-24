@@ -230,6 +230,11 @@ footer { display: none; }
 .art-card { filter: drop-shadow(0 18px 28px rgb(17 17 20 / .14)); }
 .flip-back { background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--tint) 60%, var(--surface))); }
 
+/* Korean wraps between words (critique 4: "쌓여
+요", "적어 주
+세요"); long unbroken strings still wrap. */
+.workspace, .workspace textarea, dialog { word-break: keep-all; overflow-wrap: break-word; }
+
 /* Mini card: the same frame in HTML, scaled by its own width (container query units). */
 .mini-card {
   --mc-base: #e6e6eb; --mc-mix: #f3f3f6; --mc-deep: #9a9aa4;

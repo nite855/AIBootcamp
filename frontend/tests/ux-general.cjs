@@ -24,7 +24,7 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
     const guide = page.locator('.first-run li');
     assert.equal(await guide.count(), 3);
     // 2026-11-24 critique: reflective wording; the probability note moved to the catalog legend.
-    assert.ok((await guide.nth(1).innerText()).includes('분석을 준비하고 있어요'));
+    assert.ok((await guide.nth(1).innerText()).includes('감정 읽기를 준비하고 있어요'));
     assert.doesNotMatch(await page.locator('.how-panel').innerText(), /분류 확률|감정 분석 모델/);
     assert.equal(await page.locator('.write-calendar').count(), 0, 'first run shows the guide instead of the calendar');
     await page.locator('#diary-text').fill('첫 번째 기록');

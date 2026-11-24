@@ -1301,7 +1301,8 @@ html[data-appearance] .sample-paper{border-radius:18px;box-shadow:none;border-wi
 
 /* Moment refresh: messenger-style top bar + bottom tabs, softer surfaces, trend chart and
    the "new card" celebration. Loaded last so it can settle earlier layout rules. */
-:root { --spring: cubic-bezier(.34, 1.56, .64, 1); --soft-ease: cubic-bezier(.22, .8, .3, 1); --tabbar-h: 0px; }
+/* 2026-11-24 critique 4: the 56% overshoot bounced like a toy; a gentle 12% settle keeps the lift without the wobble. */
+:root { --spring: cubic-bezier(.3, 1.12, .5, 1); --soft-ease: cubic-bezier(.22, .8, .3, 1); --tabbar-h: 0px; }
 
 /* ── Top bar: big screen title on the left, tabs on the right (desktop) ── */
 header { flex-wrap: nowrap; gap: 16px; align-items: center; position: relative; z-index: 3; }
@@ -2075,6 +2076,11 @@ footer { display: none; }
 .art-card { filter: drop-shadow(0 18px 28px rgb(17 17 20 / .14)); }
 .flip-back { background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--tint) 60%, var(--surface))); }
 
+/* Korean wraps between words (critique 4: "쌓여
+요", "적어 주
+세요"); long unbroken strings still wrap. */
+.workspace, .workspace textarea, dialog { word-break: keep-all; overflow-wrap: break-word; }
+
 /* Mini card: the same frame in HTML, scaled by its own width (container query units). */
 .mini-card {
   --mc-base: #e6e6eb; --mc-mix: #f3f3f6; --mc-deep: #9a9aa4;
@@ -2215,6 +2221,9 @@ footer { display: none; }
 .status-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 28%, var(--surface)); }
 /* Today's question under an empty editor (2026-11-24 critique): the help used to hide in "⋯". It is never
    inserted into the draft; "다른 질문" opens the rotating prompt dialog. Gone as soon as there is text. */
+/* Demo mode (critique 4): the editor holds the real draft beside example cards, so it says whose it is. */
+.editor-scope { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 40px; padding-top: 22px; color: var(--muted); font-size: 13px; line-height: 1.5; word-break: keep-all; }
+.editor-scope b { color: var(--ink); font-weight: 600; }
 .write-prompt { display: none; }
 .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 40px; color: var(--muted); font-size: 14px; line-height: 1.5; }
 .write-prompt .prompt-label { color: var(--ink); font-weight: 600; font-size: 13px; }
@@ -2291,14 +2300,18 @@ footer { display: none; }
 .recent-list .recent-tile:hover { transform: translateY(-2px); }
 /* Legacy .entry rules place children in columns; tiles stack them in one column. */
 .write-workspace .recent-list .recent-tile { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; }
-.write-workspace .recent-tile > :not(.tile-orb) { grid-column: 1 / -1; grid-row: auto; min-width: 0; }
-.tile-orb { position: absolute; left: 24px; top: 31px; width: 74px; height: 74px; border-radius: 50%; background: radial-gradient(circle at 45% 45%, var(--orb, #e3e3e8), color-mix(in srgb, var(--orb, #e3e3e8) 55%, transparent) 60%, transparent 75%); filter: blur(6px); }
+.write-workspace .recent-tile > :not(.tile-card) { grid-column: 1 / -1; grid-row: auto; min-width: 0; }
+/* 2026-11-24 critique 4: a blurred colour orb read as a loading spinner; the tile now shows the record's own mini card
+   (sealed envelope while pending), the same object as the rail, calendar and catalogue. */
+.tile-card { position: absolute; left: 28px; top: 50%; width: 68px; translate: 0 -50%; pointer-events: none; }
+.tile-card .mini-card { box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 4px 10px rgb(0 0 0 / .08); }
 .recent-tile .entry-preview { position: relative; display: block; overflow: hidden; font-size: 15px; font-weight: 500; line-height: 1.45; white-space: nowrap; text-overflow: ellipsis; }
-.recent-tile small { position: relative; color: var(--muted); font-size: 13px; }
+.recent-tile > small { position: relative; color: var(--muted); font-size: 13px; }
+.recent-head .rh-past { display: none; }
 .recent-list .recent-empty { grid-column: 1 / -1; display: grid; place-items: center; min-height: 136px; margin: 0; padding: 0 24px; border-radius: var(--soft-radius-tile); background: var(--surface); box-shadow: var(--soft-shadow); color: var(--muted); font-size: 14px; text-align: center; }
 
 /* ── Shared glow behind a staged card ── */
-.stage-glow { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--card-base-pos-2, #ffc6a3) 55%, transparent) 0, color-mix(in srgb, var(--card-base-neu-2, #d9c4ff) 30%, transparent) 40%, transparent 70%); filter: blur(10px); opacity: .9; }
+.stage-glow { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--card-base-pos-2, #ffc6a3) 55%, transparent) 0, color-mix(in srgb, var(--card-base-pos-3, #ffe49a) 30%, transparent) 40%, transparent 70%); filter: blur(10px); opacity: .9; }
 
 /* ── Today's card (480×508): fan of two pastel cards behind today's locked card ── */
 /* The stage is 420px at 900px tall screens and shrinks on shorter ones (1366×768) so the week rail
@@ -2456,8 +2469,20 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
      under the tab bar. Phones then show the newest earlier record instead, or only the heading and links. */
   .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today { display: none; }
   .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today + .recent-tile { display: grid; }
-  .write-main:has(.write-editor[data-done="true"]) .recent-list:not(:has(.recent-tile:not(.is-today))) { display: none; }
+  /* critique 4: with no earlier record the heading stood alone over the week rail. "전체 보기" is the only way to
+     the archive, so the row stays as a "지난 기록" link row (no tiles, no extra height above the rail). */
+  .write-main:has(.write-editor[data-done="true"]) .recent-panel[data-only-today] .recent-list { display: none; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-panel[data-only-today] .rh-recent { display: none; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-panel[data-only-today] .rh-past { display: inline; }
+  .tile-card { left: 22px; width: 56px; }
+  .recent-list .recent-tile { padding-left: 96px; }
   .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
+  .editor-scope { margin: 0 24px; padding-top: 18px; font-size: 12px; }
+  /* critique 4: on a first run the empty "최근 기록" tile pushed the how-cards-work guide below the fold. The tile goes;
+     the row stays as the same "지난 기록" link row as after today's first save. */
+  .write-workspace:has(.write-side[data-first="true"]) .recent-list { display: none; }
+  .write-workspace:has(.write-side[data-first="true"]) .rh-recent { display: none; }
+  .write-workspace:has(.write-side[data-first="true"]) .rh-past { display: inline; }
   /* Phones keep the storage warning too (2026-11-24), as one small line. */
   /* 12px floor for meaningful text and whole words per line ("최대 30편" no longer splits into "30 / 편"). */
   .write-main > #privacy:not(.limit-note) { margin: 6px 8px 0; font-size: 12px; line-height: 1.5; word-break: keep-all; }
@@ -3728,6 +3753,8 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
   html .card-box.is-sealed .mystery-card { animation: none !important; }
   html .card-box.is-sealed .mystery-card::after, html .card-box.is-sealed .grade-rays, html .draw-ghost { animation: none !important; opacity: 0 !important; }
   html .seal-hint .draw-progress i { animation: none !important; }
+  /* critique 4: the mystery back's shimmer kept sweeping under reduced motion. */
+  html .mystery-back::after { animation: none !important; opacity: 0 !important; }
   html .card-box.is-flipping .mystery-card { animation: rm-fade-out .6s .2s both !important; transform: translate(-50%, -50%) !important; }
   html .card-box.is-flipping .mystery-inner { animation: none !important; }
   html .card-box.is-flipping .flip-scene { animation: rm-fade-in .7s .5s both !important; }
@@ -3744,6 +3771,8 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
    It keeps its shape and drop shadow but sits a step lower in light. */
 html[data-theme="dark"] :is([data-grade="pending"] .art-card, .card-box[data-reveal="pending"] .art-card) { filter: brightness(.8) drop-shadow(0 18px 28px rgb(0 0 0 / .3)); }
 html[data-theme="dark"] .mini-card.is-locked { filter: brightness(.8); }
+/* critique 4 (night): the light paper of a sealed card still glared; it sits lower than the grey locked card. */
+html[data-theme="dark"] .mini-card.is-sealed { filter: brightness(.68); }
 
     </style>
   </head>
@@ -5087,7 +5116,7 @@ async function benchmarkAction(a) {
   function cardSVG(record = currentRecord(), { snippet = true, name: showName = true } = {}) {
     const card = DiaryCards.resolve(record), ready = card.status === "ready";
     const type = ready ? CardexCore.type(card.type) : null;
-    const name = ready ? type.name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+    const name = ready ? type.name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
     const uid = "mc" + (++cardSeq);
     // 2026-11-24 "봉인된 편지": a pending card is a sealed letter on warm paper, never an emotion color.
     const sealed = card.status === "pending";
@@ -5098,7 +5127,7 @@ async function benchmarkAction(a) {
     const parent = ready ? CardexCore.parent(type.parent).name : "";
     const summary = ready
       ? name + " · " + parent + " · " + card.stage + "단계 · 분류 확률 " + Math.round(card.score * 100) + "%" + (card.ties.length > 1 ? " · 공동 최다" : "") + " · 감정의 강도를 뜻하지 않아요"
-      : card.status === "pending" ? "분석 대기 · 감정 분석은 준비 중이에요" : card.status === "blank" ? "빈 카드 · 뚜렷한 대표 감정이 없는 기록이에요" : "분석 실패 · 기록은 그대로 읽을 수 있어요";
+      : card.status === "pending" ? "봉인된 카드 · 감정 읽기가 준비되면 열려요" : card.status === "blank" ? "빈 카드 · 뚜렷한 대표 감정이 없는 기록이에요" : "분석 실패 · 기록은 그대로 읽을 수 있어요";
     const example = state.mode === "example" ? " · 예시 · 실제 입력 분석 아님" : "";
     const art = ready
       // Figma glass-window proportions: floor shadow (.35, blur 3.9 → 13.2 at 1080) and the blob frame at 63% of the window.
@@ -5112,9 +5141,9 @@ async function benchmarkAction(a) {
         + '<text x="984" y="1300" text-anchor="end" ' + CARD_FONT + ' font-weight="800" font-size="62" fill="#111114">' + cardNumber(card.type, card.stage) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".6">' + E(date) + '</text>'
       : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">' + (sealed ? "봉인된 카드" : "잠긴 카드") + '</text>'
-        + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
+        + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "감정 읽기 전" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(card.status === "pending" ? "봉인된 감정 카드" : name + " 감정 카드") + '" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
       + '<desc>' + E(summary + example) + '</desc>'
       + '<defs><linearGradient id="' + uid + '-bg" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="' + c.mix + '"/><stop offset=".55" stop-color="' + c.base + '"/><stop offset="1" stop-color="' + c.base + '"/></linearGradient>'
       + '<linearGradient id="' + uid + '-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity=".12"/></linearGradient>'
@@ -5140,7 +5169,7 @@ async function benchmarkAction(a) {
   function miniCard(record, characterClass = "mc-character") {
     const card = DiaryCards.resolve(record), grade = DiaryCards.grade(card);
     // A pending record is a sealed letter (2026-11-24); blank and failed cards keep the locked "?".
-    if (card.status === "pending") return '<span class="mini-card is-locked is-sealed" data-grade="' + grade + '" aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-envelope"><i class="mc-flap"></i><i class="mc-seal"></i></span></span><span class="mc-band"><small>봉인된 카드</small><strong>분석 대기</strong></span></span>';
+    if (card.status === "pending") return '<span class="mini-card is-locked is-sealed" data-grade="' + grade + '" aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-envelope"><i class="mc-flap"></i><i class="mc-seal"></i></span></span><span class="mc-band"><small>봉인된 카드</small><strong>감정 읽기 전</strong></span></span>';
     if (card.status !== "ready") return lockedMiniCard(card.status === "blank" ? "빈 카드" : "분석 실패", grade);
     const key = card.type.replace("_", "-");
     let dots = "";
@@ -5162,7 +5191,7 @@ async function benchmarkAction(a) {
     // Back face (Figma "공개 · 뒷면"): the card's color band (MY MOMENT · name · No.), the date and
     // stage, a rule, the full record and a "moment · 눌러서 앞면 보기 ↻" footer.
     const ready = card.status === "ready", key = ready ? card.type.replace("_", "-") : "";
-    const backName = ready ? CardexCore.type(card.type).name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+    const backName = ready ? CardexCore.type(card.type).name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
     const backDate = record ? `${record.recordDate.replaceAll("-", ".")} ${weekdayName(record.recordDate)}${ready ? ` · ${card.stage}단계` : ""}` : "";
     const inner=record ? `<div class="flip-scene"><div class="tilt-layer"><div class="flip-inner"><span class="grade-aura" aria-hidden="true"></span><div class="flip-front"><button class="flip-trigger" data-flip="back" type="button" aria-label="카드를 뒤집어 기록 보기">${cardSVG()}<span class="flip-light" aria-hidden="true"></span></button></div><div class="flip-back" role="button" tabindex="-1" aria-label="카드 앞면으로 돌아가기. Enter 또는 스페이스를 누르세요." aria-hidden="true" inert${ready ? ` style="--back-base:var(--card-base-${key});--back-mix:var(--card-mix-${key})"` : ""}><span class="flip-light" aria-hidden="true"></span><div class="back-band"><small>MY MOMENT</small><strong>${E(backName)}</strong>${ready ? `<em>${cardNumber(card.type, card.stage)}</em>` : ""}</div><p class="back-date">${E(backDate)}</p><hr class="back-rule"><h2 class="sr-only">그날의 기록</h2><div class="flip-text" tabindex="0">${E(record.text)}</div><div class="back-foot"><b>moment</b><small>눌러서 앞면 보기 ↻</small></div></div></div></div></div>` : emptyCard();
     return `<section class="card-area"><div class="card-box"${record ? gradeAttrs(card) : ""}>${inner}</div><p class="caption muted">${record ? `카드를 눌러 뒤집어 보세요 ↻<span class="caption-store"> · ${recordStorageLabel()}</span>` : "기록은 보관할 수 있어요."}</p></section>`;
@@ -5203,7 +5232,7 @@ function firstRunGuide() {
     ["하루를 기록해요", "짧아도 괜찮아요. 하루 한 편만 남길 수 있어요."],
     // 2026-11-24 critique: reflective wording before the first record; the probability note lives in the
     // catalog legend, where cards exist to explain it.
-    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 분석을 준비하고 있어요."],
+    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 감정 읽기를 준비하고 있어요."],
     ["카드를 모아요", "그날의 카드가 도감에 모여요. 모은 카드는 언제든 다시 볼 수 있어요."],
   ];
   return `<section class="panel how-panel" aria-labelledby="how-title"><div class="how-stage" aria-hidden="true"><span class="stage-glow"></span>${lockedMiniCard("첫 번째 카드")}</div><h2 id="how-title">카드는 이렇게 모여요</h2><ol class="first-run how-steps">${steps.map(([t, d], i) => `<li><b aria-hidden="true">${i + 1}</b><span><strong>${t}</strong><small>${d}</small></span></li>`).join("")}</ol></section>`;
@@ -5222,7 +5251,7 @@ function doneMessage(record) {
   if (card.status === "ready") return `${CardexCore.type(card.type).name} · ${card.stage}단계 카드를 받았어요`;
   if (card.status === "blank") return "빈 카드를 받았어요";
   if (card.status === "error") return "기록은 저장됐어요 · 분석하지 못했어요";
-  return "기록을 저장했어요 · 카드는 분석 대기 중이에요";
+  return "기록을 남겼어요 · 카드는 봉인해 두었어요";
 }
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const monthTitle = month => `${month.slice(0, 4)}년 ${Number(month.slice(5, 7))}월`;
@@ -5322,17 +5351,17 @@ function todayPanel() {
   const today = localDate(), record = dayRecord(today);
   if (record) {
     const card = DiaryCards.resolve(record);
-    const copy = card.status === "pending" ? "감정 분석이 끝나면 카드가 열려요" : "내일 또 만나요";
+    const copy = card.status === "pending" ? "감정 읽기가 준비되면 열려요" : "내일 또 만나요";
     return `<section class="panel today-panel has-card" aria-labelledby="today-title"><div class="today-stage"><span class="stage-glow" aria-hidden="true"></span><button type="button" class="today-card" data-card-day="${today}" aria-label="오늘의 카드 열기, ${E(cardLabel(record))}"${gradeAttrs(card)}>${cardSVG(record)}</button></div><div class="today-copy"><h2 id="today-title">오늘의 카드</h2><p class="muted today-hint">${copy}</p></div></section>`;
   }
   const failed = state.mode === "real" && !loading && Boolean(lastStorageError || !storeReady);
   return `<section class="panel today-panel" aria-labelledby="today-title"><div class="today-stage card-fan" aria-hidden="true"><span class="stage-glow"></span><span class="fan-card f1"></span><span class="fan-card f2"></span><span class="fan-center">${lockedMiniCard("오늘의 카드")}</span></div><div class="today-copy"><h2 id="today-title">오늘의 카드</h2><p class="muted today-hint">${failed ? "저장되면 카드가 열려요" : "기록을 남기면 카드가 열려요"}</p></div></section>`;
 }
-// Recent record tile: emotion-colored orb, first line, "11.17 · 기쁨·활력 · 2단계". Opens the record page.
+// Recent record tile: the record's mini card (sealed while pending, critique 4), first line, "11.17 · 기쁨·활력 · 2단계". Opens the record page.
 function recentTile(record) {
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const meta = `${record.recordDate.slice(5).replace("-", ".")} · ${ready ? CardexCore.type(card.type).name + " · " + card.stage + "단계" : cardLabel(record)}${record.favorite ? " · ★" : ""}`;
-  return `<button type="button" class="entry recent-tile${record.recordDate === localDate() ? " is-today" : ""}" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-orb" aria-hidden="true"${ready ? ` style="--orb:var(--card-base-${card.type.replace("_", "-")});--orb-deep:var(--card-deep-${card.type.replace("_", "-")})"` : ""}></span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
+  return `<button type="button" class="entry recent-tile${record.recordDate === localDate() ? " is-today" : ""}" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-card" aria-hidden="true">${miniCard(record, "tile-character")}</span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
 }
 function homeView() {
   const recent = activeRecords().slice().sort(compareRecords).slice(0, 2);
@@ -5356,13 +5385,13 @@ function homeView() {
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>
-      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      ${state.mode === "example" ? '<p class="editor-scope"><b>내 기록장</b><span>시연 카드와 따로 보관돼요 · 저장하면 시연이 끝나요</span></p>' : ""}<label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
       <p class="write-prompt"><span class="prompt-label">오늘의 질문</span><span class="prompt-text">${E(DiaryCore.writingPrompt(state.date, 0))}</span>${btn("help-write-inline", "다른 질문", "text-link", 'aria-haspopup="dialog"')}</p>
       <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${state.writeError ? `<span id="write-error" class="write-error"><span class="error-mark" aria-hidden="true">!</span>${E(state.writeError)}</span>` : ""}${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
     ${limitNotice()}
-    <section class="recent-panel" aria-labelledby="recent-title"><div class="recent-head"><h2 id="recent-title">최근 기록</h2><div class="recent-tools">${btn("favorite-records", "☆ 즐겨찾기", "text-link")}${btn("archive-records", "전체 보기", "text-link")}</div></div><div class="recent-list">${recent.map(recentTile).join("") || '<p class="recent-empty">아직 남긴 기록이 없어요. 첫 기록을 남기면 여기에 쌓여요.</p>'}</div></section>
+    <section class="recent-panel"${recent.length && recent.every(r => r.recordDate === localDate()) ? ' data-only-today' : ""} aria-labelledby="recent-title"><div class="recent-head"><h2 id="recent-title"><span class="rh-recent">최근 기록</span><span class="rh-past">지난 기록</span></h2><div class="recent-tools">${btn("favorite-records", "☆ 즐겨찾기", "text-link")}${btn("archive-records", "전체 보기", "text-link")}</div></div><div class="recent-list">${recent.map(recentTile).join("") || '<p class="recent-empty">아직 남긴 기록이 없어요. 첫 기록을 남기면 여기에 쌓여요.</p>'}</div></section>
   </section>
   <aside class="write-side" data-view="${state.writeCalendar === "month" ? "month" : "week"}"${first ? ' data-first="true"' : ""} aria-label="${first ? "카드가 모이는 방법" : "오늘의 카드와 카드 달력"}">${first ? firstRunGuide() : todayPanel() + writeCalendar()}</aside>`;
 }
@@ -5373,9 +5402,9 @@ function cardModalHTML(date) {
   if (!record) return "";
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const days = recordDays(), i = days.indexOf(date);
-  const title = ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기 카드";
+  const title = ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인해 둔 카드";
   const meta = ready ? `${cardNumber(card.type, card.stage)} · 최고 확률 ${Math.round(card.score * 100)}% · 임시 분류${card.ties.length > 1 ? " · 공동 최다" : ""}`
-    : card.status === "pending" ? "봉인해 둔 카드예요 · 감정 읽기가 준비되면 열려요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
+    : card.status === "pending" ? "감정 읽기가 준비되면 열려요 · 기록은 언제든 읽을 수 있어요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
   const count = Array.from(record.text).length.toLocaleString("ko-KR");
   const actions = (["ready", "blank"].includes(card.status) ? `<button type="button" class="primary" data-modal="share">공유하기</button>` : "")
     + (ready ? `<button type="button" class="quiet" data-modal="catalog">도감에서 보기</button>` : "")
@@ -5636,7 +5665,7 @@ function weekdayMood(month) {
   const top = insight && insight.positive !== null ? insight.positive : -1;
   const rows = summary.map((d, i) => {
     const p = d.parents, seg = (key, cls) => p && p[key] > 0 ? `<b class="${cls}" style="--p:${p[key]}"></b>` : "";
-    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : d.count ? "분석 대기" : "기록 없음";
+    const text = p ? `긍정 ${CardexCore.percent(p.positive)} · 중립 ${CardexCore.percent(p.neutral)} · 부정 ${CardexCore.percent(p.negative)}` : d.count ? "봉인된 카드" : "기록 없음";
     return `<li class="weekday-row${d.weekday === top ? " is-top" : ""}" style="--i:${i}"><span class="weekday-pct" aria-hidden="true">${p ? Math.round(p.positive * 100) + "%" : "—"}</span><span class="weekday-bar" role="img" aria-label="${WEEKDAYS[d.weekday]}요일, ${text}, ${d.count}편">${seg("positive", "seg-pos")}${seg("neutral", "seg-neu")}${seg("negative", "seg-neg")}</span><span class="weekday-name">${WEEKDAYS[d.weekday]}</span><small>${d.count}편</small></li>`;
   }).join("");
   const parts = insight ? [insight.positive !== null ? `${WEEKDAYS[insight.positive]}요일엔 긍정이` : "", insight.negative !== null ? `${WEEKDAYS[insight.negative]}요일엔 부정이` : ""].filter(Boolean) : [];
@@ -5671,10 +5700,10 @@ function statisticsPanel() {
   // The explanatory note and the insight (not in Figma) stay as one small caption line.
   const trendBody = stats.valid
     ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">아래 점은 그날 받은 카드의 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
-    : `<div class="stats-empty"><p>감정 분석은 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
+    : `<div class="stats-empty"><p>감정 읽기는 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
   // Records exist but none is analyzed (real records until the model is connected): one page-level
   // banner says why the ratio, distribution and weekday panels are empty, so writing more never looks like the fix.
-  const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>분석 대기</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 분석이 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
+  const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>감정 읽기 전</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 읽기가 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
   return `${head}${waiting}${summary}<div class="stats-sections">
     <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균</small></div>${trendBody}${insightLine(stats)}</section>
     <section class="panel stats-dist" aria-labelledby="dist-title"><div class="row"><h3 id="dist-title"><span class="wide-only">감정 분포</span><span class="narrow-only">많이 받은 감정</span></h3><small>9종 · 받은 카드 수</small></div>${distributionRows(state.month)}</section>
@@ -5764,7 +5793,7 @@ function cardLabel(r) {
       ? "빈 카드"
       : c.status === "error"
         ? "분석 실패"
-        : "분석 대기";
+        : "봉인된 카드";
 }
 const stageStars = stage => "★".repeat(stage) + "☆".repeat(3 - stage);
 // DiaryCards.collection keeps record IDs per slot; the detail sheet needs the records themselves.
@@ -5810,8 +5839,8 @@ function catalogPanel() {
   const saved = state.mode === "real" ? activeRecords().length : 0;
   const demo = state.mode === "real" ? btn("preview-catalog", "시연 모드로 미리 보기", saved ? "primary" : "secondary") : "";
   const empty = found ? "" : saved
-    ? `<div class="collection-empty" role="status" data-empty="waiting"><h3>카드가 분석을 기다리고 있어요</h3><p>기록 ${saved}편은 잘 저장됐어요. AI 감정 분석이 연결되면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${demo}</div>`
-    : `<div class="collection-empty" role="status" data-empty="first"><h3>아직 모은 카드가 없어요</h3><p>기록을 남기면 감정 분석을 거쳐 그날의 감정 카드가 이 바인더에 꽂혀요${state.mode === "real" ? " · AI 감정 분석은 아직 연결 전이에요" : ""}</p>${btn("write", "첫 기록 남기기", "primary")}${demo}</div>`;
+    ? `<div class="collection-empty" role="status" data-empty="waiting"><h3>카드는 봉인해 두었어요</h3><p>기록 ${saved}편은 잘 저장됐어요. AI 감정 읽기가 연결되면 그날의 감정 카드가 이 바인더에 꽂혀요</p>${demo}</div>`
+    : `<div class="collection-empty" role="status" data-empty="first"><h3>아직 모은 카드가 없어요</h3><p>기록을 남기면 감정 읽기를 거쳐 그날의 감정 카드가 이 바인더에 꽂혀요${state.mode === "real" ? " · AI 감정 읽기는 아직 연결 전이에요" : ""}</p>${btn("write", "첫 기록 남기기", "primary")}${demo}</div>`;
   const progress = found ? `<section class="collect-card" aria-label="수집 현황${state.mode === "example" ? " · 예시 도감" : ""}"><p><strong class="moment-number">${found}</strong><span> / ${slots.length} 수집</span></p><i class="collect-bar" aria-hidden="true"><b style="width:${(found / slots.length) * 100}%"></b></i></section>` : "";
   // Plain words (2026-11-24): "분류 확률 구간" read as jargon; the bands and the "not intensity" rule stay.
   const legend = '<p class="catalog-legend">단계는 AI가 그 감정이라고 본 확신 정도예요(1단계 30~60% · 2단계 60~90% · 3단계 90% 이상). 감정이 얼마나 강했는지와는 달라요. 중립에는 사실 위주의 글·궁금함·놀람·당황이 들어가요.</p>';
@@ -5899,7 +5928,7 @@ function bindCatalog() {
     showToast("도감에 담겼어요");
     // The toast is hidden from assistive tech; the status line (spoken once) says the same.
     state.error = false;
-    state.status = c.status === "ready" ? "도감에 담겼어요. 카드 상세를 열었어요." : "도감을 열었어요. 분석이 끝나면 카드가 담겨요.";
+    state.status = c.status === "ready" ? "도감에 담겼어요. 카드 상세를 열었어요." : "도감을 열었어요. 감정 읽기가 준비되면 카드가 담겨요.";
     state.view = "history";
     state.archiveTab = "catalog";
     state.cardFilter = null;
@@ -5993,7 +6022,9 @@ function playCelebration(fresh) {
   if (!keys.length) return;
   const lead = keys.reduce((best, k) => (Number(k.split(":")[1]) > Number(best.split(":")[1]) ? k : best), keys[0]);
   const [type, stage] = lead.split(":"), name = CardexCore.type(type).name, rest = keys.filter(k => k !== lead);
-  const title = keys.length > 1 ? `새로운 감정 카드 ${keys.length}장 획득!` : "새로운 감정 카드 획득!";
+  // Demo cards were never earned (critique 4: "27장 획득!" promised what real records cannot give yet).
+  const title = state.mode === "example" ? (keys.length > 1 ? `시연 도감에 카드 ${keys.length}장이 담겨 있어요` : "시연 도감에 카드가 담겨 있어요")
+    : keys.length > 1 ? `새로운 감정 카드 ${keys.length}장 획득!` : "새로운 감정 카드 획득!";
   const desc = `${E(name)} · ${stage}단계 카드가 도감에 채워졌어요.${rest.length ? ` 외 ${rest.length}장도 함께 담겼어요.` : ""}`;
   const count = [6, 8, 12][Math.min(2, Math.max(0, Number(stage) - 1))] || 6, step = 360 / count;
   const sparkles = Array.from({ length: count }, (_, i) => `<i style="--a:${Math.round(i * step + (i % 2 ? 12 : 0))}deg;--d:${(i % 3) * 26 + 120}px;--s:${(i % 4) * 2 + 6}px;--delay:${(i % 5) * 40}ms"></i>`).join("");
@@ -6054,7 +6085,7 @@ function cardInfo(record) {
   const copy = card.status === "ready" ? `최고 확률 ${Math.round(card.score * 100)}% · 임시 분류 · ${example ? "시연용 예시 분석이에요" : "확률은 감정의 강도가 아니에요"}`
     : card.status === "blank" ? `최고 확률 ${Math.round(card.score * 100)}% · 뚜렷한 대표 감정이 없는 기록이에요`
     : card.status === "error" ? "기록은 그대로 읽을 수 있어요 · 분석 결과만 사용하지 않아요"
-    : "감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이에요";
+    : "감정 읽기가 준비되면 카드가 열려요 · AI 감정 읽기는 아직 연결 전이에요";
   const failed = state.mode === "real" && (lastStorageError || !storeReady);
   const menu = more("card-more", btn("read-full", "기록 읽기", "quiet")
     + (["ready", "blank"].includes(card.status) ? btn("download", "이미지 저장", "quiet", state.busy ? "disabled" : "") : "")
@@ -6069,7 +6100,7 @@ function cardInfo(record) {
 // Small chip in the stage's top-left corner (Figma "새 카드").
 function stageChip(record) {
   const card = DiaryCards.resolve(record);
-  const label = card.status === "ready" ? "새 카드" : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+  const label = card.status === "ready" ? "새 카드" : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
   return `<span class="stage-chip" data-status="${card.status}"><i aria-hidden="true"></i>${label}</span>`;
 }
 
@@ -6479,7 +6510,7 @@ function profilePanel() {
     ${group("notice", "알림", notice("notifyDaily", "매일 기록 알림", "켜 두면 알림이 준비된 뒤 오후 9:00에 알려드릴게요") + notice("notifyAnalysis", "카드 분석 완료 알림", "켜 두면 알림이 준비된 뒤 카드가 열릴 때 알려드릴게요") + '<p class="notice-note">이 기기에서는 아직 알림을 보낼 수 없어요. 설정만 저장해 두었다가 알림이 준비되면 사용해요.</p>')}
     ${group("records", "기록", `<label class="switch-row pref-row"><span class="pref-text"><strong>시연 모드</strong><small>합성 데이터로 화면을 보여줘요 · 실제 기록과 섞이지 않아요</small></span><input type="checkbox" role="switch" data-action="preview" ${state.mode === "example" ? "checked" : ""}></label>`)}
     ${group("data", "데이터", pref("모든 기록 삭제", "기록은 이 브라우저에만 보관돼요. 계정·동기화·서버 백업은 없어요", btn("delete-all", "삭제", "secondary danger", 'aria-label="모든 기록 삭제" aria-haspopup="dialog"')))}
-    ${group("about", "정보", pref("앱 정보 · 글꼴 라이선스", 'AI 감정 분석은 아직 연결 전이라 실제 기록은 "분석 대기"로 보여요 · Moment Sans(Pretendard 기반), Bricolage Grotesque (SIL OFL)', '<button type="button" class="secondary" data-profile-action="license" aria-haspopup="dialog">라이선스 보기</button>'))}
+    ${group("about", "정보", pref("앱 정보 · 글꼴 라이선스", 'AI 감정 읽기는 아직 연결 전이라 실제 기록의 카드는 봉인해 두어요 · Moment Sans(Pretendard 기반), Bricolage Grotesque (SIL OFL)', '<button type="button" class="secondary" data-profile-action="license" aria-haspopup="dialog">라이선스 보기</button>'))}
     </section>
     </div></div>
     <dialog id="profile-dialog" class="read-dialog profile-dialog" aria-labelledby="profile-dialog-title"><form method="dialog"><h2 id="profile-dialog-title">프로필 편집</h2><label class="profile-field" for="profile-name-input">닉네임 <small class="muted">최대 ${MomentProfile.NAME_MAX}자</small><input id="profile-name-input" type="text" maxlength="${MomentProfile.NAME_MAX * 2}" value="${E(profile.name)}" autocomplete="nickname"></label><fieldset class="profile-icons"><legend>아이콘</legend>${MomentProfile.ICONS.map(id => `<label class="icon-option"><input type="radio" name="profile-icon" value="${id}" ${id === profile.icon ? "checked" : ""}><span style="--avatar:${profile.color}" aria-hidden="true">${profileIcon(id)}</span><span class="sr-only">${MomentProfile.ICON_LABELS[id]}</span></label>`).join("")}</fieldset><fieldset class="profile-colors"><legend>아바타 색</legend>${MomentProfile.COLORS.map((c, i) => `<label class="color-option"><input type="radio" name="profile-color" value="${c}" ${c === profile.color ? "checked" : ""}><span style="--avatar:${c}" aria-hidden="true">${profileIcon(profile.icon)}</span><span class="sr-only">색 ${i + 1}</span></label>`).join("")}</fieldset><div class="row"><button type="button" class="quiet" data-profile-cancel>취소</button><button type="submit" class="primary" value="save">저장</button></div></form></dialog></section>`;
@@ -6747,7 +6778,7 @@ function bindProfile() {
     if (a === "save") {
       if (rollDate()) { render(); return; } // the day changed under the editor; the notice explains
       const kind = saveKind(), today = todayRealRecord();
-      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 감정 분석도 다시 기다려요. 이전 내용은 되돌릴 수 없어요.` : "";
+      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 카드도 다시 봉인돼요. 이전 내용은 되돌릴 수 없어요.` : "";
       if (state.mode === "example") {
         // Saving writes the real draft, so leaving example mode must be explicit.
         const accepted = await confirmAction(`예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.${replace ? " " + replace : ""}`, opener, { title: '실제 기록으로 저장', accept: replace ? '바꿔서 저장' : '실제 기록으로 저장' });
@@ -6899,7 +6930,7 @@ function bindProfile() {
         state.currentEntryId = entry.id;
         state.selected = entry.id;
         state.status =
-          "기록을 저장 중이에요. 감정 분석은 준비 중이에요.";
+          "기록을 저장 중이에요.";
         state.preview = false;
         state.view = "write";
       } catch (e) {
@@ -6964,9 +6995,9 @@ function bindProfile() {
       // Message per action: a delete must never read as "saved".
       const stored = await persist();
       if (stored) state.status = a === "delete-example" ? "기록을 삭제했어요."
-        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
-        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
-        : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
+        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 카드는 다시 봉인해 두었어요."
+        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 카드는 다시 봉인해 두었어요."
+        : a === "new-entry" ? "" : "기록을 저장했어요. 카드는 봉인해 두었어요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
       // A new/edited record opens the wait panel, which is the confirmation itself: the toast used to cover
       // its title on phones (2026-11-24 critique), so saves from the editor skip it.

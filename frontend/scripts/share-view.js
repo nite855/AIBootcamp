@@ -16,7 +16,7 @@ function cardInfo(record) {
   const copy = card.status === "ready" ? `최고 확률 ${Math.round(card.score * 100)}% · 임시 분류 · ${example ? "시연용 예시 분석이에요" : "확률은 감정의 강도가 아니에요"}`
     : card.status === "blank" ? `최고 확률 ${Math.round(card.score * 100)}% · 뚜렷한 대표 감정이 없는 기록이에요`
     : card.status === "error" ? "기록은 그대로 읽을 수 있어요 · 분석 결과만 사용하지 않아요"
-    : "감정 분석이 끝나면 카드가 열려요 · AI 감정 분석은 아직 연결 전이에요";
+    : "감정 읽기가 준비되면 카드가 열려요 · AI 감정 읽기는 아직 연결 전이에요";
   const failed = state.mode === "real" && (lastStorageError || !storeReady);
   const menu = more("card-more", btn("read-full", "기록 읽기", "quiet")
     + (["ready", "blank"].includes(card.status) ? btn("download", "이미지 저장", "quiet", state.busy ? "disabled" : "") : "")
@@ -31,7 +31,7 @@ function cardInfo(record) {
 // Small chip in the stage's top-left corner (Figma "새 카드").
 function stageChip(record) {
   const card = DiaryCards.resolve(record);
-  const label = card.status === "ready" ? "새 카드" : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+  const label = card.status === "ready" ? "새 카드" : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
   return `<span class="stage-chip" data-status="${card.status}"><i aria-hidden="true"></i>${label}</span>`;
 }
 

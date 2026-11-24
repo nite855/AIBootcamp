@@ -19,7 +19,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       await reveal(page, 'catalog');
       const first = page.locator('.collection-empty');
       assert.equal(await first.getAttribute('data-empty'), 'first');
-      assert.match(await first.innerText(), /AI 감정 분석은 아직 연결 전이에요/);
+      assert.match(await first.innerText(), /AI 감정 읽기는 아직 연결 전이에요/);
       assert.equal(await first.locator('[data-action=write]').count(), 1);
       assert.equal(await first.locator('[data-action=preview-catalog]').innerText(), '시연 모드로 미리 보기');
       assert.ok((await first.locator('[data-action=preview-catalog]').boundingBox()).height >= 44, 'demo button is a 44px target');
@@ -39,7 +39,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       const waiting = page.locator('.collection-empty');
       await waiting.waitFor();
       assert.equal(await waiting.getAttribute('data-empty'), 'waiting');
-      assert.match(await waiting.innerText(), /카드가 분석을 기다리고 있어요/);
+      assert.match(await waiting.innerText(), /카드는 봉인해 두었어요/);
       assert.match(await waiting.innerText(), /기록 1편은 잘 저장됐어요/);
       assert.equal(await waiting.locator('[data-action=write]').count(), 0, 'no "write more" promise');
       await noOverflow('waiting catalog');
@@ -51,7 +51,7 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
       assert.match(await banner.innerText(), /이번 달 기록 1편은 잘 저장됐어요/);
       assert.equal(await banner.locator('[data-action=preview]').count(), 1);
       const labels = await page.locator('.weekday-bar').evaluateAll(xs => xs.map(x => x.getAttribute('aria-label')));
-      assert.ok(labels.some(l => /분석 대기, 1편/.test(l)) && labels.some(l => /기록 없음, 0편/.test(l)), labels.join(' | '));
+      assert.ok(labels.some(l => /봉인된 카드, 1편/.test(l)) && labels.some(l => /기록 없음, 0편/.test(l)), labels.join(' | '));
       assert.ok(labels.every(l => !/분석 없음/.test(l)));
       await noOverflow('waiting statistics');
 

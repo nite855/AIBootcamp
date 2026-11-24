@@ -47,7 +47,7 @@ const LONG = '<b>굵게</b> 아주아주 긴 첫 줄 미리보기 문장이 계�
       assert.equal(await todayCard.count(), 1);
       assert.equal(await todayCard.locator('.mini-card.is-locked').count(), 1, 'unanalyzed record shows the locked frame');
       const label = await todayCard.getAttribute('aria-label');
-      assert.ok(label.includes('오늘') && label.includes('분석 대기') && label.includes('<b>굵게</b>'), 'label: ' + label);
+      assert.ok(label.includes('오늘') && label.includes('봉인된 카드') && label.includes('<b>굵게</b>'), 'label: ' + label);
       assert.equal(await panel.locator('.day-card b').count(), 0, 'record text never becomes markup');
       // A first day is not a streak (2026-11-24 critique: no number pressure on day one); it shows from day 2.
       assert.equal(await panel.locator('.streak-chip').count(), 0, 'no "1일 연속" chip');
@@ -77,7 +77,7 @@ const LONG = '<b>굵게</b> 아주아주 긴 첫 줄 미리보기 문장이 계�
       await panel.locator(`.month-cards button[data-card-day="${today}"]`).click();
       const modal = page.locator('#card-modal[open]');
       await modal.waitFor();
-      assert.match(await modal.locator('#card-modal-title').innerText(), /분석 대기/);
+      assert.match(await modal.locator('#card-modal-title').innerText(), /봉인해 둔 카드/);
       assert.ok((await modal.locator('.cm-text').innerText()).startsWith('<b>굵게</b>'));
       assert.equal(await modal.locator('.cm-text b').count(), 0);
       assert.equal(await modal.locator('[data-modal=share]').count(), 0, 'pending cards cannot be shared');

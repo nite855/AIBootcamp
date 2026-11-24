@@ -486,6 +486,8 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
   html .card-box.is-sealed .mystery-card { animation: none !important; }
   html .card-box.is-sealed .mystery-card::after, html .card-box.is-sealed .grade-rays, html .draw-ghost { animation: none !important; opacity: 0 !important; }
   html .seal-hint .draw-progress i { animation: none !important; }
+  /* critique 4: the mystery back's shimmer kept sweeping under reduced motion. */
+  html .mystery-back::after { animation: none !important; opacity: 0 !important; }
   html .card-box.is-flipping .mystery-card { animation: rm-fade-out .6s .2s both !important; transform: translate(-50%, -50%) !important; }
   html .card-box.is-flipping .mystery-inner { animation: none !important; }
   html .card-box.is-flipping .flip-scene { animation: rm-fade-in .7s .5s both !important; }
@@ -502,3 +504,5 @@ html .seal-hint .seal-skip { min-height: 44px; min-width: 44px; margin-top: 4px;
    It keeps its shape and drop shadow but sits a step lower in light. */
 html[data-theme="dark"] :is([data-grade="pending"] .art-card, .card-box[data-reveal="pending"] .art-card) { filter: brightness(.8) drop-shadow(0 18px 28px rgb(0 0 0 / .3)); }
 html[data-theme="dark"] .mini-card.is-locked { filter: brightness(.8); }
+/* critique 4 (night): the light paper of a sealed card still glared; it sits lower than the grey locked card. */
+html[data-theme="dark"] .mini-card.is-sealed { filter: brightness(.68); }

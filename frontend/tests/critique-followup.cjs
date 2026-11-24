@@ -3,7 +3,7 @@
 // 2) Ctrl+Enter saves; the wait panel gives the first sentence back with the long date and is the one way back.
 // 3) Done bar: "카드 보기" is secondary for a pending card; no "1일 연속" chip on day one.
 // 4) Demo data keeps the product rules (≤ 30 records, one per day) and the demo editor says it writes real records.
-// 5) Phones: the recent heading and one tile stay, meaningful text is 12px or more.
+// 5) Phones: at most one recent tile (no orphan heading, critique 4), meaningful text is 12px or more.
 const assert = require('node:assert/strict'), path = require('node:path'), os = require('node:os');
 const { pathToFileURL } = require('node:url');
 const { executablePath } = require('./browser-runtime.cjs');
@@ -90,7 +90,9 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
 
       // 5) Phones: heading + one tile, 12px floor on the storage note and calendar labels.
       if (mobile) {
-        assert.ok(await page.locator('.recent-head h2').isVisible(), `${tag}: recent heading visible`);
+        // Critique 4: with only today's record the heading says what will appear (no orphan), and "전체 보기" stays.
+        assert.equal(await page.locator('.recent-head h2').innerText(), '지난 기록', `${tag}: the row reads as the archive link, not the rail's heading`);
+        assert.ok(await page.locator('[data-action=archive-records]').isVisible(), `${tag}: archive link stays`);
         // Critique 3: today's tile no longer repeats the editor, so the week rail clears the tab bar at rest.
         assert.equal(await page.locator('.recent-tile.is-today').isVisible(), false, `${tag}: no duplicate of today's record`);
         await page.evaluate(() => scrollTo(0, 0));

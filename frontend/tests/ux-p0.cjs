@@ -72,7 +72,7 @@ const { executablePath, reveal, unseal } = require('./browser-runtime.cjs');
 
     // Pending card title names the analysis state; storage state stays in the caption.
     const pendingCard = page.locator('.flip-trigger .art-card');
-    assert.equal(await pendingCard.getAttribute('aria-label'), '분석 대기 감정 카드');
+    assert.equal(await pendingCard.getAttribute('aria-label'), '봉인된 감정 카드');
     assert.ok(!(await pendingCard.innerHTML()).includes('기록을 보관했어요'));
     assert.ok((await page.locator('.card-area .caption').innerText()).includes('기록을 보관했어요'));
 

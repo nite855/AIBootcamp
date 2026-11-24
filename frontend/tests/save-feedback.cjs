@@ -74,7 +74,7 @@ const URL = process.env.CARDEX_TEST_URL || pathToFileURL(path.resolve(__dirname,
       await page.locator('[data-wait-action=write]').click();
       const status = page.locator('.done-status');
       await status.waitFor();
-      assert.match(await status.innerText(), /기록을 저장했어요 · 카드는 분석 대기 중이에요/);
+      assert.match(await status.innerText(), /기록을 남겼어요 · 카드는 봉인해 두었어요/);
       assert.ok(await status.evaluate(el => el.scrollWidth <= el.clientWidth + 1), `${tag}: the done sentence is not cut`);
       for (const b of await page.locator('.done-actions > button').all()) assert.ok((await b.boundingBox()).height >= 44, `${tag}: 44px buttons`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${tag}: no horizontal overflow`);

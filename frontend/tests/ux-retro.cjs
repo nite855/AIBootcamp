@@ -27,7 +27,7 @@ const { executablePath, reveal } = require('./browser-runtime.cjs');
       assert.equal(await todayCell.getAttribute('aria-current'), 'date');
       assert.equal(await todayCell.evaluate(el => el.classList.contains('is-ready')), false, 'pending record gets no color');
       assert.equal(await todayCell.locator('.emo-stage').count(), 0);
-      assert.match(await todayCell.getAttribute('aria-label'), /분석 대기/);
+      assert.match(await todayCell.getAttribute('aria-label'), /봉인된 카드/);
       assert.match(await page.locator('.stats-ratio').innerText(), /—/, 'no ratio without analysis');
 
       // Month navigation: next is disabled on the current month; prev/next round-trip keeps focus.

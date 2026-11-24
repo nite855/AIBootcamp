@@ -32,7 +32,7 @@ function firstRunGuide() {
     ["하루를 기록해요", "짧아도 괜찮아요. 하루 한 편만 남길 수 있어요."],
     // 2026-11-24 critique: reflective wording before the first record; the probability note lives in the
     // catalog legend, where cards exist to explain it.
-    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 분석을 준비하고 있어요."],
+    ["감정을 읽어요", "기록의 분위기에 가장 가까운 감정을 카드 색으로 담아요. 지금은 감정 읽기를 준비하고 있어요."],
     ["카드를 모아요", "그날의 카드가 도감에 모여요. 모은 카드는 언제든 다시 볼 수 있어요."],
   ];
   return `<section class="panel how-panel" aria-labelledby="how-title"><div class="how-stage" aria-hidden="true"><span class="stage-glow"></span>${lockedMiniCard("첫 번째 카드")}</div><h2 id="how-title">카드는 이렇게 모여요</h2><ol class="first-run how-steps">${steps.map(([t, d], i) => `<li><b aria-hidden="true">${i + 1}</b><span><strong>${t}</strong><small>${d}</small></span></li>`).join("")}</ol></section>`;
@@ -51,7 +51,7 @@ function doneMessage(record) {
   if (card.status === "ready") return `${CardexCore.type(card.type).name} · ${card.stage}단계 카드를 받았어요`;
   if (card.status === "blank") return "빈 카드를 받았어요";
   if (card.status === "error") return "기록은 저장됐어요 · 분석하지 못했어요";
-  return "기록을 저장했어요 · 카드는 분석 대기 중이에요";
+  return "기록을 남겼어요 · 카드는 봉인해 두었어요";
 }
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const monthTitle = month => `${month.slice(0, 4)}년 ${Number(month.slice(5, 7))}월`;
@@ -151,17 +151,17 @@ function todayPanel() {
   const today = localDate(), record = dayRecord(today);
   if (record) {
     const card = DiaryCards.resolve(record);
-    const copy = card.status === "pending" ? "감정 분석이 끝나면 카드가 열려요" : "내일 또 만나요";
+    const copy = card.status === "pending" ? "감정 읽기가 준비되면 열려요" : "내일 또 만나요";
     return `<section class="panel today-panel has-card" aria-labelledby="today-title"><div class="today-stage"><span class="stage-glow" aria-hidden="true"></span><button type="button" class="today-card" data-card-day="${today}" aria-label="오늘의 카드 열기, ${E(cardLabel(record))}"${gradeAttrs(card)}>${cardSVG(record)}</button></div><div class="today-copy"><h2 id="today-title">오늘의 카드</h2><p class="muted today-hint">${copy}</p></div></section>`;
   }
   const failed = state.mode === "real" && !loading && Boolean(lastStorageError || !storeReady);
   return `<section class="panel today-panel" aria-labelledby="today-title"><div class="today-stage card-fan" aria-hidden="true"><span class="stage-glow"></span><span class="fan-card f1"></span><span class="fan-card f2"></span><span class="fan-center">${lockedMiniCard("오늘의 카드")}</span></div><div class="today-copy"><h2 id="today-title">오늘의 카드</h2><p class="muted today-hint">${failed ? "저장되면 카드가 열려요" : "기록을 남기면 카드가 열려요"}</p></div></section>`;
 }
-// Recent record tile: emotion-colored orb, first line, "11.17 · 기쁨·활력 · 2단계". Opens the record page.
+// Recent record tile: the record's mini card (sealed while pending, critique 4), first line, "11.17 · 기쁨·활력 · 2단계". Opens the record page.
 function recentTile(record) {
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const meta = `${record.recordDate.slice(5).replace("-", ".")} · ${ready ? CardexCore.type(card.type).name + " · " + card.stage + "단계" : cardLabel(record)}${record.favorite ? " · ★" : ""}`;
-  return `<button type="button" class="entry recent-tile${record.recordDate === localDate() ? " is-today" : ""}" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-orb" aria-hidden="true"${ready ? ` style="--orb:var(--card-base-${card.type.replace("_", "-")});--orb-deep:var(--card-deep-${card.type.replace("_", "-")})"` : ""}></span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
+  return `<button type="button" class="entry recent-tile${record.recordDate === localDate() ? " is-today" : ""}" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-card" aria-hidden="true">${miniCard(record, "tile-character")}</span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
 }
 function homeView() {
   const recent = activeRecords().slice().sort(compareRecords).slice(0, 2);
@@ -185,13 +185,13 @@ function homeView() {
   return `<section class="write-main" aria-labelledby="write-title">
     <div class="page-heading write-heading${first ? " is-first" : ""}"><p class="page-date">${dateLine}${example}</p><h1 id="write-title">${heading}</h1></div>
     <div class="panel write-panel write-editor" data-storage-error="${failed}" data-done="${Boolean(done)}" data-empty="${empty}"${state.writeError ? " data-write-error" : ""}>
-      <label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
+      ${state.mode === "example" ? '<p class="editor-scope"><b>내 기록장</b><span>시연 카드와 따로 보관돼요 · 저장하면 시연이 끝나요</span></p>' : ""}<label for="diary-text" class="sr-only">오늘의 기록</label><textarea id="diary-text" aria-keyshortcuts="Control+Enter Meta+Enter" placeholder="오늘 있었던 일, 떠오른 생각, 사소한 기분까지&#10;편하게 적어 주세요. 하루 한 편이면 충분해요." aria-describedby="char-count privacy save-status feedback">${E(state.text)}</textarea>
       <p class="write-prompt"><span class="prompt-label">오늘의 질문</span><span class="prompt-text">${E(DiaryCore.writingPrompt(state.date, 0))}</span>${btn("help-write-inline", "다른 질문", "text-link", 'aria-haspopup="dialog"')}</p>
       <div class="write-bar">${doneBar}<span class="status-dot" aria-hidden="true"></span><p class="write-status">${state.writeError ? `<span id="write-error" class="write-error"><span class="error-mark" aria-hidden="true">!</span>${E(state.writeError)}</span>` : ""}${charCount()}<span class="status-sep" aria-hidden="true"> · </span><span id="save-status">${E(storageMessage)}</span></p><p class="save-error"><span class="error-mark" aria-hidden="true">!</span><span><strong>저장하지 못했어요.</strong> 저장 공간을 확인하고 다시 시도해 주세요. <button type="button" class="storage-details" data-action="storage-details" ${failed ? "" : "hidden"}>원인 ⓘ</button></span></p><div class="write-actions">${options}${btn(lastStorageError ? "retry-save" : "save", lastStorageError ? "다시 시도" : saveLabel(), "primary")}</div></div>
     </div>
     <p class="save-note">작성한 내용은 이 화면에 그대로 남아 있어요. 저장되기 전에 창을 닫으면 사라질 수 있어요.</p>
     ${limitNotice()}
-    <section class="recent-panel" aria-labelledby="recent-title"><div class="recent-head"><h2 id="recent-title">최근 기록</h2><div class="recent-tools">${btn("favorite-records", "☆ 즐겨찾기", "text-link")}${btn("archive-records", "전체 보기", "text-link")}</div></div><div class="recent-list">${recent.map(recentTile).join("") || '<p class="recent-empty">아직 남긴 기록이 없어요. 첫 기록을 남기면 여기에 쌓여요.</p>'}</div></section>
+    <section class="recent-panel"${recent.length && recent.every(r => r.recordDate === localDate()) ? ' data-only-today' : ""} aria-labelledby="recent-title"><div class="recent-head"><h2 id="recent-title"><span class="rh-recent">최근 기록</span><span class="rh-past">지난 기록</span></h2><div class="recent-tools">${btn("favorite-records", "☆ 즐겨찾기", "text-link")}${btn("archive-records", "전체 보기", "text-link")}</div></div><div class="recent-list">${recent.map(recentTile).join("") || '<p class="recent-empty">아직 남긴 기록이 없어요. 첫 기록을 남기면 여기에 쌓여요.</p>'}</div></section>
   </section>
   <aside class="write-side" data-view="${state.writeCalendar === "month" ? "month" : "week"}"${first ? ' data-first="true"' : ""} aria-label="${first ? "카드가 모이는 방법" : "오늘의 카드와 카드 달력"}">${first ? firstRunGuide() : todayPanel() + writeCalendar()}</aside>`;
 }
@@ -202,9 +202,9 @@ function cardModalHTML(date) {
   if (!record) return "";
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const days = recordDays(), i = days.indexOf(date);
-  const title = ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기 카드";
+  const title = ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인해 둔 카드";
   const meta = ready ? `${cardNumber(card.type, card.stage)} · 최고 확률 ${Math.round(card.score * 100)}% · 임시 분류${card.ties.length > 1 ? " · 공동 최다" : ""}`
-    : card.status === "pending" ? "봉인해 둔 카드예요 · 감정 읽기가 준비되면 열려요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
+    : card.status === "pending" ? "감정 읽기가 준비되면 열려요 · 기록은 언제든 읽을 수 있어요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
   const count = Array.from(record.text).length.toLocaleString("ko-KR");
   const actions = (["ready", "blank"].includes(card.status) ? `<button type="button" class="primary" data-modal="share">공유하기</button>` : "")
     + (ready ? `<button type="button" class="quiet" data-modal="catalog">도감에서 보기</button>` : "")

@@ -67,7 +67,9 @@ function playCelebration(fresh) {
   if (!keys.length) return;
   const lead = keys.reduce((best, k) => (Number(k.split(":")[1]) > Number(best.split(":")[1]) ? k : best), keys[0]);
   const [type, stage] = lead.split(":"), name = CardexCore.type(type).name, rest = keys.filter(k => k !== lead);
-  const title = keys.length > 1 ? `새로운 감정 카드 ${keys.length}장 획득!` : "새로운 감정 카드 획득!";
+  // Demo cards were never earned (critique 4: "27장 획득!" promised what real records cannot give yet).
+  const title = state.mode === "example" ? (keys.length > 1 ? `시연 도감에 카드 ${keys.length}장이 담겨 있어요` : "시연 도감에 카드가 담겨 있어요")
+    : keys.length > 1 ? `새로운 감정 카드 ${keys.length}장 획득!` : "새로운 감정 카드 획득!";
   const desc = `${E(name)} · ${stage}단계 카드가 도감에 채워졌어요.${rest.length ? ` 외 ${rest.length}장도 함께 담겼어요.` : ""}`;
   const count = [6, 8, 12][Math.min(2, Math.max(0, Number(stage) - 1))] || 6, step = 360 / count;
   const sparkles = Array.from({ length: count }, (_, i) => `<i style="--a:${Math.round(i * step + (i % 2 ? 12 : 0))}deg;--d:${(i % 3) * 26 + 120}px;--s:${(i % 4) * 2 + 6}px;--delay:${(i % 5) * 40}ms"></i>`).join("");

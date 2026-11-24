@@ -43,7 +43,8 @@ const box = (page, sel) => page.locator(sel).first().boundingBox();
     assert.equal(info.modal, true, 'popup is a modal dialog');
     assert.equal(info.example, true);
     const count = Number((info.title.match(/(\d+)장/) || [])[1] || 1);
-    assert.match(info.title, /^새로운 감정 카드 (\d+장 )?획득!$/);
+    // critique 4: demo cards were never earned, so the demo popup shows them without "획득!".
+    assert.match(info.title, info.example ? /^시연 도감에 카드(가| \d+장이) 담겨 있어요$/ : /^새로운 감정 카드 (\d+장 )?획득!$/);
     assert.ok(count >= 2, 'example mode unlocks several cards at once');
     assert.equal(info.grade, 'stage-3', 'the highest stage leads');
     assert.equal(info.cardGrade, 'stage-3', 'the big card carries the grade effect');

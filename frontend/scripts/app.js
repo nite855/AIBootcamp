@@ -200,7 +200,7 @@
   function cardSVG(record = currentRecord(), { snippet = true, name: showName = true } = {}) {
     const card = DiaryCards.resolve(record), ready = card.status === "ready";
     const type = ready ? CardexCore.type(card.type) : null;
-    const name = ready ? type.name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+    const name = ready ? type.name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
     const uid = "mc" + (++cardSeq);
     // 2026-11-24 "봉인된 편지": a pending card is a sealed letter on warm paper, never an emotion color.
     const sealed = card.status === "pending";
@@ -211,7 +211,7 @@
     const parent = ready ? CardexCore.parent(type.parent).name : "";
     const summary = ready
       ? name + " · " + parent + " · " + card.stage + "단계 · 분류 확률 " + Math.round(card.score * 100) + "%" + (card.ties.length > 1 ? " · 공동 최다" : "") + " · 감정의 강도를 뜻하지 않아요"
-      : card.status === "pending" ? "분석 대기 · 감정 분석은 준비 중이에요" : card.status === "blank" ? "빈 카드 · 뚜렷한 대표 감정이 없는 기록이에요" : "분석 실패 · 기록은 그대로 읽을 수 있어요";
+      : card.status === "pending" ? "봉인된 카드 · 감정 읽기가 준비되면 열려요" : card.status === "blank" ? "빈 카드 · 뚜렷한 대표 감정이 없는 기록이에요" : "분석 실패 · 기록은 그대로 읽을 수 있어요";
     const example = state.mode === "example" ? " · 예시 · 실제 입력 분석 아님" : "";
     const art = ready
       // Figma glass-window proportions: floor shadow (.35, blur 3.9 → 13.2 at 1080) and the blob frame at 63% of the window.
@@ -225,9 +225,9 @@
         + '<text x="984" y="1300" text-anchor="end" ' + CARD_FONT + ' font-weight="800" font-size="62" fill="#111114">' + cardNumber(card.type, card.stage) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".6">' + E(date) + '</text>'
       : '<text x="96" y="1206" ' + CARD_FONT + ' font-weight="500" font-size="34" fill="#111114" fill-opacity=".5">' + (sealed ? "봉인된 카드" : "잠긴 카드") + '</text>'
-        + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "분석 대기 중" : name) + '</text>'
+        + '<text x="96" y="1292" font-weight="800" font-size="76" fill="#111114" fill-opacity=".72">' + E(card.status === "pending" ? "감정 읽기 전" : name) + '</text>'
         + '<text x="984" y="1366" text-anchor="end" ' + CARD_FONT + ' font-weight="500" font-size="32" fill="#111114" fill-opacity=".5">' + E(date) + '</text>';
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(name) + ' 감정 카드" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + CARD_W + '" height="' + CARD_H + '" viewBox="0 0 ' + CARD_W + ' ' + CARD_H + '" role="img" aria-label="' + E(card.status === "pending" ? "봉인된 감정 카드" : name + " 감정 카드") + '" class="art-card" data-card-record="' + E(record?.id || "") + '" data-card-snippet="' + snippet + '" data-card-name="' + showName + '" data-card-status="' + card.status + '"' + (ready ? ' data-card-type="' + card.type + '" data-card-stage="' + card.stage + '"' : "") + '>'
       + '<desc>' + E(summary + example) + '</desc>'
       + '<defs><linearGradient id="' + uid + '-bg" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="' + c.mix + '"/><stop offset=".55" stop-color="' + c.base + '"/><stop offset="1" stop-color="' + c.base + '"/></linearGradient>'
       + '<linearGradient id="' + uid + '-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity=".12"/></linearGradient>'
@@ -253,7 +253,7 @@
   function miniCard(record, characterClass = "mc-character") {
     const card = DiaryCards.resolve(record), grade = DiaryCards.grade(card);
     // A pending record is a sealed letter (2026-11-24); blank and failed cards keep the locked "?".
-    if (card.status === "pending") return '<span class="mini-card is-locked is-sealed" data-grade="' + grade + '" aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-envelope"><i class="mc-flap"></i><i class="mc-seal"></i></span></span><span class="mc-band"><small>봉인된 카드</small><strong>분석 대기</strong></span></span>';
+    if (card.status === "pending") return '<span class="mini-card is-locked is-sealed" data-grade="' + grade + '" aria-hidden="true"><span class="mc-head">MOMENT CARD</span><span class="mc-window"><span class="mc-envelope"><i class="mc-flap"></i><i class="mc-seal"></i></span></span><span class="mc-band"><small>봉인된 카드</small><strong>감정 읽기 전</strong></span></span>';
     if (card.status !== "ready") return lockedMiniCard(card.status === "blank" ? "빈 카드" : "분석 실패", grade);
     const key = card.type.replace("_", "-");
     let dots = "";
@@ -275,7 +275,7 @@
     // Back face (Figma "공개 · 뒷면"): the card's color band (MY MOMENT · name · No.), the date and
     // stage, a rule, the full record and a "moment · 눌러서 앞면 보기 ↻" footer.
     const ready = card.status === "ready", key = ready ? card.type.replace("_", "-") : "";
-    const backName = ready ? CardexCore.type(card.type).name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기";
+    const backName = ready ? CardexCore.type(card.type).name : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "봉인된 카드";
     const backDate = record ? `${record.recordDate.replaceAll("-", ".")} ${weekdayName(record.recordDate)}${ready ? ` · ${card.stage}단계` : ""}` : "";
     const inner=record ? `<div class="flip-scene"><div class="tilt-layer"><div class="flip-inner"><span class="grade-aura" aria-hidden="true"></span><div class="flip-front"><button class="flip-trigger" data-flip="back" type="button" aria-label="카드를 뒤집어 기록 보기">${cardSVG()}<span class="flip-light" aria-hidden="true"></span></button></div><div class="flip-back" role="button" tabindex="-1" aria-label="카드 앞면으로 돌아가기. Enter 또는 스페이스를 누르세요." aria-hidden="true" inert${ready ? ` style="--back-base:var(--card-base-${key});--back-mix:var(--card-mix-${key})"` : ""}><span class="flip-light" aria-hidden="true"></span><div class="back-band"><small>MY MOMENT</small><strong>${E(backName)}</strong>${ready ? `<em>${cardNumber(card.type, card.stage)}</em>` : ""}</div><p class="back-date">${E(backDate)}</p><hr class="back-rule"><h2 class="sr-only">그날의 기록</h2><div class="flip-text" tabindex="0">${E(record.text)}</div><div class="back-foot"><b>moment</b><small>눌러서 앞면 보기 ↻</small></div></div></div></div></div>` : emptyCard();
     return `<section class="card-area"><div class="card-box"${record ? gradeAttrs(card) : ""}>${inner}</div><p class="caption muted">${record ? `카드를 눌러 뒤집어 보세요 ↻<span class="caption-store"> · ${recordStorageLabel()}</span>` : "기록은 보관할 수 있어요."}</p></section>`;
@@ -498,7 +498,7 @@
     if (a === "save") {
       if (rollDate()) { render(); return; } // the day changed under the editor; the notice explains
       const kind = saveKind(), today = todayRealRecord();
-      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 감정 분석도 다시 기다려요. 이전 내용은 되돌릴 수 없어요.` : "";
+      const replace = kind === "replace" ? `오늘 이미 남긴 기록("${firstLine(today.text, 24)}")이 지금 쓴 내용으로 바뀌고, 카드도 다시 봉인돼요. 이전 내용은 되돌릴 수 없어요.` : "";
       if (state.mode === "example") {
         // Saving writes the real draft, so leaving example mode must be explicit.
         const accepted = await confirmAction(`예시 모드를 끄고 지금 쓴 내용을 실제 기록으로 저장합니다. 예시 기록은 실제 기록에 섞이지 않아요.${replace ? " " + replace : ""}`, opener, { title: '실제 기록으로 저장', accept: replace ? '바꿔서 저장' : '실제 기록으로 저장' });
@@ -650,7 +650,7 @@
         state.currentEntryId = entry.id;
         state.selected = entry.id;
         state.status =
-          "기록을 저장 중이에요. 감정 분석은 준비 중이에요.";
+          "기록을 저장 중이에요.";
         state.preview = false;
         state.view = "write";
       } catch (e) {
@@ -715,9 +715,9 @@
       // Message per action: a delete must never read as "saved".
       const stored = await persist();
       if (stored) state.status = a === "delete-example" ? "기록을 삭제했어요."
-        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 감정 분석은 준비 중이에요."
-        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 감정 분석은 준비 중이에요."
-        : a === "new-entry" ? "" : "기록을 저장했어요. 감정 분석은 준비 중이에요.";
+        : a === "save-example" || (a === "save" && savedAs === "edit") ? "기록을 수정했어요. 카드는 다시 봉인해 두었어요."
+        : a === "save" && savedAs === "replace" ? "오늘 기록을 지금 내용으로 바꿨어요. 카드는 다시 봉인해 두었어요."
+        : a === "new-entry" ? "" : "기록을 저장했어요. 카드는 봉인해 두었어요.";
       // A failed save leaves its error in state.status; only a stored change gets the success toast.
       // A new/edited record opens the wait panel, which is the confirmation itself: the toast used to cover
       // its title on phones (2026-11-24 critique), so saves from the editor skip it.
