@@ -91,6 +91,11 @@ const TEXT = '퇴근길에 노을이 예뻐서 한참 걸었다. 집에 와서�
       // 5) Phones: heading + one tile, 12px floor on the storage note and calendar labels.
       if (mobile) {
         assert.ok(await page.locator('.recent-head h2').isVisible(), `${tag}: recent heading visible`);
+        // Critique 3: today's tile no longer repeats the editor, so the week rail clears the tab bar at rest.
+        assert.equal(await page.locator('.recent-tile.is-today').isVisible(), false, `${tag}: no duplicate of today's record`);
+        await page.evaluate(() => scrollTo(0, 0));
+        const [railBox, tabsBox] = await page.evaluate(() => ['.week-rail', '.tabs'].map(s => document.querySelector(s).getBoundingClientRect().toJSON()));
+        assert.ok(railBox.bottom <= tabsBox.top, `${tag}: week rail above the tab bar (${railBox.bottom} ≤ ${tabsBox.top})`);
         const tiles = await page.locator('.recent-list .recent-tile').evaluateAll(ts => ts.filter(t => getComputedStyle(t).display !== 'none').length);
         assert.ok(tiles <= 1, `${tag}: at most one recent tile`);
         const small = await page.evaluate(() => [...document.querySelectorAll('.write-main > #privacy, .streak-chip, .rail-day, .rail-date, .calendar-switch button, .tabs .tab')]

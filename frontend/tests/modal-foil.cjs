@@ -16,7 +16,8 @@ module.exports = async function modalFoil(browser) {
       await reveal(page, 'save');
       await page.locator('[data-card-day]:visible:has(.mini-card.is-locked)').first().click();
       assert.equal(await page.locator('#card-modal .cm-tilt.card-fx').count(), 1, 'pending card also has neutral foil');
-      assert.equal(await page.locator('#card-modal .cm-foil').isVisible(), true, 'hint visible on every viewport');
+      // A sealed (pending) card still tilts, but a foil hint does not fit a sealed letter (2026-11-24 critique 3).
+      assert.equal(await page.locator('#card-modal .cm-foil').count(), 0, 'no foil hint on a sealed card');
       await page.keyboard.press('Escape');
       await reveal(page, 'settings'); await reveal(page, 'preview'); await reveal(page, 'write');
       const day = page.locator('[data-card-day]:visible:has(.mini-card:not(.is-locked))').first();

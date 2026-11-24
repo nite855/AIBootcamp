@@ -2452,6 +2452,11 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .recent-head { padding-left: 8px; }
   .recent-list { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
   .recent-list .recent-tile:nth-child(n + 2) { display: none; }
+  /* Today written (2026-11-24 critique 3): today's tile repeated the editor just above and pushed the week rail
+     under the tab bar. Phones then show the newest earlier record instead, or only the heading and links. */
+  .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today { display: none; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today + .recent-tile { display: grid; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-list:not(:has(.recent-tile:not(.is-today))) { display: none; }
   .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
   /* Phones keep the storage warning too (2026-11-24), as one small line. */
   /* 12px floor for meaningful text and whole words per line ("최대 30편" no longer splits into "30 / 편"). */
@@ -5327,7 +5332,7 @@ function todayPanel() {
 function recentTile(record) {
   const card = DiaryCards.resolve(record), ready = card.status === "ready";
   const meta = `${record.recordDate.slice(5).replace("-", ".")} · ${ready ? CardexCore.type(card.type).name + " · " + card.stage + "단계" : cardLabel(record)}${record.favorite ? " · ★" : ""}`;
-  return `<button type="button" class="entry recent-tile" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-orb" aria-hidden="true"${ready ? ` style="--orb:var(--card-base-${card.type.replace("_", "-")});--orb-deep:var(--card-deep-${card.type.replace("_", "-")})"` : ""}></span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
+  return `<button type="button" class="entry recent-tile${record.recordDate === localDate() ? " is-today" : ""}" data-open="${E(record.id)}"${gradeAttrs(card)}><span class="tile-orb" aria-hidden="true"${ready ? ` style="--orb:var(--card-base-${card.type.replace("_", "-")});--orb-deep:var(--card-deep-${card.type.replace("_", "-")})"` : ""}></span><strong class="entry-preview">${E(firstLine(record.text, 40))}</strong><small>${E(meta)}</small></button>`;
 }
 function homeView() {
   const recent = activeRecords().slice().sort(compareRecords).slice(0, 2);
@@ -5370,13 +5375,13 @@ function cardModalHTML(date) {
   const days = recordDays(), i = days.indexOf(date);
   const title = ready ? `${CardexCore.type(card.type).name} · ${card.stage}단계` : card.status === "blank" ? "빈 카드" : card.status === "error" ? "분석 실패" : "분석 대기 카드";
   const meta = ready ? `${cardNumber(card.type, card.stage)} · 최고 확률 ${Math.round(card.score * 100)}% · 임시 분류${card.ties.length > 1 ? " · 공동 최다" : ""}`
-    : card.status === "pending" ? "감정 분석이 연결되면 카드가 열려요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
+    : card.status === "pending" ? "봉인해 둔 카드예요 · 감정 읽기가 준비되면 열려요" : card.status === "blank" ? "뚜렷한 대표 감정이 없는 기록이에요" : "기록은 그대로 읽을 수 있어요";
   const count = Array.from(record.text).length.toLocaleString("ko-KR");
   const actions = (["ready", "blank"].includes(card.status) ? `<button type="button" class="primary" data-modal="share">공유하기</button>` : "")
     + (ready ? `<button type="button" class="quiet" data-modal="catalog">도감에서 보기</button>` : "")
     + `<button type="button" class="text-link" data-modal="open">기록 자세히</button>`;
   // Figma "카드 모달": soft card area on the left (glow + foil hint), plain record text on the right.
-  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}><div class="cm-tilt">${cardSVG(record)}<span class="cm-light" aria-hidden="true"></span></div></div><p class="cm-foil card-effect-hint"></p></div>
+  return `<div class="cm-stage"><span class="sheet-handle" aria-hidden="true"></span><span class="stage-glow" aria-hidden="true"></span><div class="cm-art"${gradeAttrs(card)}><div class="cm-tilt">${cardSVG(record)}<span class="cm-light" aria-hidden="true"></span></div></div>${card.status === "pending" ? "" : `<p class="cm-foil card-effect-hint"></p>`}</div>
     <div class="cm-info">
       <div class="cm-top"><div class="cm-nav" role="group" aria-label="기록한 날 이동">${navArrow(-1, 'data-modal-step="-1"', "이전 기록", i <= 0)}<strong class="cm-date" aria-live="polite">${E(longDate(date))}</strong>${navArrow(1, 'data-modal-step="1"', "다음 기록", i >= days.length - 1)}</div><button type="button" class="quiet cm-close" data-modal="close" aria-label="닫기">✕</button></div>
       <h2 id="card-modal-title">${E(title)}</h2>

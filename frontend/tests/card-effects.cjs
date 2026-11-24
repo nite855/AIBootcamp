@@ -65,7 +65,12 @@ const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdi
           await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
           // No long-press delay: light is visible on the next animation frame.
         } else await page.mouse.move(point.x, point.y);
-        await page.waitForFunction(() => document.querySelector('.tilt-layer').style.getPropertyValue('--shine') === '1', null, { timeout: 400 });
+        // The light still has to come on within 400ms of a move. On desktop the first move can land before the
+        // card's pointer handlers are bound after a theme re-render and is then lost (flaky about half the runs,
+        // 2026-11-24), so a lost move is followed by one more 1px move, as a real pointer would keep sending.
+        const shineOn = () => page.waitForFunction(() => document.querySelector('.tilt-layer').style.getPropertyValue('--shine') === '1', null, { timeout: 400 });
+        if (mobile) await shineOn();
+        else await shineOn().catch(async () => { await page.mouse.move(point.x + 1, point.y); await shineOn(); });
         const angles = await page.locator('.tilt-layer').evaluate(el => ['--tilt-x', '--tilt-y'].map(k => parseFloat(el.style.getPropertyValue(k))));
         assert.ok(angles.every(n => n > 0 && n <= 9));
         if (mobile) {

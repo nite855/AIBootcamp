@@ -284,6 +284,11 @@ dialog.card-modal[open] { display: grid; grid-template-columns: 400px minmax(0, 
   .recent-head { padding-left: 8px; }
   .recent-list { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 8px; }
   .recent-list .recent-tile:nth-child(n + 2) { display: none; }
+  /* Today written (2026-11-24 critique 3): today's tile repeated the editor just above and pushed the week rail
+     under the tab bar. Phones then show the newest earlier record instead, or only the heading and links. */
+  .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today { display: none; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-list .recent-tile.is-today + .recent-tile { display: grid; }
+  .write-main:has(.write-editor[data-done="true"]) .recent-list:not(:has(.recent-tile:not(.is-today))) { display: none; }
   .write-prompt, .write-editor[data-empty="true"]:not([data-done="true"]) .write-prompt { margin: 0 24px; font-size: 13px; }
   /* Phones keep the storage warning too (2026-11-24), as one small line. */
   /* 12px floor for meaningful text and whole words per line ("최대 30편" no longer splits into "30 / 편"). */
