@@ -6,7 +6,7 @@ const http = require('node:http');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const { chromium } = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(), 'aibootcamp-frontend-review/node_modules/playwright'));
-const { executablePath, dismissCelebration, unseal, settleStats } = require('../tests/browser-runtime.cjs');
+const { executablePath, unseal, settleStats } = require('../tests/browser-runtime.cjs');
 const root = path.resolve(__dirname, '../..');
 const arg = name => { const i = process.argv.indexOf(name); return i < 0 ? undefined : process.argv[i + 1]; };
 const rehearsal = process.argv.includes('--rehearsal');
@@ -67,9 +67,11 @@ async function record(browser, device) {
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   const started = Date.now();
   const at = async seconds => pause(Math.max(0, started + seconds * duration / 300 * 1000 - Date.now()));
+  // Phones are pressed with touch taps so the app shows its touch hints ("카드를 터치하고…"); mouse
+  // clicks would switch the foil hint to the desktop wording in the phone videos (2026-11-24).
+  const press = async el => { await el.scrollIntoViewIfNeeded(); await (p.hasTouch ? el.tap() : el.click()); };
   const click = async action => {
-    const el = page.locator(`[data-action="${action}"]:visible`).first();
-    await el.scrollIntoViewIfNeeded(); await el.click();
+    await press(page.locator(`[data-action="${action}"]:visible`).first());
     await pause(rehearsal ? 150 : 700);
   };
   const shot = async name => {
@@ -83,7 +85,11 @@ async function record(browser, device) {
   async function exampleMode() {
     await click('settings');
     await click('preview');
-    await dismissCelebration(page);
+    const popup = page.locator('#celebrate-dialog[open]');
+    if (await popup.waitFor({ timeout: 1000 }).then(() => true, () => false)) {
+      await press(popup.locator('.celebrate-close'));
+      await popup.waitFor({ state: 'detached' });
+    }
   }
   async function download(action, expected) {
     const event = page.waitForEvent('download'); await click(action);
@@ -106,21 +112,21 @@ async function record(browser, device) {
     await page.locator('.wait-panel').waitFor();
     assert.equal(await page.evaluate(() => DiaryReview.getState().sessions.length), 1);
     await shot('02-saved-pending');
-    await at(67); await page.locator('[data-wait-action="write"]').click();
+    await at(67); await press(page.locator('[data-wait-action="write"]'));
     await at(75); await exampleMode();
     await shot('03-examples');
     await at(95);
-    await page.locator('.entry-list [data-open="sample-1"]').click();
+    await press(page.locator('.entry-list [data-open="sample-1"]'));
     await unseal(page);
     await shot('04-card');
     await at(127); await click('card-catalog');
     await page.locator('#card-detail[open]').waitFor();
     await shot('05-catalog');
-    await at(150); await page.locator('#card-detail[open] [data-share-record]').click();
+    await at(150); await press(page.locator('#card-detail[open] [data-share-record]'));
     await page.locator('#share-title').waitFor();
     await shot('06-share');
-    await at(160); await page.locator('[data-share-opt="quote"]').click();
-    await at(167); await page.locator('[data-share-opt="quote"]').click();
+    await at(160); await press(page.locator('[data-share-opt="quote"]'));
+    await at(167); await press(page.locator('[data-share-opt="quote"]'));
     await at(175); await download('share-download', [1080, 1350]);
     await at(187); const story = await download('share-story', [1080, 1920]);
     await shot('07-story-export');
