@@ -54,9 +54,16 @@
   /*__PERSISTENCE__*/
   // Demo records follow the product's own rules (2026-11-24 critique): one record per day and no more than
   // the 30-record limit, so the month header never reads "기록 48편" under a "최대 30편" warning.
-  // Day 0 (today) is pending, days 1-27 open every catalog slot (9 types × 3 stages), day 28 is a blank card
-  // and day 29 a tie. Failed/stale analyses stay covered by the unit tests (cards.test.cjs).
-  const EXAMPLE_COUNT = 30, EXAMPLE_BLANK = 28, EXAMPLE_TIE = 29;
+  // Today (day 0) is analyzed so the demo shows today's card and the stats "오늘 긍정" tooltip; day 3 is the
+  // pending card. Days 0-2 and 4-27 open every catalog slot (9 types × 3 stages): today is slot 18 (기쁨 3단계),
+  // day 1 stays slot 0 (기쁨 1단계, the card the browser tests open). Day 28 is a blank card and day 29 a tie.
+  // Failed/stale analyses stay covered by the unit tests (cards.test.cjs).
+  const EXAMPLE_COUNT = 30, EXAMPLE_PENDING = 3, EXAMPLE_BLANK = 28, EXAMPLE_TIE = 29, EXAMPLE_TODAY_SLOT = 18;
+  const exampleSlot = i => {
+    if (i === 0) return EXAMPLE_TODAY_SLOT;
+    const k = i < EXAMPLE_PENDING ? i - 1 : i - 2; // days 1-2 → slots 0-1, days 4+ → slots 2+
+    return k < EXAMPLE_TODAY_SLOT ? k : k + 1;
+  };
   const examples = Array.from({ length: EXAMPLE_COUNT }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -71,15 +78,16 @@
       createdAt: d.toISOString(),
       updatedAt: d.toISOString(),
       version: 1,
-      analysis: i === 0 ? { status: "pending" }
+      analysis: i === EXAMPLE_PENDING ? { status: "pending" }
         : {
             status: "valid",
             version: 1,
             taxonomy_version: CardexCore.TAXONOMY,
             probabilities: Object.fromEntries(CardexCore.IDS.map((id, j) => {
               if (i === EXAMPLE_TIE) return [id, j < 2 ? 0.35 : 0.3 / (CardexCore.IDS.length - 2)];
-              const score = i === EXAMPLE_BLANK ? 0.2 : [0.45, 0.75, 0.95][Math.floor((i - 1) / CardexCore.IDS.length) % 3];
-              return [id, j === (i - 1) % CardexCore.IDS.length ? score : (1 - score) / (CardexCore.IDS.length - 1)];
+              const slot = exampleSlot(i);
+              const score = i === EXAMPLE_BLANK ? 0.2 : [0.45, 0.75, 0.95][Math.floor(slot / CardexCore.IDS.length) % 3];
+              return [id, j === slot % CardexCore.IDS.length ? score : (1 - score) / (CardexCore.IDS.length - 1)];
             })),
           },
     };

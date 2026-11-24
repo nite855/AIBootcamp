@@ -182,15 +182,17 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
     // Every main taxonomy ID resolves to the intended bundled 3D image and retains stage/probability.
     await click(touch, 'settings'); await click(touch, 'preview');
     const names = { neg_1: '불안', neg_2: '슬픔', neg_3: '분노' };
-    // 9 types: samples 1-9 are stage 1, 10-18 stage 2, 19-27 stage 3.
-    for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19]) {
+    // 9 types across the analyzed samples (2026-11-24: today is 기쁨 3단계 and sample-3 is pending, so the
+    // emotion is read from the card itself rather than derived from the sample number).
+    const seen = new Set();
+    for (const index of [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 20]) {
       if (index > 1) await click(touch, 'archive-records');
       const targetPage = Math.floor(index / 6);
       while (await touch.evaluate(() => DiaryReview.getState().page) < targetPage) await click(touch, 'next');
       await touch.locator(`[data-open="sample-${index}"]`).click();
-      const type = await touch.evaluate(() => {
-        const s = DiaryReview.getState(); return CardexCore.IDS[(Number(s.selected.split('-')[1]) - 1) % CardexCore.IDS.length];
-      });
+      const type = await touch.locator('.art-card').getAttribute('data-card-type');
+      assert.ok(await touch.evaluate(t => CardexCore.IDS.includes(t), type), `sample-${index} is an analyzed card (${type})`);
+      seen.add(type);
       // 2026-11-22: every emotion draws the Figma blob in its own deep card color (no PNG, no badge).
       const blob = await touch.locator('.art-card').evaluate((el, type) => ({
         images: el.querySelectorAll('image').length,
@@ -201,10 +203,12 @@ const waitSaved = p => p.waitForFunction(() => document.querySelector('#save-sta
       }), type);
       assert.deepEqual(blob, { images: 0, character: type, fill: blob.deep, eyes: 2, deep: blob.deep }, `${type} blob`);
       const text = await touch.locator('.art-card').textContent();
-      assert.ok(text.includes(index === 19 ? '3단계' : index === 10 ? '2단계' : '1단계')); assert.ok(text.includes(index === 19 ? '95%' : index === 10 ? '75%' : '45%'));
+      // sample-1..10 except the pending sample-3 are stage 1, sample-11 stage 2, sample-20 stage 3.
+      assert.ok(text.includes(index === 20 ? '3단계' : index === 11 ? '2단계' : '1단계')); assert.ok(text.includes(index === 20 ? '95%' : index === 11 ? '75%' : '45%'));
       assert.equal(await touch.locator('[data-emotion-mark]').count(), 0);
       if (names[type]) assert.ok(text.includes(names[type]));
     }
+    assert.equal(seen.size, 9, 'all nine emotion artworks drawn');
     await touch.screenshot({ path: path.join(os.tmpdir(), 'moment-lemon-mobile.png') });
     assert.deepEqual(errors, []);
     console.log('PASS: persistence, retry, deletion, conflict, corruption, blocked storage, dialog, touch/hold/scroll, 9 emotion artworks and three stages');

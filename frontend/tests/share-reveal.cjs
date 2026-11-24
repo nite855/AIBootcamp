@@ -75,8 +75,8 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     const artText = () => page.locator('.share-art').evaluate(el => [...el.querySelectorAll('text')].map(t => t.textContent).join('|'));
     const dateTexts = () => page.locator('.share-art text').evaluateAll(ts => ts.filter(t => /^\d{4}\.\d{2}\.\d{2}$/.test(t.textContent)).length);
     // Default: the record's first sentence is quoted; the rest of the body never appears.
-    assert.ok((await artText()).includes('“오랜만에 친구와 산책했다.”'), 'first sentence quoted by default');
-    assert.ok(!(await art()).includes('천천히 이야기하니'), 'second sentence never drawn');
+    assert.ok((await artText()).includes('“퇴근길에 작은 꽃을 샀다.”'), 'first sentence quoted by default');
+    assert.ok(!(await art()).includes('별일 없는 하루'), 'second sentence never drawn');
     assert.ok(!(await art()).includes('PRIVATE_DIARY_TEXT'));
     assert.ok(!(await art()).includes('<desc>'), 'no hidden probability description in the image');
     // Figma: the analysis number stays out of the image by default.
@@ -86,7 +86,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
       await page.locator(`[data-share-format="${format}"]`).click();
       assert.equal(await page.locator(`[data-share-format="${format}"]`).getAttribute('aria-pressed'), 'true');
       assert.equal(await page.evaluate(() => document.activeElement.dataset.shareFormat), format);
-      assert.ok((await artText()).includes('오랜만에'), 'quote in ' + format);
+      assert.ok((await artText()).includes('퇴근길에'), 'quote in ' + format);
     }
     // Options: hide probability, date and emotion name; turn the quote off and on.
     // 2026-11-24: "분석 확률 표시" (on = shown, default off) replaced the inverted "확률 숨기기".
@@ -104,7 +104,7 @@ const {chromium} = require(process.env.CARDEX_PLAYWRIGHT || path.join(os.tmpdir(
     assert.ok(!(await artText()).includes('기쁨·활력'), 'emotion name hidden on the card and caption');
     assert.ok((await artText()).includes('오늘의 카드'));
     await page.locator('[data-share-opt=quote]').uncheck();
-    assert.ok(!(await artText()).includes('오랜만에'), 'quote off');
+    assert.ok(!(await artText()).includes('퇴근길에'), 'quote off');
     assert.equal(await page.locator('#share-sentence').isVisible(), false);
     await page.locator('[data-share-opt=quote]').check();
     await page.locator('#share-sentence').fill('오늘은 산책이 좋았다');
