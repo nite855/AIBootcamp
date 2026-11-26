@@ -87,10 +87,17 @@ function trendChart(stats) {
   const tones = DiaryStatistics.windowEmotion(days, 3);
   const deep = t => `var(--card-deep-${t.type.replace("_", "-")})`;
   const stops = tones.map((t, i) => t && points[i] ? `<stop offset="${(((x(i) - left) / Math.max(1, right - left)) * 100).toFixed(2)}%" data-type="${t.type}" style="stop-color:${deep(t)}"/>` : "").join("");
+  let runIndex = 0;
   for (const run of DiaryStatistics.smoothSegments(points)) {
     // Each run draws in its turn, left to right (--x = start position 0–1 across the chart).
     const at = ((run.start[0] - left) / Math.max(1, right - left)).toFixed(3);
-    if (run.points.length > 1) marks += `<path class="chart-area" mask="url(#trend-fade)" style="--x:${at}" d="${run.d}L${run.end[0]} ${base}L${run.start[0]} ${base}Z"/>`;
+    // Area in the line's emotion colors: a faint even wash plus a blurred copy of the line clipped
+    // to the area, so the color starts right under the line at any height and fades downward
+    // (a chart-wide vertical fade left low stretches nearly invisible).
+    if (run.points.length > 1) {
+      const area = `${run.d}L${run.end[0]} ${base}L${run.start[0]} ${base}Z`, clip = `trend-clip-${runIndex++}`;
+      marks += `<clipPath id="${clip}"><path d="${area}"/></clipPath><path class="chart-area" style="--x:${at}" d="${area}"/><path class="chart-glow" clip-path="url(#${clip})" filter="url(#trend-blur)" style="--x:${at}" d="${run.d}"/>`;
+    }
     const single = run.points.length > 1 ? null : tones[points.indexOf(run.start)];
     marks += run.points.length > 1 ? `<path class="chart-line" data-series="positive" pathLength="1" style="--x:${at}" d="${run.d}"/>` : `<circle class="chart-dot"${single ? ` data-type="${single.type}"` : ""} style="--x:${at}${single ? `;--trend-color:${deep(single)}` : ""}" cx="${run.start[0]}" cy="${run.start[1]}" r="4"/>`;
   }
@@ -107,7 +114,7 @@ function trendChart(stats) {
     if (i === 0 || i === last || ((i + 1) % step === 0 && last - i >= 2))
       marks += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="chart-day">${i + 1}일</text>`;
   });
-  return `<svg class="stats-chart" viewBox="0 0 ${W} ${H}" data-days="${days.length}" role="img" aria-label="긍정 비율 3일 이동 평균${mean !== null ? ", 이번 달 평균 " + CardexCore.percent(mean) : ""}, 선 색은 최근 3일 동안 가장 강한 감정, 분석 없는 날은 공백"><defs><linearGradient id="trend-emotion" gradientUnits="userSpaceOnUse" x1="${left}" y1="0" x2="${right}" y2="0">${stops}</linearGradient><linearGradient id="trend-fade-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="trend-fade" maskUnits="userSpaceOnUse" x="0" y="${top}" width="${W}" height="${base - top}"><rect x="0" y="${top}" width="${W}" height="${base - top}" fill="url(#trend-fade-grad)"/></mask></defs>${marks}</svg>`;
+  return `<svg class="stats-chart" viewBox="0 0 ${W} ${H}" data-days="${days.length}" role="img" aria-label="긍정 비율 3일 이동 평균${mean !== null ? ", 이번 달 평균 " + CardexCore.percent(mean) : ""}, 선 색은 최근 3일 동안 가장 강한 감정, 분석 없는 날은 공백"><defs><linearGradient id="trend-emotion" gradientUnits="userSpaceOnUse" x1="${left}" y1="0" x2="${right}" y2="0">${stops}</linearGradient><filter id="trend-blur" filterUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><feGaussianBlur stdDeviation="${narrow ? 7 : 10}"/></filter></defs>${marks}</svg>`;
 }
 // Card-colored dots under the chart, one per drawn day; recorded days open the card modal.
 function trendDots(stats) {

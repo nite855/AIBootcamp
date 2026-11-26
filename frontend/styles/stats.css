@@ -69,7 +69,9 @@
 .stats-page .stats-chart { display: block; width: 100%; height: auto; max-height: none; margin-top: 8px; cursor: default; overflow: visible; }
 .stats-page .stats-chart .chart-guide, .stats-page .stats-chart .chart-base { stroke: var(--line); stroke-width: 1; stroke-dasharray: none; }
 .stats-page .stats-chart text { fill: var(--subtle, var(--muted)); font-size: 12px; }
-.stats-page .stats-chart .chart-area { fill: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); } /* faded by mask #trend-fade */
+.stats-page .stats-chart .chart-area { fill: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); opacity: .08; }
+/* Color right under the line: a blurred wide copy of the line, clipped to the area (2026-11-26). */
+.stats-page .stats-chart .chart-glow { fill: none; stroke: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); stroke-width: 34; stroke-linejoin: round; opacity: .34; pointer-events: none; }
 .stats-page .stats-chart .chart-line { fill: none; stroke: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: none; opacity: 1; }
 .stats-page .stats-chart .chart-dot { fill: var(--trend-color, var(--card-deep-pos-1, #e8789a)); }
 .stats-page .stats-chart .chart-mean { stroke: var(--subtle, var(--muted)); stroke-width: 1.5; stroke-dasharray: 4 5; }

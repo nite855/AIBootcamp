@@ -80,8 +80,10 @@ async function arrowsCentred(page, where) {
         const stops = [...document.querySelectorAll('#trend-emotion stop')].map(s => ({ type: s.dataset.type, offset: parseFloat(s.getAttribute('offset')), color: s.style.stopColor }));
         const dots = [...document.querySelectorAll('.trend-dots li')].map(li => { const b = li.querySelector('.is-ready'); const m = b && /--day-deep:var\(--card-deep-([a-z]+-\d)\)/.exec(b.getAttribute('style')); return m ? m[1].replace('-', '_') : null; });
         const line = getComputedStyle(document.querySelector('.stats-chart .chart-line')).stroke;
-        const area = document.querySelector('.stats-chart .chart-area');
-        return { stops, dots, line, areaFill: area && getComputedStyle(area).fill, areaMask: area && area.getAttribute('mask'), ids: CardexCore.IDS };
+        const areas = [...document.querySelectorAll('.stats-chart .chart-area')], glows = [...document.querySelectorAll('.stats-chart .chart-glow')];
+        // Glow sits right under the line: its clip path is the same run's area and it is blurred.
+        const glowOk = glows.every((g, i) => { const c = document.querySelector(g.getAttribute('clip-path').slice(4, -1) + ' path'); return c && c.getAttribute('d') === areas[i].getAttribute('d') && g.getAttribute('filter') === 'url(#trend-blur)' && /url\(.*#trend-emotion/.test(getComputedStyle(g).stroke); });
+        return { stops, dots, line, areaFill: areas[0] && getComputedStyle(areas[0]).fill, areas: areas.length, glows: glows.length, glowOk, lines: document.querySelectorAll('.stats-chart .chart-line').length, ids: CardexCore.IDS };
       });
       const ready = tone.dots.map((t, i) => t ? i : -1).filter(i => i >= 0);
       assert.equal(tone.stops.length, ready.length, 'one stop per analyzed day');
@@ -90,7 +92,8 @@ async function arrowsCentred(page, where) {
       ready.forEach((day, k) => { if (!tone.dots[day - 1] && !tone.dots[day - 2]) assert.equal(tone.stops[k].type, tone.dots[day], 'lone-window day matches its dot on day ' + (day + 1)); });
       assert.match(tone.line, /url\(.*#trend-emotion/, 'line stroke uses the emotion gradient');
       assert.match(tone.areaFill, /url\(.*#trend-emotion/, 'area fill uses the emotion gradient');
-      assert.equal(tone.areaMask, 'url(#trend-fade)');
+      assert.ok(tone.areas === tone.lines && tone.glows === tone.lines && tone.lines >= 1, `one area and one glow per line run (${tone.areas}/${tone.glows}/${tone.lines})`);
+      assert.equal(tone.glowOk, true, 'glow: same emotion gradient, blurred, clipped to its own area');
       assert.match(await page.locator('.stats-trend .row small').textContent(), /선 색 = 3일간 가장 강한 감정/);
 
       // Distribution: nine rows sorted by count (phones show three).
