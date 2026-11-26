@@ -1,0 +1,237 @@
+/* Scrapbook structure (Figma v0.3 "C 스크랩북") shared by every theme. Loaded last.
+   Colors always come from each theme's own roles (--ink, --blue, --surface, --tint, --paper),
+   so blossom stays the default look and each theme keeps its palette; only the structure is
+   common: pattern paper, torn title strip, ink outlines with hard offset shadows, sticker
+   navigation/buttons/chips, record items and collection slots.
+   Card geometry (.flip-scene, .art-card) is never changed here. */
+
+html[data-appearance] {
+  --sb-line: color-mix(in srgb, var(--ink) 92%, transparent);
+  --sb-soft-line: color-mix(in srgb, var(--ink) 32%, transparent);
+  --sb-drop: var(--ink);
+  --sb-border: 2px;
+  --sb-shadow: 4px;
+  --sb-panel-shadow: 6px;
+  --sb-radius: 22px;
+  --sb-grid: color-mix(in srgb, var(--blue) 15%, transparent);
+  --sb-grid-size: 36px;
+  --sb-secondary: color-mix(in srgb, #ffd94a 62%, var(--surface));
+  --sb-on-secondary: var(--ink);
+  --sb-sheet: var(--surface);
+}
+html[data-theme="dark"][data-appearance] {
+  --sb-line: color-mix(in srgb, var(--ink) 62%, transparent);
+  --sb-soft-line: color-mix(in srgb, var(--ink) 26%, transparent);
+  --sb-drop: rgb(0 0 0 / .55);
+  --sb-grid: color-mix(in srgb, var(--ink) 7%, transparent);
+  --sb-secondary: color-mix(in srgb, #ffd94a 34%, var(--surface));
+}
+
+/* ── Paper: grid by default, lined/dot/plain per theme character ── */
+html[data-appearance] body {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--sb-grid) 1px, transparent 1px), linear-gradient(90deg, var(--sb-grid) 1px, transparent 1px);
+  background-size: var(--sb-grid-size) var(--sb-grid-size);
+  background-attachment: fixed;
+}
+html:is([data-appearance="paper"], [data-appearance="editorial"]) body { background-image: linear-gradient(var(--sb-grid) 1px, transparent 1px); background-size: 100% 32px; }
+html:is([data-appearance="doodle"], [data-appearance="starlight"], [data-appearance="retro"]) body { background-image: radial-gradient(var(--sb-grid) 1.4px, transparent 1.8px); background-size: 22px 22px; }
+html[data-appearance] .app-scenery { opacity: .22; }
+html[data-appearance] .shell { background-image: none; }
+
+/* ── Title strip: a torn paper label taped to the page ── */
+html[data-appearance] header .brand {
+  position: relative;
+  align-self: flex-start;
+  padding: 12px 36px 16px 24px;
+  border-radius: 2px;
+  background: var(--sb-sheet);
+  box-shadow: 0 6px 7px color-mix(in srgb, var(--ink) 12%, transparent);
+  transform: rotate(-1.2deg);
+  transform-origin: left center;
+}
+html[data-appearance] header .brand::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -9px;
+  height: 10px;
+  background: var(--sb-sheet);
+  -webkit-mask: url("__TORN_EDGE_SVG__") 0 0 / 100% 100% no-repeat;
+  mask: url("__TORN_EDGE_SVG__") 0 0 / 100% 100% no-repeat;
+}
+html[data-appearance] header .brand small { display: block; color: var(--blue); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+html[data-appearance] .screen-title { font-size: 36px; font-weight: 700; letter-spacing: -1.08px; line-height: 1.25; color: var(--ink); }
+
+/* ── Panels: ink outline + hard offset shadow ── */
+html[data-appearance] :is(.panel, .editor),
+html[data-appearance] .home-aside :is(.latest-panel, .recent-panel, .calendar-panel) {
+  border: var(--sb-border) solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  background: var(--sb-sheet);
+  box-shadow: var(--sb-panel-shadow) var(--sb-panel-shadow) 0 var(--sb-drop);
+}
+html[data-appearance] :is(dialog, .action-popover) {
+  border: var(--sb-border) solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  box-shadow: var(--sb-panel-shadow) var(--sb-panel-shadow) 0 var(--sb-drop);
+}
+html[data-appearance] :is(h1, h2, h3) { font-weight: 700; }
+html[data-appearance] .eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .14em; }
+
+/* ── Buttons: primary sticker, secondary (yellow) sticker, quiet outline ── */
+html[data-appearance] .primary {
+  border: 2.5px solid var(--sb-line);
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--on-accent);
+  font-weight: 700;
+  box-shadow: var(--sb-shadow) var(--sb-shadow) 0 var(--sb-drop);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html[data-appearance] .secondary {
+  min-height: 44px;
+  padding: 10px 22px;
+  border: 2.5px solid var(--sb-line);
+  border-radius: 999px;
+  background: var(--sb-secondary);
+  color: var(--sb-on-secondary);
+  font-weight: 700;
+  box-shadow: var(--sb-shadow) var(--sb-shadow) 0 var(--sb-drop);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html[data-appearance] :is(.primary, .secondary):hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: calc(var(--sb-shadow) + 1px) calc(var(--sb-shadow) + 1px) 0 var(--sb-drop); }
+html[data-appearance] :is(.primary, .secondary):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--sb-drop); }
+html[data-appearance] :is(.quiet, .icon) {
+  border: var(--sb-border) solid var(--sb-soft-line);
+  border-radius: 999px;
+  background: var(--sb-sheet);
+  color: var(--ink);
+  font-weight: 600;
+}
+html[data-appearance] .quiet:hover:not(:disabled) { border-color: var(--sb-line); }
+html[data-appearance] .danger { color: var(--error); }
+
+/* ── Navigation: separate stickers on desktop, floating sticker bar on phones ── */
+html[data-appearance] .tabs { gap: 12px; padding: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-appearance] .tabs .tab {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: var(--sb-border) solid var(--sb-line);
+  border-radius: 999px;
+  background: var(--sb-sheet);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 3px 3px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+html[data-appearance] .tabs .tab:hover { background: color-mix(in srgb, var(--tint) 60%, var(--sb-sheet)); color: var(--ink); }
+html[data-appearance] .tabs .tab[aria-current="page"] { background: var(--blue); color: var(--on-accent); box-shadow: 3px 3px 0 var(--sb-drop); }
+html[data-appearance] .tab-icon { display: none; }
+@media (max-width: 959px) {
+  html[data-appearance] .tabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: none;
+    gap: 8px;
+    padding: 12px clamp(10px, 4vw, 20px) calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: var(--sb-border) solid var(--sb-line);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--sb-sheet) 96%, transparent);
+    box-shadow: 0 -6px 18px -12px color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+  html[data-appearance] .tabs .tab { flex-direction: row; padding: 6px 4px; font-size: clamp(13px, 3.6vw, 15px); border-radius: 999px; }
+  html[data-appearance] .tabs .tab[aria-current="page"] { background: var(--blue); color: var(--on-accent); box-shadow: 2px 2px 0 var(--sb-drop); }
+  html[data-appearance] .screen-title { font-size: clamp(24px, 7.4vw, 30px); }
+  html[data-appearance] header .brand { padding: 10px 26px 13px 18px; }
+  html[data-appearance] header .brand small { display: block; font-size: 10px; }
+  html[data-appearance] :is(.panel, .editor),
+  html[data-appearance] .home-aside :is(.latest-panel, .recent-panel, .calendar-panel) { box-shadow: 4px 4px 0 var(--sb-drop); border-radius: 18px; }
+}
+@media (max-height: 650px) and (max-width: 959px) {
+  html[data-appearance] header .brand small { display: none; }
+  html[data-appearance] header .brand { padding-block: 6px 9px; }
+}
+
+/* ── Writing surface: dashed note area ── */
+html[data-appearance] .editor textarea {
+  border: 2px dashed color-mix(in srgb, var(--blue) 55%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--tint) 30%, var(--sb-sheet));
+}
+html[data-appearance] .editor textarea:focus-visible { border-style: solid; }
+
+/* ── Chips ── */
+html[data-appearance] :is(.chip, .example-badge, .legend-chip) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: var(--sb-border) solid var(--sb-soft-line);
+  border-radius: 999px;
+  background: var(--sb-sheet);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+html[data-appearance] :is(.chip[aria-pressed="true"], .chip.is-on) { border-color: var(--sb-line); background: var(--blue); color: var(--on-accent); box-shadow: 2px 2px 0 var(--sb-drop); }
+html[data-appearance] .chip-today { border-color: var(--sb-line); background: var(--sb-secondary); color: var(--sb-on-secondary); }
+html[data-appearance] .chip-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sb-line); flex: none; }
+
+/* ── Record items ── */
+html[data-appearance] .entry,
+html[data-appearance] .recent-list .entry {
+  min-height: 0;
+  padding: 10px 14px 10px 10px;
+  gap: 12px;
+  border: 1.5px solid var(--sb-line);
+  border-radius: 16px;
+  background: var(--sb-sheet);
+  box-shadow: none;
+}
+html[data-appearance] .entry:hover { background: color-mix(in srgb, var(--tint) 40%, var(--sb-sheet)); transform: none; }
+html[data-appearance] .recent-list { display: grid; gap: 10px; }
+html[data-appearance] .entry .mini-art {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--sb-line);
+  border-radius: 7px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 70%, var(--sb-sheet)), color-mix(in srgb, var(--blue) 35%, var(--sb-sheet)));
+  overflow: hidden;
+}
+html[data-appearance] .entry .mini-art svg { width: 34px; height: 34px; }
+html[data-appearance] .entry-arrow {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  font-size: 0;
+  background: var(--ink);
+  -webkit-mask: url("__CHEVRON_SVG__") center / 20px 20px no-repeat;
+  mask: url("__CHEVRON_SVG__") center / 20px 20px no-repeat;
+}
+
+/* ── Calendar cells ── */
+html[data-appearance] .calendar-day { border: 1.5px solid var(--sb-soft-line); border-radius: 12px; background: var(--sb-sheet); font-weight: 700; }
+html[data-appearance] .calendar-day.has-records { border-color: var(--sb-soft-line); background: color-mix(in srgb, var(--tint) 75%, var(--sb-sheet)); }
+html[data-appearance] .calendar-day.is-today { border: 2px dashed var(--blue); }
+
+/* ── Collection slots ── */
+html[data-appearance] .catalog-grid button,
+html[data-appearance] .slot {
+  border: var(--sb-border) solid var(--sb-line);
+  border-radius: 14px;
+  background: var(--sb-sheet);
+  box-shadow: 3px 3px 0 var(--sb-drop);
+}
+html[data-appearance] :is(.catalog-grid button, .slot)[data-locked="true"],
+html[data-appearance] .slot.is-locked {
+  border-style: dashed;
+  border-color: var(--sb-soft-line);
+  background: color-mix(in srgb, var(--sb-sheet) 50%, transparent);
+  box-shadow: none;
+}

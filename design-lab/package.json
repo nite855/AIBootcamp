@@ -1,0 +1,10 @@
+{
+  "name": "aibootcamp-design-lab",
+  "private": true,
+  "scripts": {
+    "test": "node --test */tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "1.1.0"
+  }
+}

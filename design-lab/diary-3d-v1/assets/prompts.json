@@ -1,0 +1,47 @@
+﻿[
+    {
+        "id":  "pos_1",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-db9ba4c9-6f55-44b5-a28d-ac433d5fff82.png",
+        "prompt":  "Use case: stylized-concept. Joyful pastel butter-yellow plump mochi bunny; rounded short ears, tiny cocoa eyes, smiling mouth, rosy cheeks. Opaque soft vinyl/jelly toy, top-left highlight, soft shadow; centered isolated transparent square, no text or UI."
+    },
+    {
+        "id":  "pos_2",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-ca0f3287-52d5-46e7-b01a-34147ca80d45.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears, tiny cocoa eyes peacefully closed, contented little smile. Pastel pale peach body. Emotion satisfaction."
+    },
+    {
+        "id":  "pos_3",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-ff8cf8c9-7dcf-4af0-aee2-4fcaff849920.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears, tiny cocoa eyes gently closed, relaxed little mouth, restful pose. Pastel pale mint body. Emotion calm."
+    },
+    {
+        "id":  "neg_1",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-604a94c1-d5ff-4694-a05e-a69f5e9b1300.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears, tiny cocoa worried eyes, very small uncertain mouth, little tucked paws. Pastel lavender body. Emotion anxiety, gentle and sympathetic."
+    },
+    {
+        "id":  "neg_2",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-45ee07aa-2e57-4b1e-acc0-6d86b0c7d7a6.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears slightly drooping, tiny cocoa sad eyes, small downturned mouth, one tiny tear. Pastel powder blue body. Emotion sadness, gentle and sympathetic."
+    },
+    {
+        "id":  "neg_3",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-b7674f9c-fb18-41c0-b36e-ad5ecb8b48a4.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears, tiny cocoa determined eyes and softly angled eyebrows, little pout, tiny tucked paws. Pastel dusty coral body. Emotion anger, cute and mild, not threatening."
+    },
+    {
+        "id":  "neutral",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-8e89dd3d-0c39-4ff5-90b6-e654acd6b7e3.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. Cute very round plump mochi bunny, two short rounded ears, tiny cocoa dot eyes and a tiny horizontal mouth, relaxed neutral pose. Warm ivory body. Emotion neutral."
+    },
+    {
+        "id":  "heart",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-36c20883-c251-49ca-9592-71264b4e1627.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. One plump inflated heart, pastel muted rose-pink, clean symmetrical silhouette, no face, no eyes, no accessories. Gentle opaque soft toy satin finish."
+    },
+    {
+        "id":  "star",
+        "path":  "C:\\Users\\gydnj\\.codex\\generated_images\\01a1a4eb-af63-7e03-9e45-ebed73011959\\exec-e5424f8a-8080-452d-8916-cc7be9ab616d.png",
+        "prompt":  "Use case: stylized-concept. One isolated 3D asset for Korean emotional diary. Premium minimal collectible soft toy, opaque pastel vinyl/mochi material with gentle glossy highlight from upper left, soft contact shadow. Square framing, centered whole subject at 75% canvas with clear padding. Genuine transparent alpha background. No glass, no transparency in the object, no text, letters, UI or floor plane. One plump five-point star with rounded tips, pastel butter-yellow, no face, no eyes, no accessories. Gentle opaque soft toy satin finish."
+    }
+]

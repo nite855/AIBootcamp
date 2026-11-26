@@ -1,0 +1,29 @@
+{
+  "checks": 55,
+  "errors": [],
+  "externalRequests": [],
+  "browser": "131.0.6778.33",
+  "screenshots": [
+    "archive-landscape.png",
+    "archive-mobile.png",
+    "archive-pc.png",
+    "archive-small.png",
+    "before-mobile.png",
+    "before-pc.png",
+    "calendar-landscape.png",
+    "calendar-mobile.png",
+    "calendar-pc.png",
+    "calendar-small.png",
+    "card-mobile.png",
+    "card-pc.png",
+    "restore-failed.png",
+    "restore-mobile.png",
+    "write-landscape.png",
+    "write-laptop.png",
+    "write-mobile.png",
+    "write-narrow.png",
+    "write-pc.png",
+    "write-small.png",
+    "write-tablet.png"
+  ]
+}

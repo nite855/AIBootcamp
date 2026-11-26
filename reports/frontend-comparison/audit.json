@@ -1,0 +1,198 @@
+{
+  "date": "2026-11-03",
+  "scope": "Light theme, entry and fixture overview only; not full E2E",
+  "results": [
+    {
+      "name": "diary-simple-v1",
+      "htmlKiB": 392,
+      "sourceFiles": 0,
+      "sourceLines": 0,
+      "tests": 13,
+      "pass": 11,
+      "fail": 2,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "기록 속 기쁨의 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "기록 속 기쁨의 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "diary-social-v1",
+      "htmlKiB": 384,
+      "sourceFiles": 11,
+      "sourceLines": 732,
+      "tests": 12,
+      "pass": 12,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "기록에서 발견한 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "기록에서 발견한 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "emotion-cardex",
+      "htmlKiB": 328,
+      "sourceFiles": 4,
+      "sourceLines": 484,
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "emotion-cardex-v2",
+      "htmlKiB": 338,
+      "sourceFiles": 6,
+      "sourceLines": 548,
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "emotion-cardex-v3",
+      "htmlKiB": 338,
+      "sourceFiles": 6,
+      "sourceLines": 548,
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "emotion-cardex-v4",
+      "htmlKiB": 340,
+      "sourceFiles": 6,
+      "sourceLines": 564,
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "민서님의 대화 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "integrated-tcg-2026-11-03",
+      "htmlKiB": 368,
+      "sourceFiles": 8,
+      "sourceLines": 671,
+      "tests": 25,
+      "pass": 25,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "이번 대화의 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "이번 대화의 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "tcg-social-studio-v1",
+      "htmlKiB": 359,
+      "sourceFiles": 8,
+      "sourceLines": 650,
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "screens": [
+        {
+          "width": 1440,
+          "heading": "이번 대화의 모먼트",
+          "overflow": false,
+          "scrollWidth": 1440
+        },
+        {
+          "width": 390,
+          "heading": "이번 대화의 모먼트",
+          "overflow": false,
+          "scrollWidth": 390
+        }
+      ],
+      "browserErrors": []
+    }
+  ]
+}

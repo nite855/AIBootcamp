@@ -1,0 +1,106 @@
+/* Soft UI v1.1 theme decoration (Figma section 05 "테마 시안 비교 · 메인 화면", 2026-11-21 F8).
+   Backgrounds only: layout and card geometry are shared through soft.css. __DECOR_*__ markers are
+   replaced with inline SVG data URIs by tools/build.mjs so index.html stays standalone. */
+
+.app-scenery { display: none; }
+.diary-page { display: none; }
+
+/* Candy stripe: 72px pastel stripes; stars gathered at the edges (one 1440×900 layer, not tiled). */
+html[data-appearance="candy"] body {
+  background-color: #fff7c4;
+  background-image:
+    url("__DECOR_CANDY__"),
+    repeating-linear-gradient(90deg, #fff3b0 0 72px, #d8ecfa 72px 144px);
+  background-repeat: no-repeat, repeat;
+  background-position: center top, 0 0;
+  background-size: max(1440px, 100vw) auto, auto;
+  background-attachment: fixed;
+}
+
+/* Frosted glass: ivory with peach/mint glows, fine noise, translucent panels, tiles and bars. */
+html[data-appearance="glass"] body {
+  background-color: #f3f3ec;
+  background-image:
+    url("__DECOR_NOISE__"),
+    radial-gradient(60% 55% at 12% 8%, #ffd9c4cc, transparent 70%),
+    radial-gradient(55% 60% at 92% 88%, #c9eedfcc, transparent 70%),
+    radial-gradient(40% 40% at 70% 20%, #fbe3ef99, transparent 70%);
+  background-size: 200px 200px, auto, auto, auto;
+  background-attachment: fixed;
+}
+html[data-appearance="glass"] :is(.panel, .editor, .tabs, .recent-tile) {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  box-shadow: inset 0 0 0 1px #ffffffb3, var(--soft-shadow);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+}
+html[data-appearance="glass"] .write-bar { background: color-mix(in srgb, var(--surface) 70%, transparent); box-shadow: inset 0 0 0 1px #ffffffb3; }
+/* Desktop only: a backdrop filter on the header would trap the fixed mobile tab bar inside it. */
+@media (min-width: 960px) {
+  html[data-appearance="glass"] header {
+    background: color-mix(in srgb, var(--surface) 62%, transparent);
+    box-shadow: inset 0 0 0 1px #ffffffb3, var(--soft-shadow);
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  }
+}
+
+/* Mist (첫눈): bluish grey, a few large flakes and a white snow hill over the bottom. */
+html[data-appearance="mist"] body {
+  background-color: #e9eff6;
+  background-image:
+    url("__DECOR_SNOW__"),
+    radial-gradient(70% 26% at 22% 108%, #ffffff 97%, transparent 100%),
+    radial-gradient(62% 22% at 84% 110%, #fbfcfe 97%, transparent 100%),
+    radial-gradient(40% 14% at 54% 104%, #f4f7fb 96%, transparent 100%),
+    linear-gradient(180deg, #e2e9f2, #eef2f7);
+  background-repeat: no-repeat;
+  background-position: center top, 0 0, 0 0, 0 0, 0 0;
+  background-size: max(1440px, 100vw) auto, auto, auto, auto, auto;
+  background-attachment: fixed;
+}
+
+/* Grid diary: 20px graph paper with a major line every 100px, ruled writing area, highlighter
+   behind the date and a "p. 322 · 2026 diary" page label. */
+html[data-appearance="grid"] body {
+  background-color: #faf9f5;
+  background-image:
+    linear-gradient(#e2ddd0 1px, transparent 1px),
+    linear-gradient(90deg, #e2ddd0 1px, transparent 1px),
+    linear-gradient(#ece8de 1px, transparent 1px),
+    linear-gradient(90deg, #ece8de 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-attachment: fixed;
+}
+html[data-appearance="grid"] :is(.editor, .write-panel) textarea {
+  background-image: linear-gradient(transparent calc(1.9em - 1px), #ece8de calc(1.9em - 1px));
+  background-size: 100% 1.9em;
+  background-attachment: local;
+}
+html[data-appearance="grid"] .page-date .page-day { padding: 0 2px; background: linear-gradient(transparent 58%, #fbe38a 58%, #fbe38a 92%, transparent 92%); }
+html[data-appearance="grid"] .diary-page { display: inline; margin-left: 12px; font-family: var(--font-display); font-size: 12px; color: var(--muted); }
+
+/* Tea room: dark room, cross-stitch motifs; light panels and tiles carry a stitched dashed border
+   inside the edge (Figma), and the top bar stays plain. */
+html[data-appearance="tearoom"] body {
+  background-color: #2a2427;
+  background-image: url("__DECOR_STITCH__");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: min(1440px, 100vw) auto;
+  background-attachment: fixed;
+}
+html[data-appearance="tearoom"] :is(.panel, .editor, .recent-tile) {
+  outline: 2px dashed #e9a7bd;
+  outline-offset: -9px;
+}
+html[data-appearance="tearoom"] .page-heading h1 { color: #f4dde6; }
+html[data-appearance="tearoom"] :is(.page-date, .recent-head h2) { color: #c9aebb; }
+@media (max-width: 959px) {
+  html[data-appearance="tearoom"] header .brand-word { color: var(--ink-bg); }
+}
+
+@media (forced-colors: active) {
+  html[data-appearance] body { background-image: none; }
+  html[data-appearance="tearoom"] :is(.panel, .editor, .recent-tile) { outline: 0; }
+}

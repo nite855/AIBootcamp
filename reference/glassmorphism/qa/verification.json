@@ -1,0 +1,199 @@
+{
+  "inventory": [
+    {
+      "src": "icons/icon-home.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-home.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-diary-write.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-diary-write.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-emotion-heart.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-emotion-heart.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-emotion-card.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-emotion-card.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-archive.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-archive.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-calendar.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-calendar.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-statistics.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-statistics.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "icons/icon-settings.png",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "src": "icons/icon-settings.svg",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "src": "components/component-diary-input.png",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "src": "components/component-diary-input.svg",
+      "width": 640,
+      "height": 460
+    },
+    {
+      "src": "components/component-emotion-card.png",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "src": "components/component-emotion-card.svg",
+      "width": 400,
+      "height": 580
+    },
+    {
+      "src": "components/component-record-list.png",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "src": "components/component-record-list.svg",
+      "width": 640,
+      "height": 460
+    },
+    {
+      "src": "components/component-weekly-chart.png",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "src": "components/component-weekly-chart.svg",
+      "width": 640,
+      "height": 460
+    },
+    {
+      "src": "components/component-bottom-nav.png",
+      "width": 1774,
+      "height": 887
+    },
+    {
+      "src": "components/component-bottom-nav.svg",
+      "width": 640,
+      "height": 170
+    },
+    {
+      "src": "components/component-buttons.png",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "src": "components/component-buttons.svg",
+      "width": 640,
+      "height": 220
+    }
+  ],
+  "alpha": [
+    {
+      "src": "icon-archive.png",
+      "transparent": 918951,
+      "partial": 652401,
+      "visible": 653565
+    },
+    {
+      "src": "icon-calendar.png",
+      "transparent": 763716,
+      "partial": 808003,
+      "visible": 808800
+    },
+    {
+      "src": "icon-diary-write.png",
+      "transparent": 763861,
+      "partial": 808398,
+      "visible": 808655
+    },
+    {
+      "src": "icon-emotion-card.png",
+      "transparent": 919873,
+      "partial": 652004,
+      "visible": 652643
+    },
+    {
+      "src": "icon-emotion-heart.png",
+      "transparent": 979726,
+      "partial": 592463,
+      "visible": 592790
+    },
+    {
+      "src": "icon-home.png",
+      "transparent": 1046400,
+      "partial": 524817,
+      "visible": 526116
+    },
+    {
+      "src": "icon-settings.png",
+      "transparent": 956781,
+      "partial": 614875,
+      "visible": 615735
+    },
+    {
+      "src": "icon-statistics.png",
+      "transparent": 860929,
+      "partial": 711521,
+      "visible": 711587
+    }
+  ],
+  "viewports": [
+    1440,
+    375
+  ],
+  "errors": []
+}

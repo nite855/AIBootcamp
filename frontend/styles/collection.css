@@ -1,0 +1,129 @@
+/* Soft UI v1.1 card collection, second pass (Figma 06 "도감 · 전체", "도감 · 첫 실행", "도감 · 카드 상세",
+   "M · 도감 · 전체", 2026-11-21 F4). No board panel: 44px Light title, 22px text tabs with superscript
+   counts, a 320×112 progress card, six 192×268.8 cards (gap 36/32) without captions, a bottom scroll fade.
+   grade-effects.css (last) keeps the data-grade glow on slots and the detail card. */
+
+.catalog-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.catalog-page > * { min-width: 0; }
+.catalog-page .catalog-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px 24px; margin: 0 0 22px; }
+.catalog-page .catalog-heading { display: grid; gap: 20px; padding: 6px 0 0 28px; }
+.catalog-page .catalog-title { margin: 0; font-size: 44px; font-weight: 600; line-height: 1.18; letter-spacing: -.88px; color: var(--ink-bg, var(--ink)); }
+
+/* Text tabs: 22px, the count as a 12px superscript; unselected tabs in ink3. */
+.catalog-page .catalog-tabs { display: flex; gap: 28px; width: auto; max-width: 100%; padding: 0 0 0 4px; overflow-x: auto; border-radius: 0; background: transparent; box-shadow: none; }
+.catalog-page .catalog-tab { display: inline-flex; align-items: flex-start; gap: 3px; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--subtle, var(--muted)); font-size: 22px; font-weight: 400; }
+.catalog-page .catalog-tab b { font-family: var(--font-display); font-size: 12px; font-weight: 500; opacity: 1; }
+.catalog-page .catalog-tab[aria-selected="true"] { background: transparent; color: var(--ink-bg, var(--ink)); font-weight: 500; }
+.catalog-page .catalog-tab:hover { color: var(--ink-bg, var(--ink)); }
+
+/* Progress card (320×112): 36px count, "/ 27 수집", an 8px accent bar. */
+.catalog-page .collect-card { display: grid; align-content: start; gap: 18px; flex: 0 0 320px; width: 320px; max-width: 100%; height: 112px; padding: 22px 28px; border-radius: 28px; background: var(--surface); box-shadow: var(--soft-shadow); }
+.catalog-page .collect-card p { display: flex; align-items: baseline; gap: 6px; margin: 0; }
+.catalog-page .collect-card strong { font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1; color: var(--ink); }
+.catalog-page .collect-card span { color: var(--muted); font-size: 14px; }
+.catalog-page .collect-card .collect-bar { display: block; width: auto; height: 8px; margin: 0; overflow: hidden; border-radius: 4px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); }
+.catalog-page .collect-card .collect-bar b { display: block; height: 100%; border-radius: inherit; background: var(--blue); }
+
+/* Emotion chips (not in Figma; kept small and quiet). */
+.catalog-page .catalog-filters { gap: 4px 2px; margin: 0 0 22px 28px; }
+.catalog-page .catalog-filters .chip { min-height: 32px; padding: 4px 10px; border: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 13px; }
+.catalog-page .catalog-filters .chip[aria-pressed="true"] { background: color-mix(in srgb, var(--tint) 60%, var(--surface)); color: var(--ink); font-weight: 600; }
+.catalog-page .catalog-filters .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+/* 44px touch height (2026-11-24 a11y) without changing the drawn 32px chip. */
+.catalog-page .catalog-filters .chip { position: relative; }
+.catalog-page .catalog-filters .chip::after { content: ""; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+
+/* Grid without a panel. */
+.catalog-page .catalog-board { position: relative; display: grid; gap: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.catalog-page .collection-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 192px)); grid-template-rows: none; grid-auto-rows: auto; grid-auto-flow: row; justify-content: space-between; gap: 36px 32px; margin: 0; }
+.catalog-page .slot-thumb .mini-card svg.catalog-character { width: 76%; height: auto; max-height: none; }
+.catalog-page .collection-grid.is-type { grid-template-columns: repeat(3, minmax(0, 192px)); justify-content: start; }
+/* Flex column: a grid track would size the 5:7 thumb's row before its width is known. */
+.catalog-page .collection-grid .slot { display: flex; flex-direction: column; grid-column: auto; grid-row: auto; width: auto; height: auto; max-height: none; min-width: 0; min-height: 0; aspect-ratio: auto; overflow: visible; padding: 0; border: 0; border-radius: 19.2px; background: transparent; box-shadow: none; color: var(--ink); text-align: left; transform: none; }
+.catalog-page .slot .slot-thumb { position: relative; display: block; width: 100%; height: auto; aspect-ratio: auto; min-height: 0; max-height: none; overflow: visible; margin: 0; padding: 0; border: 0; border-radius: 19.2px; background: transparent; box-shadow: none; transition: transform .2s var(--soft-ease, ease-out); }
+.catalog-page .slot .slot-thumb .mini-card { border-radius: 19.2px; box-shadow: 0 14.4px 28.8px -9.6px rgb(89 77 115 / .14); }
+.catalog-page .slot.is-locked .slot-thumb .mini-card { box-shadow: none; }
+.catalog-page .slot:hover .slot-thumb { transform: translateY(-3px); }
+.catalog-page .slot:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+.catalog-page .slot[aria-pressed="true"] .slot-thumb { outline: 2px solid var(--ink); outline-offset: 3px; }
+.catalog-page .catalog-legend { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+/* Bottom scroll fade (Figma 120px, white → transparent). */
+.catalog-page .catalog-fade { position: sticky; bottom: 0; height: 120px; margin-top: -120px; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--bg, var(--surface))); }
+
+/* First run: the locked grid at .45 under a veil, the call to action over the first row. */
+.catalog-page .catalog-board.is-first-run .catalog-grid-wrap { opacity: .45; -webkit-mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); mask: linear-gradient(to bottom, #000 0, #000 30%, transparent 75%); max-height: 520px; overflow: hidden; }
+.catalog-page .collection-empty { position: absolute; z-index: 2; left: 50%; top: 290px; display: grid; justify-items: center; gap: 10px; width: min(100%, 520px); margin: 0; padding: 36px 24px; border-radius: 0; background: radial-gradient(closest-side, var(--bg, var(--surface)) 55%, transparent); text-align: center; transform: translateX(-50%); }
+.collection-empty h3 { margin: 0; font-size: 22px; font-weight: 500; color: var(--ink); }
+.collection-empty p { margin: 0; color: var(--muted); font-size: 14px; text-align: center; text-wrap: balance; }
+.collection-empty :is(.primary, .secondary) { margin-top: 6px; min-height: 44px; padding: 10px 24px; font-size: 14px; }
+.collection-empty .primary + .secondary { margin-top: 0; }
+.collection-empty small { color: var(--muted); font-size: 12px; }
+
+/* ── Detail (1040×700, radius 40): a 460px soft stage with the card, information on the right ── */
+dialog.card-detail { width: min(1040px, calc(100vw - 48px)); max-width: none; height: min(700px, calc(100dvh - 48px)); max-height: none; margin: auto; padding: 0; overflow: hidden; border-radius: 40px; }
+.card-detail .detail-back { display: none; }
+.card-detail .detail-layout { display: grid; grid-template-columns: 460px minmax(0, 1fr); align-items: stretch; height: 100%; gap: 0; padding: 0; }
+.card-detail .detail-stage { position: relative; isolation: isolate; display: grid; place-items: center; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); }
+.card-detail .detail-stage .stage-glow { position: absolute; z-index: -1; width: 380px; height: 380px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--blue) 14%, transparent), transparent 68%); }
+.card-detail .detail-card { position: relative; display: block; width: 312px; aspect-ratio: auto; transform: none; max-width: calc(100% - 48px); min-height: 0; padding: 0; overflow: hidden; border: 0; border-radius: 28px; background: transparent; aspect-ratio: auto; }
+.card-detail .detail-card[data-grade] { box-shadow: 0 0 34px 6px var(--grade-glow); }
+.detail-card .art-card { display: block; width: 100%; height: auto; filter: none; }
+.detail-card .grade-sheen { z-index: 1; }
+.card-detail .detail-info { position: relative; display: flex; flex-direction: column; gap: 0; min-width: 0; padding: 60px 56px 40px 56px; overflow: auto; }
+.card-detail .detail-close { position: absolute; top: 24px; right: 24px; width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); font-size: 14px; }
+.card-detail .detail-close::after { content: ""; position: absolute; inset: -2px; }
+.card-detail .detail-no { margin: 0; color: var(--muted); font-family: var(--font-display); font-size: 13px; font-weight: 500; }
+.card-detail #card-detail-title { margin: 6px 0 0; font-size: 34px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.card-detail .detail-meta { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.card-detail .detail-info h3 { margin: 26px 0 12px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.card-detail .detail-info h3 small { color: var(--muted); font-size: 13px; font-weight: 500; }
+.card-detail .growth-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.card-detail .growth-row li { display: grid; gap: 2px; padding: 12px 14px; border-radius: 18px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); font-size: 14px; }
+.card-detail .growth-row li b { font-weight: 500; }
+.card-detail .growth-row li span { color: var(--muted); font-size: 12px; }
+.card-detail .growth-row [data-growth="now"] { background: var(--ink); color: var(--surface); }
+.card-detail .growth-row [data-growth="now"] span { color: inherit; opacity: .75; }
+.card-detail .growth-row [data-growth="locked"] { color: var(--subtle, var(--muted)); }
+.card-detail .growth-hint { margin: 12px 0 0; color: var(--blue); font-size: 13px; }
+.card-detail .detail-records { display: grid; gap: 8px; max-height: 200px; overflow: auto; }
+.card-detail .detail-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; min-height: 48px; padding: 12px 16px; border: 0; border-radius: 16px; background: color-mix(in srgb, var(--tint) 60%, var(--surface)); box-shadow: none; color: var(--ink); font-size: 14px; text-align: left; }
+.card-detail .detail-row b { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--muted); }
+.card-detail .detail-row span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.card-detail .detail-row i { font-style: normal; color: var(--subtle, var(--muted)); }
+.card-detail .detail-row:hover { background: color-mix(in srgb, var(--tint) 90%, var(--surface)); }
+.card-detail .detail-fine { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+.card-detail .detail-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.card-detail .detail-actions button { min-height: 44px; }
+
+@media (max-width: 959px) {
+  .catalog-page .catalog-head { margin-bottom: 18px; }
+  .catalog-page .catalog-heading { gap: 12px; padding-left: 0; }
+  .catalog-page .catalog-title { font-size: 28px; font-weight: 600; letter-spacing: -.5px; }
+  .catalog-page .catalog-tabs { gap: 18px; padding: 0; }
+  .catalog-page .catalog-tab { font-size: 18px; }
+  /* Progress as one line: count on the left, the bar on the right. */
+  .catalog-page .catalog-head { flex-direction: column; align-items: stretch; }
+  .catalog-page .collect-card { flex: none; grid-template-columns: auto minmax(0, 120px); justify-content: space-between; align-items: center; gap: 12px; width: 100%; height: auto; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .catalog-page .collect-card strong { font-size: 20px; }
+  /* Figma mobile order: title, the progress line, then the tabs. */
+  .catalog-page .catalog-heading { display: contents; }
+  .catalog-page .catalog-title { order: -3; }
+  .catalog-page .catalog-tabs { order: -1; }
+  .catalog-page .collect-card { order: -2; }
+  /* The row scrolls sideways (overflow clips), so it keeps room for the chips' 44px touch area. */
+  .catalog-page .catalog-filters { margin-left: 0; padding-top: 6px; padding-bottom: 8px; }
+  .catalog-page .collection-grid, .catalog-page .collection-grid.is-type { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 16px; }
+  .catalog-page .collection-empty { top: 110px; }
+  /* Detail as a full page ("← 도감"). */
+  dialog.card-detail { width: 100%; height: 100dvh; max-height: none; margin: 0; border-radius: 0; overflow: auto; }
+  .card-detail .detail-back { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin: 12px 0 0 12px; padding: 8px 10px; border: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 14px; }
+  .card-detail .detail-back::before { content: "←"; }
+  .card-detail .detail-layout { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .card-detail .detail-stage { margin: 8px 20px 0; padding: 28px 0; border-radius: 32px; }
+  .card-detail .detail-card { width: min(240px, 64vw); }
+  .card-detail .detail-close { display: none; }
+  .card-detail .detail-info { padding: 22px 20px calc(28px + env(safe-area-inset-bottom, 0px)); overflow: visible; }
+  .card-detail #card-detail-title { font-size: 26px; }
+  .card-detail .detail-records { max-height: none; }
+  .card-detail .detail-actions > button { flex: 1; }
+}

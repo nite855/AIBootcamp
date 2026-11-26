@@ -1,0 +1,69 @@
+/* Soft UI v1.1 share (Figma "공유 · 미리보기" 2077:13831 / mobile 2077:14301, 2026-11-21 F6).
+   Loaded after profile.css. Scoped under .share-page to settle the older share rules in screens.css. */
+
+.share-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1280px; margin-inline: auto; }
+.share-page > * { min-width: 0; }
+/* The older .panel rule centres panels at 760px across every column; here the sheet keeps its cell. */
+.share-page .panel { grid-column: auto; width: auto; max-width: none; justify-self: stretch; }
+.share-page .share-art-frame, .share-page .share-art { transform: none; rotate: none; }
+.share-back { display: none; justify-self: start; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: var(--muted-bg, var(--muted)); font: inherit; font-size: 14px; box-shadow: none; }
+.share-head { display: grid; gap: 6px; padding-inline: 28px; }
+.share-title { margin: 0; font-size: 44px; font-weight: 600; letter-spacing: -.02em; color: var(--ink-bg, var(--ink)); }
+.share-head p.muted { margin: 0; font-size: 15px; color: var(--muted-bg, var(--muted)); }
+
+.share-page .share-layout { display: grid; grid-template-columns: minmax(0, 760fr) minmax(0, 480fr); gap: 40px; align-items: stretch; }
+/* Preview stage: soft surface, image frame 400×500, format pills inside at the bottom. */
+.share-page .share-stage { position: relative; display: grid; justify-items: center; align-content: center; gap: 24px; min-width: 0; min-height: 632px; padding: 40px 32px 32px; border-radius: 36px; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); }
+.share-page .share-art-frame { width: min(100%, 400px); padding: 0; border: 0; border-radius: 24px; background: transparent; box-shadow: 0 30px 60px -20px rgb(38 38 51 / .18), 0 8px 20px -8px rgb(38 38 51 / .1); overflow: hidden; }
+.share-page .share-art { display: block; width: 100%; height: auto; }
+.share-formats { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0; background: transparent; box-shadow: none; }
+.share-formats .chip { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 14px; box-shadow: 0 2px 6px rgb(38 38 51 / .06); }
+.share-formats .chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); font-weight: 600; }
+
+/* Options panel: white, radius 36, rows 56 high with 20 between, no row borders. */
+.share-page .share-sheet { display: flex; flex-direction: column; gap: 0; width: auto; max-width: none; padding: 36px 36px 28px; border-radius: 36px; }
+.share-sheet h3 { margin: 0 0 20px; font-size: 18px; font-weight: 500; }
+.share-options { display: grid; gap: 20px; }
+.share-page .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-weight: 400; }
+.share-option > span { display: grid; gap: 4px; }
+.share-option strong { font-size: 15px; font-weight: 500; }
+.share-option small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.share-page input[role="switch"] { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 46px; height: 28px; margin: 0; border-radius: 999px; background: color-mix(in srgb, var(--muted) 35%, var(--surface)); cursor: pointer; transition: background-color .18s ease; }
+.share-page input[role="switch"]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .25); transition: transform .18s ease; }
+.share-page input[role="switch"]:checked { background: var(--ink); }
+.share-page input[role="switch"]:checked::after { transform: translateX(18px); }
+.share-page input[role="switch"]:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+/* Kept extras, made quiet: quote editor and privacy note. */
+.share-page .share-sentence { display: grid; gap: 6px; margin-top: 16px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.share-page .share-sentence small { font-weight: 400; }
+.share-page .share-sentence[hidden] { display: none; }
+.share-page .share-sentence input { min-height: 44px; padding: 8px 14px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); color: var(--ink); font: inherit; font-size: 14px; font-weight: 400; }
+.share-page .share-privacy { margin: 10px 0 0; padding: 0; border-radius: 0; background: transparent; font-size: 12px; font-weight: 500; color: var(--muted); }
+.share-page .share-link-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+.share-page .share-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: auto; padding-top: 24px; }
+.share-page .share-actions > button { width: 100%; min-height: 52px; }
+.share-page .share-actions > button.secondary { border: 0; background: color-mix(in srgb, var(--tint) 45%, var(--surface)); box-shadow: none; }
+.share-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.share-foot small { font-size: 12px; color: var(--muted); }
+.share-foot > button { min-height: 44px; padding: 0 8px; font-size: 13px; }
+
+@media (max-width: 959px) {
+  .share-page { gap: 16px; }
+  .share-back { display: inline-flex; align-items: center; }
+  .share-head { padding-inline: 4px; }
+  .share-title { font-size: 28px; font-weight: 400; }
+  .share-page .share-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .share-page .share-stage { min-height: 0; padding: 24px 16px 20px; border-radius: 28px; gap: 16px; }
+  .share-page .share-art-frame { width: min(100%, 280px); border-radius: 20px; }
+  .share-page .share-sheet { padding: 22px 20px 18px; border-radius: 28px; }
+  .share-sheet h3 { margin-bottom: 8px; font-size: 16px; }
+  .share-options { gap: 4px; }
+  .share-page .switch-row { min-height: 48px; }
+  /* Save and story stay big; the link copy turns into a small row. */
+  .share-page .share-actions { order: -1; margin: 0 0 12px; padding-top: 0; }
+  .share-page .share-actions > button[data-action="share-link"] { min-height: 44px; background: transparent; font-size: 14px; }
+}
+@media (forced-colors: active) {
+  .share-page input[role="switch"] { appearance: auto; -webkit-appearance: auto; width: auto; height: auto; }
+  .share-page input[role="switch"]::after { content: none; }
+}

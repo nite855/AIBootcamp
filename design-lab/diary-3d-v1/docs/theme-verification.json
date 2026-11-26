@@ -1,0 +1,22 @@
+[
+  {
+    "variant": "lemon",
+    "mode": "light",
+    "minimumTextContrast": 4.623945994741155
+  },
+  {
+    "variant": "lemon",
+    "mode": "dark",
+    "minimumTextContrast": 5.516265425932994
+  },
+  {
+    "variant": "gray",
+    "mode": "light",
+    "minimumTextContrast": 5.017964656344052
+  },
+  {
+    "variant": "gray",
+    "mode": "dark",
+    "minimumTextContrast": 6.830997580735993
+  }
+]

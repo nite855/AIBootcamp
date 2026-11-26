@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-24T00:00:00+09:00",
+  "title": "Design System: 오늘의 모먼트",
+  "extensions": {
+    "colorMeta": {
+      "night-ink": { "role": "primary", "displayName": "밤 잉크 Night Ink", "canonical": "#111114", "tonalRamp": ["#111114", "#26262b", "#3b3b42", "#55555d", "#75757e", "#9a9aa2", "#c4c4ca", "#ececef"] },
+      "daysky-blue": { "role": "primary", "displayName": "낮하늘 블루 Daysky Blue", "canonical": "#3b5bfd", "tonalRamp": ["#0f1f6b", "#1a2f9e", "#2843d6", "#3b5bfd", "#6a83fd", "#97a8fe", "#c3cdfe", "#e8ecff"] },
+      "dawn-pink": { "role": "secondary", "displayName": "새벽 핑크 Dawn Pink", "canonical": "#ffb3c7", "tonalRamp": ["#5c1f30", "#8a3450", "#b84d70", "#e8789a", "#ff97b3", "#ffb3c7", "#ffd3df", "#fff0f4"] },
+      "noon-paper": { "role": "neutral", "displayName": "한낮 종이 Noon Paper", "canonical": "#ffffff" },
+      "morning-mist": { "role": "neutral", "displayName": "아침 안개 Morning Mist", "canonical": "#f7f7f8" },
+      "dusk-line": { "role": "neutral", "displayName": "저녁 경계 Dusk Line", "canonical": "#f0f0f2" },
+      "afternoon-gray": { "role": "neutral", "displayName": "흐린 오후 Afternoon Gray", "canonical": "#5f5f68" },
+      "twilight-subtle": { "role": "neutral", "displayName": "해질녘 Twilight Subtle", "canonical": "#b8b8c0" },
+      "error-rose": { "role": "neutral", "displayName": "오류 로즈 Error Rose", "canonical": "#a12b43" },
+      "card-deep-pos-1": { "role": "tertiary", "displayName": "기쁨·활력" },
+      "card-deep-pos-2": { "role": "tertiary", "displayName": "만족·감사" },
+      "card-deep-pos-3": { "role": "tertiary", "displayName": "안정·자신감" },
+      "card-deep-neg-1": { "role": "tertiary", "displayName": "불안" },
+      "card-deep-neg-2": { "role": "tertiary", "displayName": "슬픔" },
+      "card-deep-neg-3": { "role": "tertiary", "displayName": "분노" },
+      "card-deep-neu-1": { "role": "tertiary", "displayName": "객관적 서술" },
+      "card-deep-neu-2": { "role": "tertiary", "displayName": "의문" },
+      "card-deep-neu-3": { "role": "tertiary", "displayName": "놀람·당황" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "기록 화면의 52px 제목(첫 실행 48px)." },
+      "headline": { "displayName": "Headline", "purpose": "화면 제목, 모바일 기록 제목." },
+      "title": { "displayName": "Title", "purpose": "패널 머리글, 오늘 카드 문구, 달력 제목." },
+      "body": { "displayName": "Body", "purpose": "일기 입력창 17px/1.85." },
+      "label": { "displayName": "Label", "purpose": "상태 줄, 날짜, 보조 링크, 탭 라벨." },
+      "numeral": { "displayName": "Numeral", "purpose": "워드마크·카드 번호·숫자 전용 Bricolage Grotesque." }
+    },
+    "shadows": [
+      { "name": "soft-panel", "value": "0 30px 60px -20px rgb(38 38 51 / .08), 0 10px 24px -6px rgb(38 38 51 / .06), 0 1px 2px rgb(38 38 51 / .06)", "purpose": "패널·상단 바·대화상자·타일·하단 탭." },
+      { "name": "soft-small", "value": "0 10px 24px -8px rgb(38 38 51 / .08), 0 1px 2px rgb(38 38 51 / .06)", "purpose": "부채꼴 배경 카드 등 작은 떠 있는 요소." },
+      { "name": "soft-panel-dark", "value": "0 1px 2px rgb(0 0 0 / .3), 0 10px 24px rgb(0 0 0 / .25), 0 30px 60px rgb(0 0 0 / .3)", "purpose": "night·tearoom 테마의 패널 그림자." },
+      { "name": "card-lift", "value": "drop-shadow(0 18px 28px rgb(17 17 20 / .14))", "purpose": "5:7 감정 카드 본체(filter)." },
+      { "name": "mini-card", "value": "0 1px 2px rgb(0 0 0 / .06), 0 6px 14px rgb(0 0 0 / .08)", "purpose": "도감·달력·목록 미니카드." }
+    ],
+    "motion": [
+      { "name": "soft-ease", "value": "cubic-bezier(.22, .8, .3, 1)", "purpose": "기본 상태 전환." },
+      { "name": "spring", "value": "cubic-bezier(.34, 1.56, .64, 1)", "purpose": "탭 아이콘과 작은 도착 연출의 탄성." },
+      { "name": "press", "value": "transform .18s ease → scale(.97)", "purpose": "버튼 눌림." },
+      { "name": "reveal", "value": "1.5s 두근두근 → 1.2s 고조 → 1.7s 펑", "purpose": "예시 카드 공개 연출. reduced-motion은 같은 시간의 불투명도 대체." }
+    ],
+    "breakpoints": [
+      { "name": "mobile-max", "value": "959px" },
+      { "name": "stage-min", "value": "960px" },
+      { "name": "stage-base", "value": "1440px" },
+      { "name": "short-max", "value": "650px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "화면마다 하나뿐인 잉크 알약 주 행동.",
+      "html": "<button class=\"ds-btn-primary\">기록하고 카드 받기</button>",
+      "css": ".ds-btn-primary { min-height: 44px; padding: 13px 24px; border: 0; border-radius: 999px; background: var(--ink, #111114); color: var(--on-ink, #fff); font: 600 15px/1.2 var(--font-ui, 'Moment Sans', sans-serif); cursor: pointer; transition: transform .18s ease, opacity .18s ease; } .ds-btn-primary:hover { opacity: .88; } .ds-btn-primary:active { transform: scale(.97); } .ds-btn-primary:focus-visible { outline: 3px solid var(--blue, #3b5bfd); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "안개색 알약 보조 행동.",
+      "html": "<button class=\"ds-btn-secondary\">카드 보기</button>",
+      "css": ".ds-btn-secondary { min-height: 44px; padding: 13px 24px; border: 0; border-radius: 999px; background: var(--tint, #f7f7f8); color: var(--ink, #111114); font: 500 15px/1.2 var(--font-ui, 'Moment Sans', sans-serif); cursor: pointer; transition: transform .18s ease, background-color .18s ease; } .ds-btn-secondary:hover { background: color-mix(in srgb, var(--tint, #f7f7f8) 70%, var(--line, #f0f0f2)); } .ds-btn-secondary:active { transform: scale(.97); } .ds-btn-secondary:focus-visible { outline: 3px solid var(--blue, #3b5bfd); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "감정 필터 칩, 선택되면 잉크로 반전.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">전체</button><button class=\"ds-chip\" aria-pressed=\"false\">기쁨·활력</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { min-height: 36px; padding: 8px 16px; border: 0; border-radius: 999px; background: var(--tint, #f7f7f8); color: var(--ink, #111114); font: 500 14px/1 var(--font-ui, sans-serif); cursor: pointer; } .ds-chip[aria-pressed=\"true\"] { background: var(--ink, #111114); color: var(--on-ink, #fff); } .ds-chip:focus-visible { outline: 3px solid var(--blue, #3b5bfd); outline-offset: 2px; }"
+    },
+    {
+      "name": "Writing Panel",
+      "kind": "input",
+      "refersTo": "editor-textarea",
+      "description": "테두리 없는 입력창과 안개색 작성 바가 든 떠 있는 패널.",
+      "html": "<div class=\"ds-write\"><textarea placeholder=\"오늘 어떤 순간이 마음에 남았나요?\"></textarea><div class=\"ds-bar\"><span class=\"ds-dot\"></span><span class=\"ds-status\">자동 저장됨 · 128자</span><button class=\"ds-save\">기록하고 카드 받기</button></div></div>",
+      "css": ".ds-write { display: grid; gap: 12px; padding-bottom: 24px; border-radius: 32px; background: var(--surface, #fff); box-shadow: 0 30px 60px -20px rgb(38 38 51 / .08), 0 10px 24px -6px rgb(38 38 51 / .06), 0 1px 2px rgb(38 38 51 / .06); overflow: hidden; } .ds-write:focus-within { box-shadow: 0 0 0 2px var(--blue, #3b5bfd), 0 30px 60px -20px rgb(38 38 51 / .08); } .ds-write textarea { min-height: 160px; padding: 36px 40px 0; border: 0; background: transparent; color: var(--ink, #111114); font: 400 17px/1.85 var(--font-ui, sans-serif); resize: vertical; } .ds-write textarea:focus-visible { outline: none; } .ds-write textarea::placeholder { color: var(--subtle, #b8b8c0); } .ds-bar { display: flex; align-items: center; gap: 10px; min-height: 56px; margin: 0 24px; padding: 6px 6px 6px 20px; border-radius: 999px; background: var(--tint, #f7f7f8); } .ds-dot { width: 14px; height: 14px; border-radius: 50%; background: #a6ebd6; } .ds-status { flex: 1; color: var(--muted, #5f5f68); font: 400 13px/1.4 var(--font-ui, sans-serif); } .ds-save { min-height: 44px; padding: 12px 24px; border: 0; border-radius: 999px; background: var(--ink, #111114); color: #fff; font: 600 15px/1 var(--font-ui, sans-serif); transition: transform .18s ease; } .ds-save:active { transform: scale(.97); }"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "nav-tab-active",
+      "description": "브랜드·3탭·아바타를 담은 흰 알약 상단 바.",
+      "html": "<header class=\"ds-top\"><span class=\"ds-brand\"><i></i>moment</span><nav class=\"ds-tabs\"><a aria-current=\"page\">기록</a><a>통계</a><a>도감</a></nav><span class=\"ds-avatar\"></span></header>",
+      "css": ".ds-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 64px; padding: 0 12px; border-radius: 999px; background: var(--surface, #fff); box-shadow: 0 30px 60px -20px rgb(38 38 51 / .08), 0 10px 24px -6px rgb(38 38 51 / .06), 0 1px 2px rgb(38 38 51 / .06); } .ds-brand { display: inline-flex; align-items: center; gap: 10px; padding-left: 12px; font: 700 19px/1 'Bricolage Grotesque', var(--font-ui, sans-serif); letter-spacing: -.02em; } .ds-brand i { width: 22px; height: 22px; border-radius: 50%; background: #ffb3c7; } .ds-tabs { display: flex; gap: 4px; } .ds-tabs a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 20px; border-radius: 999px; color: var(--muted, #5f5f68); font: 400 15px/1 var(--font-ui, sans-serif); cursor: pointer; } .ds-tabs a:hover { color: var(--ink, #111114); background: color-mix(in srgb, var(--tint, #f7f7f8) 60%, transparent); } .ds-tabs a[aria-current=\"page\"] { background: var(--tint, #f7f7f8); color: var(--ink, #111114); font-weight: 600; } .ds-avatar { justify-self: end; width: 40px; height: 40px; border-radius: 50%; background: color-mix(in srgb, #f3cdb6 62%, #fff); box-shadow: inset 0 0 0 1px #f0f0f2; }"
+    },
+    {
+      "name": "Recent Record Tile",
+      "kind": "card",
+      "refersTo": "tile",
+      "description": "흐린 감정색 구슬과 한 줄 미리보기를 가진 28px 타일.",
+      "html": "<button class=\"ds-tile\"><span class=\"ds-orb\"></span><strong>퇴근길에 본 노을이 예뻤다</strong><small>11월 23일 · 분석 대기</small></button>",
+      "css": ".ds-tile { position: relative; display: grid; gap: 4px; align-content: end; width: 240px; min-height: 136px; padding: 24px; border: 0; border-radius: 28px; background: var(--surface, #fff); box-shadow: 0 30px 60px -20px rgb(38 38 51 / .08), 0 10px 24px -6px rgb(38 38 51 / .06), 0 1px 2px rgb(38 38 51 / .06); color: var(--ink, #111114); text-align: left; overflow: hidden; cursor: pointer; transition: transform .18s ease; } .ds-tile:hover { transform: translateY(-2px); } .ds-tile:focus-visible { outline: 3px solid var(--blue, #3b5bfd); outline-offset: 2px; } .ds-orb { position: absolute; left: 24px; top: 20px; width: 74px; height: 74px; border-radius: 50%; background: radial-gradient(circle at 45% 45%, #ffc6a3, color-mix(in srgb, #ffc6a3 55%, transparent) 60%, transparent 75%); filter: blur(6px); } .ds-tile strong { position: relative; overflow: hidden; font: 500 15px/1.45 var(--font-ui, sans-serif); white-space: nowrap; text-overflow: ellipsis; } .ds-tile small { position: relative; color: var(--muted, #5f5f68); font-size: 13px; }"
+    },
+    {
+      "name": "Mini Moment Card",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "5:7 감정 카드의 축소판(블롭 그림은 원형으로 대체).",
+      "html": "<div class=\"ds-mini\"><span class=\"ds-mini-head\">No.001</span><span class=\"ds-mini-win\"><i></i></span><span class=\"ds-mini-band\"><strong>기쁨·활력</strong><em>2</em></span></div>",
+      "css": ".ds-mini { container-type: inline-size; display: grid; grid-template-rows: auto 1fr auto; width: 140px; aspect-ratio: 5 / 7; overflow: hidden; border-radius: 9% / 6.43%; background: linear-gradient(160deg, #ffd9bf, #ffb3c7 55%); color: #111114; box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 6px 14px rgb(0 0 0 / .08); } .ds-mini-head { padding: 8cqw 8cqw 0; font: 800 3.6cqw/1 'Bricolage Grotesque', sans-serif; letter-spacing: .18em; opacity: .62; } .ds-mini-win { display: grid; place-items: center; margin: 4cqw 6cqw 0; border-radius: 6cqw; background: linear-gradient(180deg, rgb(255 255 255 / .55), rgb(255 255 255 / .12)); box-shadow: inset 0 0 0 .5cqw rgb(255 255 255 / .75); } .ds-mini-win i { width: 50%; aspect-ratio: 1; border-radius: 46% 54% 52% 48%; background: #e8789a; box-shadow: 0 0 8cqw #e8789a; } .ds-mini-band { display: flex; justify-content: space-between; align-items: end; margin-top: 6cqw; padding: 5cqw 8cqw 8cqw; background: #ffd9bf; } .ds-mini-band strong { font: 800 7cqw/1.1 var(--font-ui, sans-serif); } .ds-mini-band em { font: 800 5.4cqw/1 'Bricolage Grotesque', sans-serif; font-style: normal; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "하루의 포켓 카드 (Pocket Moment)",
+    "overview": "하루 한 편의 일기가 휴대폰 주머니에 쏙 들어가는 작은 카드 한 장이 됩니다. 화면은 흰 종이처럼 조용하게 비워 두고, 색과 빛은 감정 카드에만 둡니다. 패널은 부드러운 그림자로 바닥에서 살짝 떠 있고 모서리는 크게 둥글어서 손에 쥐는 물건처럼 보입니다. 버튼은 누르면 살짝 눌리고, 카드는 기울기를 따라 빛이 흐릅니다. 가볍게 매일 꺼내 보는 일상의 손맛이 목표입니다.\n\n밀도는 낮습니다. 기록 화면의 결정은 \"쓰기 → 카드 받기\" 하나로 모으고, 보조 동작은 … 메뉴와 텍스트 링크로 물러나 있습니다. 테마 10종은 바탕·표면·잉크·강조색만 바꾸며 레이아웃·형태·그림자 문법은 공유합니다.",
+    "keyCharacteristics": [
+      "조용한 흰 바탕 위에 3겹의 옅은 그림자로 떠 있는 둥근 패널(32px)",
+      "잉크색 알약 버튼 하나가 화면의 주 행동",
+      "색은 감정 카드(9색 블롭과 광채)에만 집중",
+      "데스크톱은 1440 기준 16:9 스테이지, 모바일은 하단 플로팅 3탭",
+      "누르면 0.97로 눌리고, 카드는 포인터를 따라 기울고 빛나는 촉감"
+    ],
+    "rules": [
+      { "name": "The Color Lives in the Card Rule", "body": "채도 높은 색은 감정 카드와 그 광채에만 둡니다. UI 크롬(바, 패널, 버튼)은 잉크·안개·종이로만 칠합니다. 카드 뒤 광채(stage-glow)도 카드 base 색에서 가져옵니다.", "section": "colors" },
+      { "name": "The Muted Floor Rule", "body": "정보를 담은 글자는 --muted 이상의 대비로 씁니다. --subtle은 장식용 힌트에만 씁니다.", "section": "colors" },
+      { "name": "The Theme Swaps Values, Not Roles Rule", "body": "새 색은 역할 토큰(--color-*)으로만 추가하고, 10개 테마 모두에 값을 넣습니다. 컴포넌트 CSS에 hex를 직접 쓰지 않습니다. 카드 색만 예외로, 카드 색은 테마와 무관하게 고정입니다.", "section": "colors" },
+      { "name": "The One Family for Hangul Rule", "body": "한글에는 Moment Sans만 씁니다. Bricolage는 라틴 문자와 숫자 전용입니다.", "section": "typography" },
+      { "name": "The Medium-Not-Bold Rule", "body": "제목은 600, 패널 머리글은 500을 씁니다. 700 이상은 워드마크·숫자·오늘 날짜 강조에만 씁니다.", "section": "typography" },
+      { "name": "The No-Border Rule", "body": "패널과 버튼에는 테두리가 없습니다(border: 0). 구분은 그림자와 안개색 바탕으로만 합니다. 포커스만 파란 링으로 둡니다(작성 패널은 0 0 0 2px 링 + 그림자).", "section": "elevation" },
+      { "name": "The Card Floats Highest Rule", "body": "감정 카드보다 높이 뜨는 UI는 대화상자와 바텀시트뿐입니다.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 한 화면의 주 행동은 밤 잉크 알약 버튼 하나로 둡니다.",
+      "Do 패널은 흰 표면, 32px 모서리, Soft panel 그림자로 띄우고 테두리를 쓰지 않습니다.",
+      "Do 감정은 카드 9색(--card-deep-*/base/mix)으로만 구분하고, 등급은 효과로만 구분합니다.",
+      "Do 터치 영역은 최소 44px로 하고, 작은 버튼은 투명 ::after로 넓힙니다.",
+      "Do 새 색은 역할 토큰으로 10개 테마 모두에 정의하고, 토큰 JSON을 고친 뒤 빌드합니다.",
+      "Do 움직임은 --soft-ease(cubic-bezier(.22,.8,.3,1))를 기본으로 하고, prefers-reduced-motion에서는 불투명도만 쓰는 정지 대체를 둡니다."
+    ],
+    "donts": [
+      "Don't 점수, 게이지, 퍼센트를 크게 강조하지 않습니다. 진단지처럼 보이는 \"병원·심리검사 같은 임상 느낌\"을 내지 않습니다.",
+      "Don't 네온, 무지개 번쩍임, 희귀도 서열을 쓰지 않습니다. \"게임 가챠처럼 요란한 느낌\"이 되지 않게 하고, 3단계 홀로그램도 초당 3회 미만으로 맥동합니다.",
+      "Don't 촘촘한 표나 회색 관리자 화면 같은 \"업무용 대시보드 느낌\"을 내지 않습니다.",
+      "Don't 손글씨 글꼴, 스티커 남발, 과포화 파스텔을 쓰지 않습니다. \"유아적인 캐릭터 앱 느낌\"이 되지 않게 합니다.",
+      "Don't UI 크롬(바·패널·버튼)에 감정 카드 색이나 그라데이션을 칠하지 않습니다.",
+      "Don't 의미 있는 글자에 --subtle을 쓰지 않고, 모바일에서도 정보 글자를 11px 미만으로 줄이지 않습니다.",
+      "Don't 공유 PNG에 등급 이펙트를 넣지 않습니다."
+    ]
+  }
+}

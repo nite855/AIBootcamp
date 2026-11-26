@@ -1,0 +1,14 @@
+/* Material treatments preserve the shared layout and readable writing surface. */
+input,select,textarea,button{accent-color:var(--blue)}
+select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+textarea::placeholder{color:var(--muted);opacity:1}
+button{color:var(--ink)}
+.stats-chart text{fill:var(--muted)}
+.settings-panel .panel-body{overflow-y:auto;overscroll-behavior:contain;padding:4px;scrollbar-gutter:stable}
+.settings-panel .panel-body>*{flex-shrink:0}
+.settings-panel fieldset{border:0;padding:0;margin:0;min-width:0}
+.settings-panel legend{font-weight:600;margin-bottom:10px}
+.mode-options{display:flex;gap:12px;flex-wrap:wrap}.mode-options label{min-height:44px;display:flex;align-items:center;gap:6px}
+
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=on]),:root:not([data-motion=on]) *,:root:not([data-motion=on]) *::before,:root:not([data-motion=on]) *::after,:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light),:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light)::before,:root[data-motion=on] *:not(.flip-inner,.tilt-layer,.flip-light)::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.theme-option:has(input:checked){outline:3px solid Highlight}}

@@ -1,0 +1,60 @@
+/* Statistics entry motion (2026-11-21): when the statistics screen opens (or the month or mode
+   changes) the charts draw themselves once, in order — summary tiles, ratio bar, trend line,
+   dots, distribution bars, emotion calendar and weekday bars. statistics-view.js only adds
+   [data-stats-anim="in"] on those renders, so other re-renders stay still. Nothing moves panels
+   or bar containers (clip-path/opacity only on them), keeping layout measurements stable;
+   fill-mode backwards leaves hover transitions untouched after the motion ends. */
+@keyframes stats-fade { from { opacity: 0; } }
+@keyframes stats-pop { from { opacity: 0; transform: scale(.4); } 70% { transform: scale(1.12); } }
+@keyframes stats-cell { from { opacity: 0; transform: scale(.86); } }
+@keyframes stats-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes stats-wipe-x { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes stats-wipe-up { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+[data-stats-anim="in"] {
+  --stats-ease: cubic-bezier(.22, .8, .24, 1);
+}
+
+/* Summary tiles fade in one after another (numbers count up in statistics-view.js). */
+[data-stats-anim="in"] .stats-cards > .panel { animation: stats-fade .45s var(--stats-ease) backwards; }
+[data-stats-anim="in"] .stats-cards > .panel:nth-child(2) { animation-delay: .08s; }
+[data-stats-anim="in"] .stats-cards > .panel:nth-child(3) { animation-delay: .16s; }
+[data-stats-anim="in"] .ratio-bar { animation: stats-wipe-x .7s .25s var(--stats-ease) backwards; }
+[data-stats-anim="in"] .stats-empty-panel { animation: stats-fade .5s .2s var(--stats-ease) backwards; }
+
+/* Trend chart: grid first, then the line draws left to right (each run starts at its x), the
+   area and mean line follow, today's tooltip pops in last. */
+[data-stats-anim="in"] .stats-chart :is(.chart-guide, .chart-base, .chart-axis, .chart-day) { animation: stats-fade .4s .2s ease backwards; }
+[data-stats-anim="in"] .stats-chart .chart-line {
+  stroke-dasharray: 1 1;
+  animation: stats-draw 1s calc(.35s + var(--x, 0) * .6s) var(--stats-ease) backwards;
+}
+[data-stats-anim="in"] .stats-chart :is(.chart-area, .chart-glow) { animation: stats-fade .5s calc(1.05s + var(--x, 0) * .6s) ease backwards; }
+[data-stats-anim="in"] .stats-chart .chart-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: stats-pop .4s calc(.4s + var(--x, 0) * .6s) var(--stats-ease) backwards;
+}
+[data-stats-anim="in"] .stats-chart :is(.chart-mean, .chart-mean-label) { animation: stats-fade .5s 1.1s ease backwards; }
+[data-stats-anim="in"] .stats-chart .chart-today {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: stats-pop .45s 1.25s var(--stats-ease) backwards;
+}
+
+/* Card-colored dots under the chart pop in day by day. */
+[data-stats-anim="in"] .trend-dots li > * { animation: stats-pop .35s calc(.4s + var(--i, 0) * 25ms) var(--stats-ease) backwards; }
+
+/* Distribution bars grow from the left, row by row. */
+[data-stats-anim="in"] .dist-bar b { animation: stats-wipe-x .65s calc(.3s + var(--i, 0) * 55ms) var(--stats-ease) backwards; }
+[data-stats-anim="in"] .dist-row strong { animation: stats-fade .4s calc(.45s + var(--i, 0) * 55ms) ease backwards; }
+
+/* Emotion calendar cells settle in, day by day. */
+[data-stats-anim="in"] .emo-calendar .emo-day { animation: stats-cell .35s calc(.35s + var(--i, 0) * 14ms) var(--stats-ease) backwards; }
+
+/* Weekday bars rise from the bottom (phones: rows fill from the left). */
+[data-stats-anim="in"] .weekday-bar { animation: stats-wipe-up .7s calc(.45s + var(--i, 0) * 60ms) var(--stats-ease) backwards; }
+[data-stats-anim="in"] .weekday-row .weekday-pct { animation: stats-fade .4s calc(.8s + var(--i, 0) * 60ms) ease backwards; }
+@media (max-width: 959px) {
+  [data-stats-anim="in"] .weekday-bar { animation-name: stats-wipe-x; }
+}

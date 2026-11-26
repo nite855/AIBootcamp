@@ -1,0 +1,120 @@
+TAP version 13
+# Subtest: inline JavaScript parses without external runtime dependencies
+ok 1 - inline JavaScript parses without external runtime dependencies
+  ---
+  duration_ms: 4.5598
+  type: 'test'
+  ...
+# Subtest: date selector is above every record title; delete remains below textarea
+ok 2 - date selector is above every record title; delete remains below textarea
+  ---
+  duration_ms: 0.5488
+  type: 'test'
+  ...
+# Subtest: main result card comes first and has no chart/table/details data
+not ok 3 - main result card comes first and has no chart/table/details data
+  ---
+  duration_ms: 17.7801
+  type: 'test'
+  location: 'C:\\Users\\gydnj\\OneDrive\\00_YUCollege\\02_2026_2hakgi\\AI서비스프로젝트\\AIBootcamp\\hw\\diary-simple-v1\\tests\\simple.test.cjs:35:1'
+  failureType: 'testCodeFailure'
+  error: 'isDiary is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    simpleOverview (evalmachine.<anonymous>:8:23)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    TestContext.<anonymous> (C:\Users\gydnj\OneDrive\00_YUCollege\02_2026_2hakgi\AI서비스프로젝트\AIBootcamp\hw\diary-simple-v1\tests\simple.test.cjs:35:112)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: blocked tab gives recovery message and preserves result
+ok 4 - blocked tab gives recovery message and preserves result
+  ---
+  duration_ms: 2.3259
+  type: 'test'
+  ...
+# Subtest: handoff accepts only the exact child, origin and nonce
+ok 5 - handoff accepts only the exact child, origin and nonce
+  ---
+  duration_ms: 2.6019
+  type: 'test'
+  ...
+# Subtest: file URL transfer uses wildcard target only with exact child/source checks
+ok 6 - file URL transfer uses wildcard target only with exact child/source checks
+  ---
+  duration_ms: 3.8211
+  type: 'test'
+  ...
+# Subtest: child restores identical result in memory and detaches opener
+ok 7 - child restores identical result in memory and detaches opener
+  ---
+  duration_ms: 5.2973
+  type: 'test'
+  ...
+# Subtest: child rejects mismatched summary instead of displaying distorted values
+ok 8 - child rejects mismatched summary instead of displaying distorted values
+  ---
+  duration_ms: 6.0548
+  type: 'test'
+  ...
+# Subtest: handoff timeout gives a recovery notice without deleting original result
+ok 9 - handoff timeout gives a recovery notice without deleting original result
+  ---
+  duration_ms: 3.8381
+  type: 'test'
+  ...
+# Subtest: single/no-date fixtures keep unavailable states separate
+ok 10 - single/no-date fixtures keep unavailable states separate
+  ---
+  duration_ms: 4.0011
+  type: 'test'
+  ...
+# Subtest: distribution parent totals derive from seven original probabilities
+ok 11 - distribution parent totals derive from seven original probabilities
+  ---
+  duration_ms: 1.7298
+  type: 'test'
+  ...
+# Subtest: input validation rejects empty, oversized and invalid dates without truncation
+ok 12 - input validation rejects empty, oversized and invalid dates without truncation
+  ---
+  duration_ms: 4.3737
+  type: 'test'
+  ...
+# Subtest: delete action preserves other records and resets last deleted record
+not ok 13 - delete action preserves other records and resets last deleted record
+  ---
+  duration_ms: 0.8414
+  type: 'test'
+  location: 'C:\\Users\\gydnj\\OneDrive\\00_YUCollege\\02_2026_2hakgi\\AI서비스프로젝트\\AIBootcamp\\hw\\diary-simple-v1\\tests\\simple.test.cjs:46:1'
+  failureType: 'testCodeFailure'
+  error: 'co is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    evalmachine.<anonymous>:1:3
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    TestContext.<anonymous> (C:\Users\gydnj\OneDrive\00_YUCollege\02_2026_2hakgi\AI서비스프로젝트\AIBootcamp\hw\diary-simple-v1\tests\simple.test.cjs:55:5)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 11
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 205.7308

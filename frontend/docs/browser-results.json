@@ -1,0 +1,10 @@
+{
+  "results": [
+    "real input validation/delete/confirmation stays pending without synthetic analysis",
+    "simple card → integrated details → calendar/period/repeats/gallery → private PNG → same detail result",
+    "90 single/multi/no-date route-width checks; light/dark screenshots",
+    "refresh shows empty result recovery; offline standalone; no HTTP requests or JS errors"
+  ],
+  "errors": [],
+  "requests": []
+}

@@ -1,0 +1,45 @@
+/* Layout foundation (Figma v0.3): a 16:9 stage on desktop, fluid single column on phones.
+   Loaded right before moment.css. Stage numbers are set by app.js size() from the
+   --layout-stage-* tokens: --stage-w (px), --stage-zoom (>= 1), --stage-gutter (px). */
+
+/* ── Desktop: 16:9 stage ──
+   Stage width = min(viewport width, viewport height × 16/9). Below the 1440px base the
+   existing fluid layout is used as-is (zoom 1, so 44px touch targets stay 44px); above it the
+   whole stage scales up proportionally, keeping the 1440 composition on 1920/2560 screens.
+   Extra height (16:10, 4:3) is absorbed by the stage itself; extra width (21:9) becomes the
+   theme background (soft UI v1.1 has no side rails). Taller screens such as the monthly
+   statistics scroll the page as usual. */
+@media (min-width: 960px) {
+  html, body { min-height: 100%; }
+  html .shell {
+    zoom: var(--stage-zoom, 1);
+    width: calc(var(--stage-w, 100vw) / var(--stage-zoom, 1));
+    max-width: none;
+    min-height: calc(var(--app-height, 100dvh) / var(--stage-zoom, 1));
+    margin-inline: auto;
+    /* Figma v1.1: top bar 40px from the edge at 1440, top 24. */
+    padding: 24px clamp(24px, 2.78vw, 40px);
+  }
+  /* Content sits a further 40px inside (x 80 at 1440); the catalog and statistics use 24px (x 64). */
+  html main#main-content { padding-inline: clamp(0px, 2.78vw, 40px); }
+  html main#main-content[data-view="history"] { padding-inline: clamp(0px, 1.67vw, 24px); }
+  /* Panels fill the stage height so short content never leaves a band of empty page. */
+  html .home-workspace { align-items: stretch; }
+  html .home-workspace > * { min-height: 0; }
+}
+
+.shell { z-index: 1; }
+
+/* ── Phones and tablets: fluid width, safe areas, no fixed pixel layout ── */
+@media (max-width: 959px) {
+  html .shell {
+    width: 100%;
+    max-width: var(--layout-mobile-max, 760px);
+    margin-inline: auto;
+    padding-top: max(clamp(14px, 4.2vw, 20px), env(safe-area-inset-top, 0px));
+    padding-left: max(clamp(14px, 4.2vw, 20px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(14px, 4.2vw, 20px), env(safe-area-inset-right, 0px));
+  }
+  .screen-title { font-size: clamp(20px, 5.8vw, 24px); }
+  :is(.editor, .panel) { padding: clamp(16px, 4.6vw, 24px); }
+}

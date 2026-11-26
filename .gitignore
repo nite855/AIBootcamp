@@ -1,4 +1,68 @@
+# 로컬 환경 설정·인증 정보 (공유용 예제는 허용)
+.env
+.env.*
+!.env.example
+moment-backup-*.json
+
+# Python 가상환경·캐시·패키징 결과
 .venv/
+venv/
+env/
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+*.egg-info/
+.coverage
+.coverage.*
+htmlcov/
+
+# Node 의존성·빌드 캐시·테스트 실행 결과
+node_modules/
+.npm/
+.cache/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# 모델 가중치·비공개 데이터셋·학습 및 평가 산출물
 models/
+model/
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+pytorch_model*.bin
+emotional-dialogue-input-study-*/
+/artifacts/**
+!/artifacts/emotional-dialogue-study/
+!/artifacts/emotional-dialogue-study/configs/
+!/artifacts/emotional-dialogue-study/configs/*.json
+
+# 임시 브라우저 검증 폴더 (문서에서 참조하는 최종 증거는 유지)
+/reports/**/lan-*/
+!/reports/frontend-integration/lan-CgNI29/
+/reports/record-ui-2026-11-09/verified-*/
+!/reports/record-ui-2026-11-09/verified-rbmzeT/
+
+# 버전 백업·로그·임시 파일
+.backups/
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 운영체제·로컬 편집기 설정
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.code-workspace

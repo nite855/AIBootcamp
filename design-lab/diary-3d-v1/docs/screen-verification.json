@@ -1,0 +1,42 @@
+[
+  {
+    "variant": "lemon",
+    "screens": {
+      "dashboard": {
+        "visible": true
+      },
+      "card": {
+        "visible": true
+      },
+      "statistics": {
+        "visible": true
+      },
+      "catalog": {
+        "visible": true
+      },
+      "settings": {
+        "visible": true
+      }
+    }
+  },
+  {
+    "variant": "gray",
+    "screens": {
+      "dashboard": {
+        "visible": true
+      },
+      "card": {
+        "visible": true
+      },
+      "statistics": {
+        "visible": true
+      },
+      "catalog": {
+        "visible": true
+      },
+      "settings": {
+        "visible": true
+      }
+    }
+  }
+]
