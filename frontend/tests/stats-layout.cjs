@@ -73,6 +73,25 @@ async function arrowsCentred(page, where) {
       assert.equal(await page.locator('[data-trend-focus], [data-stats-day], [data-stats]').count(), 0, 'old focus toggle, day stepper and panel switch are gone');
       const box = await chart.boundingBox();
       assert.ok(box.height >= (desktop ? 240 : 160), 'chart height ' + box.height);
+      // Line color (2026-11-26): one gradient stop per analyzed day, colored by the strongest emotion of
+      // the 3-day window (DiaryStatistics.windowEmotion, unit-tested); a day whose window holds only itself
+      // takes its own card color, so it matches the dot below.
+      const tone = await page.evaluate(() => {
+        const stops = [...document.querySelectorAll('#trend-emotion stop')].map(s => ({ type: s.dataset.type, offset: parseFloat(s.getAttribute('offset')), color: s.style.stopColor }));
+        const dots = [...document.querySelectorAll('.trend-dots li')].map(li => { const b = li.querySelector('.is-ready'); const m = b && /--day-deep:var\(--card-deep-([a-z]+-\d)\)/.exec(b.getAttribute('style')); return m ? m[1].replace('-', '_') : null; });
+        const line = getComputedStyle(document.querySelector('.stats-chart .chart-line')).stroke;
+        const area = document.querySelector('.stats-chart .chart-area');
+        return { stops, dots, line, areaFill: area && getComputedStyle(area).fill, areaMask: area && area.getAttribute('mask'), ids: CardexCore.IDS };
+      });
+      const ready = tone.dots.map((t, i) => t ? i : -1).filter(i => i >= 0);
+      assert.equal(tone.stops.length, ready.length, 'one stop per analyzed day');
+      assert.ok(tone.stops.every((s, k) => tone.ids.includes(s.type) && s.color.includes(`--card-deep-${s.type.replace('_', '-')}`) && (k === 0 || s.offset > tone.stops[k - 1].offset)), 'stops: valid emotion, card color, left to right');
+      assert.ok(new Set(tone.stops.map(s => s.type)).size >= 2, 'the demo month shows more than one emotion color');
+      ready.forEach((day, k) => { if (!tone.dots[day - 1] && !tone.dots[day - 2]) assert.equal(tone.stops[k].type, tone.dots[day], 'lone-window day matches its dot on day ' + (day + 1)); });
+      assert.match(tone.line, /url\(.*#trend-emotion/, 'line stroke uses the emotion gradient');
+      assert.match(tone.areaFill, /url\(.*#trend-emotion/, 'area fill uses the emotion gradient');
+      assert.equal(tone.areaMask, 'url(#trend-fade)');
+      assert.match(await page.locator('.stats-trend .row small').textContent(), /선 색 = 3일간 가장 강한 감정/);
 
       // Distribution: nine rows sorted by count (phones show three).
       const counts = await page.locator('.dist-row strong').allInnerTexts();

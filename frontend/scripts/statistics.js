@@ -151,6 +151,30 @@
       return win.reduce((a, b) => a + b, 0) / win.length;
     });
   }
+  // Trend line color (2026-11-26): the strongest emotion of the same trailing window the line
+  // averages. Each analyzed day's 9-emotion probabilities are averaged over the window (days without
+  // analysis are skipped, as in movingAverage) and the largest share wins, ties in IDS order. Because
+  // the window and weights match, the averaged positive share equals the line value. A day without
+  // analysis stays null so the gap matches the line. Returns { type, share } or null per day.
+  function windowEmotion(days, size = 3) {
+    const list = Array.isArray(days) ? days : [];
+    const n = Number.isSafeInteger(size) && size > 0 ? size : 1;
+    const leafOf = (d) => {
+      const leaf = d?.summary?.validCount ? d.summary.leaf : null;
+      return leaf && C.IDS.every((id) => Number.isFinite(leaf[id])) ? leaf : null;
+    };
+    const leaves = list.map(leafOf);
+    return leaves.map((leaf, i) => {
+      if (!leaf) return null;
+      const win = leaves.slice(Math.max(0, i - n + 1), i + 1).filter(Boolean);
+      let type = null, share = -Infinity;
+      for (const id of C.IDS) {
+        const v = win.reduce((a, l) => a + l[id], 0) / win.length;
+        if (v > share + 1e-12) { type = id; share = v; }
+      }
+      return { type, share };
+    });
+  }
   // Records this month against the previous month (January compares with last December).
   function monthDelta(records, month) {
     const list = Array.isArray(records) ? records : [];
@@ -188,5 +212,5 @@
     const positive = lead("positive"), negative = lead("negative");
     return positive === null && negative === null ? null : { positive, negative };
   }
-  return { monthSummary, insight, dayEmotion, shiftMonth, smoothSegments, weekStart, weekDates, shiftWeek, addDays, streakDays, weekLabel, movingAverage, monthDelta, weekdaySummary, weekdayInsight, INSIGHT_MINIMUM };
+  return { monthSummary, insight, dayEmotion, shiftMonth, smoothSegments, weekStart, weekDates, shiftWeek, addDays, streakDays, weekLabel, movingAverage, windowEmotion, monthDelta, weekdaySummary, weekdayInsight, INSIGHT_MINIMUM };
 });

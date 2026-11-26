@@ -82,11 +82,17 @@ function trendChart(stats) {
   for (const value of [0, 0.5, 1])
     marks += `<path class="${value ? "chart-guide" : "chart-base"}" d="M${left} ${y(value)}H${right}"/><text class="chart-axis" x="${right + 8}" y="${y(value) + 4}" text-anchor="start">${value * 100}%</text>`;
   const points = smooth.map((v, i) => v === null ? null : [x(i), y(v)]);
+  // Line color (2026-11-26): the strongest emotion of the same 3-day window, as card colors that
+  // blend between neighbouring days (one horizontal gradient in chart space, shared by every run).
+  const tones = DiaryStatistics.windowEmotion(days, 3);
+  const deep = t => `var(--card-deep-${t.type.replace("_", "-")})`;
+  const stops = tones.map((t, i) => t && points[i] ? `<stop offset="${(((x(i) - left) / Math.max(1, right - left)) * 100).toFixed(2)}%" data-type="${t.type}" style="stop-color:${deep(t)}"/>` : "").join("");
   for (const run of DiaryStatistics.smoothSegments(points)) {
     // Each run draws in its turn, left to right (--x = start position 0–1 across the chart).
     const at = ((run.start[0] - left) / Math.max(1, right - left)).toFixed(3);
-    if (run.points.length > 1) marks += `<path class="chart-area" style="--x:${at}" d="${run.d}L${run.end[0]} ${base}L${run.start[0]} ${base}Z"/>`;
-    marks += run.points.length > 1 ? `<path class="chart-line" data-series="positive" pathLength="1" style="--x:${at}" d="${run.d}"/>` : `<circle class="chart-dot" style="--x:${at}" cx="${run.start[0]}" cy="${run.start[1]}" r="4"/>`;
+    if (run.points.length > 1) marks += `<path class="chart-area" mask="url(#trend-fade)" style="--x:${at}" d="${run.d}L${run.end[0]} ${base}L${run.start[0]} ${base}Z"/>`;
+    const single = run.points.length > 1 ? null : tones[points.indexOf(run.start)];
+    marks += run.points.length > 1 ? `<path class="chart-line" data-series="positive" pathLength="1" style="--x:${at}" d="${run.d}"/>` : `<circle class="chart-dot"${single ? ` data-type="${single.type}"` : ""} style="--x:${at}${single ? `;--trend-color:${deep(single)}` : ""}" cx="${run.start[0]}" cy="${run.start[1]}" r="4"/>`;
   }
   if (mean !== null) marks += `<path class="chart-mean" pathLength="1" d="M${left} ${y(mean)}H${right}"/><text class="chart-mean-label" x="${left + 2}" y="${y(mean) - 8}" text-anchor="start">평균 ${CardexCore.percent(mean)}</text>`;
   // Today's tooltip, when today is drawn and analyzed.
@@ -94,14 +100,14 @@ function trendChart(stats) {
   if (ti >= 0 && smooth[ti] !== null) {
     const tx = x(ti), ty = y(smooth[ti]), label = `오늘 긍정 ${CardexCore.percent(raw[ti])}`, bw = 104;
     const bx = Math.min(right - bw, Math.max(left, tx - bw + 12)), by = Math.max(0, ty - 38);
-    marks += `<g class="chart-today"><circle cx="${tx}" cy="${ty}" r="7"/><rect x="${bx}" y="${by}" width="${bw}" height="26" rx="13"/><text x="${bx + bw / 2}" y="${by + 17}" text-anchor="middle">${label}</text></g>`;
+    marks += `<g class="chart-today"${tones[ti] ? ` style="--trend-color:${deep(tones[ti])}"` : ""}><circle cx="${tx}" cy="${ty}" r="7"/><rect x="${bx}" y="${by}" width="${bw}" height="26" rx="13"/><text x="${bx + bw / 2}" y="${by + 17}" text-anchor="middle">${label}</text></g>`;
   }
   const last = days.length - 1, step = narrow && days.length > 20 ? 10 : 5;
   days.forEach((d, i) => {
     if (i === 0 || i === last || ((i + 1) % step === 0 && last - i >= 2))
       marks += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="chart-day">${i + 1}일</text>`;
   });
-  return `<svg class="stats-chart" viewBox="0 0 ${W} ${H}" data-days="${days.length}" role="img" aria-label="긍정 비율 3일 이동 평균${mean !== null ? ", 이번 달 평균 " + CardexCore.percent(mean) : ""}, 분석 없는 날은 공백"><defs><linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--card-deep-pos-1, #e8789a)" stop-opacity=".22"/><stop offset="1" stop-color="var(--card-deep-pos-1, #e8789a)" stop-opacity="0"/></linearGradient></defs>${marks}</svg>`;
+  return `<svg class="stats-chart" viewBox="0 0 ${W} ${H}" data-days="${days.length}" role="img" aria-label="긍정 비율 3일 이동 평균${mean !== null ? ", 이번 달 평균 " + CardexCore.percent(mean) : ""}, 선 색은 최근 3일 동안 가장 강한 감정, 분석 없는 날은 공백"><defs><linearGradient id="trend-emotion" gradientUnits="userSpaceOnUse" x1="${left}" y1="0" x2="${right}" y2="0">${stops}</linearGradient><linearGradient id="trend-fade-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="trend-fade" maskUnits="userSpaceOnUse" x="0" y="${top}" width="${W}" height="${base - top}"><rect x="0" y="${top}" width="${W}" height="${base - top}" fill="url(#trend-fade-grad)"/></mask></defs>${marks}</svg>`;
 }
 // Card-colored dots under the chart, one per drawn day; recorded days open the card modal.
 function trendDots(stats) {
@@ -180,13 +186,13 @@ function statisticsPanel() {
     return `${head}${summary}<section class="panel stats-empty-panel"><span class="stage-glow" aria-hidden="true"></span><p class="stats-empty-title">기록이 쌓이면 마음의 흐름을 보여드릴게요</p><p class="muted">분석된 기록이 ${DiaryStatistics.INSIGHT_MINIMUM}편 이상이면 감정 추이 그래프가 그려져요</p>${state.month === thisMonth ? btn("write", "오늘 기록하기", "primary") : ""}</section>`;
   // The explanatory note and the insight (not in Figma) stay as one small caption line.
   const trendBody = stats.valid
-    ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">아래 점은 그날 받은 카드의 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
+    ? trendChart(stats) + trendDots(stats) + `<p class="chart-note">선과 점의 색은 카드 색이에요 · 점을 누르면 그날의 카드가 열려요</p>`
     : `<div class="stats-empty"><p>감정 읽기는 준비 중이에요. 기록은 달력에서 열어 볼 수 있어요.</p></div>` + trendDots(stats);
   // Records exist but none is analyzed (real records until the model is connected): one page-level
   // banner says why the ratio, distribution and weekday panels are empty, so writing more never looks like the fix.
   const waiting = stats.valid ? "" : `<p class="stats-wait-banner" role="note"><b>감정 읽기 전</b><span>이번 달 기록 ${stats.total}편은 잘 저장됐어요. AI 감정 읽기가 연결되면 비율·분포·요일별 마음이 채워져요.</span>${state.mode === "real" ? btn("preview", "시연 모드로 미리 보기", "quiet") : ""}</p>`;
   return `${head}${waiting}${summary}<div class="stats-sections">
-    <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균</small></div>${trendBody}${insightLine(stats)}</section>
+    <section class="panel stats-main stats-trend" aria-labelledby="stats-trend-title"><div class="row"><h3 id="stats-trend-title">감정 추이</h3><small>긍정 비율 · 3일 이동 평균<span class="wide-only"> · 선 색 = 3일간 가장 강한 감정</span></small></div>${trendBody}${insightLine(stats)}</section>
     <section class="panel stats-dist" aria-labelledby="dist-title"><div class="row"><h3 id="dist-title"><span class="wide-only">감정 분포</span><span class="narrow-only">많이 받은 감정</span></h3><small>9종 · 받은 카드 수</small></div>${distributionRows(state.month)}</section>
     <section class="panel stats-mood"><div class="stats-calendar" aria-labelledby="stats-calendar-title"><div class="row"><div><h3 id="stats-calendar-title">${monthShort(state.month)} 감정 달력</h3><small>칸 색 = 그날 받은 카드 · 점 = 카드 단계 · 회색 = 분석 전</small></div></div>${emotionCalendar(state.month)}</div><div class="stats-weekday" aria-labelledby="weekday-title"><div class="row"><div><h3 id="weekday-title">요일별 마음</h3><small>요일마다 긍정 · 중립 · 부정 비율</small></div><p class="weekday-legend" aria-hidden="true"><span><i class="seg-pos"></i>긍정</span><span><i class="seg-neu"></i>중립</span><span><i class="seg-neg"></i>부정</span></p></div>${weekdayMood(state.month)}</div></section>
   </div>`;

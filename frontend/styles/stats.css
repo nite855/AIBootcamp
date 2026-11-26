@@ -69,12 +69,12 @@
 .stats-page .stats-chart { display: block; width: 100%; height: auto; max-height: none; margin-top: 8px; cursor: default; overflow: visible; }
 .stats-page .stats-chart .chart-guide, .stats-page .stats-chart .chart-base { stroke: var(--line); stroke-width: 1; stroke-dasharray: none; }
 .stats-page .stats-chart text { fill: var(--subtle, var(--muted)); font-size: 12px; }
-.stats-page .stats-chart .chart-area { fill: url(#trend-fill); }
-.stats-page .stats-chart .chart-line { fill: none; stroke: var(--card-deep-pos-1, #e8789a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: none; opacity: 1; }
-.stats-page .stats-chart .chart-dot { fill: var(--card-deep-pos-1, #e8789a); }
+.stats-page .stats-chart .chart-area { fill: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); } /* faded by mask #trend-fade */
+.stats-page .stats-chart .chart-line { fill: none; stroke: url(#trend-emotion) var(--card-deep-pos-1, #e8789a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: none; opacity: 1; }
+.stats-page .stats-chart .chart-dot { fill: var(--trend-color, var(--card-deep-pos-1, #e8789a)); }
 .stats-page .stats-chart .chart-mean { stroke: var(--subtle, var(--muted)); stroke-width: 1.5; stroke-dasharray: 4 5; }
 .stats-page .stats-chart .chart-mean-label { font-size: 12px; font-weight: 500; fill: var(--subtle, var(--muted)); }
-.chart-today circle { fill: var(--surface); stroke: var(--card-deep-pos-1, #e8789a); stroke-width: 3; }
+.chart-today circle { fill: var(--surface); stroke: var(--trend-color, var(--card-deep-pos-1, #e8789a)); stroke-width: 3; }
 .chart-today rect { fill: var(--ink); }
 .stats-page .chart-today text { fill: var(--surface); opacity: 1; font-size: 12px; font-weight: 500; }
 .trend-dots { display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 2px; margin: 0 44px 0 0; padding: 0; list-style: none; }

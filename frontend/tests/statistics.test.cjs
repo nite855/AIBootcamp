@@ -161,6 +161,48 @@ test("moving average keeps gaps and averages the available window", () => {
   assert.deepEqual(S.movingAverage("bad"), []);
 });
 
+test("window emotion: strongest emotion of the trailing 3-day averaged probabilities", () => {
+  const p = (shares) => Object.fromEntries(C.IDS.map(id => [id, shares[id] || 0]));
+  const day = (shares) => shares ? { summary: { validCount: 1, leaf: p(shares) } } : { summary: { validCount: 0, leaf: null } };
+  assert.deepEqual(S.windowEmotion([]), []);
+  assert.deepEqual(S.windowEmotion("bad"), []);
+  assert.deepEqual(S.windowEmotion([null, {}, { summary: { validCount: 1, leaf: { pos_1: 1 } } }]), [null, null, null], "missing or partial leaf is no analysis");
+  // Window shorter at the start; a strong day outweighs two weaker ones.
+  const days = [day({ pos_1: 0.92, neu_1: 0.08 }), day({ neg_2: 0.35, neu_1: 0.65 }), day({ neg_2: 0.4, pos_1: 0.6 })];
+  const out = S.windowEmotion(days);
+  assert.equal(out[0].type, "pos_1", "first day uses a one-day window");
+  assert.ok(Math.abs(out[0].share - 0.92) < 1e-9);
+  assert.equal(out[1].type, "pos_1", "0.46 average beats neu_1 0.365");
+  assert.equal(out[2].type, "pos_1");
+  // Gaps stay null and are skipped inside the window.
+  const gap = S.windowEmotion([day({ neg_3: 1 }), day(null), day({ pos_2: 0.4, neu_2: 0.6 })]);
+  assert.equal(gap[1], null, "a gap stays a gap");
+  assert.equal(gap[2].type, "neg_3", "window = day 1 and day 3 only (neg_3 0.5)");
+  // Old days fall out of the window.
+  const slide = S.windowEmotion([day({ neg_1: 1 }), day({ pos_3: 1 }), day({ pos_3: 1 }), day({ pos_3: 1 })]);
+  assert.equal(slide[3].type, "pos_3");
+  assert.ok(Math.abs(slide[3].share - 1) < 1e-9);
+  // Ties follow IDS order.
+  assert.equal(S.windowEmotion([day({ neu_3: 0.5, pos_2: 0.5 })])[0].type, "pos_2");
+  assert.equal(S.windowEmotion([day({}), day({})], 0)[1].type, C.IDS[0], "invalid size falls back to 1");
+});
+
+test("window emotion matches the trend line: averaged positive share equals the moving average", () => {
+  const month = "2026-11";
+  const pr = (i) => { const raw = C.IDS.map((_, k) => ((i * 7 + k * 3) % 9) + 1), sum = raw.reduce((a, b) => a + b, 0); return Object.fromEntries(C.IDS.map((id, k) => [id, raw[k] / sum])); };
+  const records = [1, 2, 4, 5, 6, 9].map(d => ({ recordDate: `${month}-${String(d).padStart(2, "0")}`, version: 1, analysis: { version: 1, taxonomy_version: C.TAXONOMY, status: "valid", probabilities: pr(d) } }));
+  const days = S.monthSummary(records, month).days;
+  const line = S.movingAverage(days.map(d => d.summary.validCount ? d.summary.parents.positive : null), 3);
+  const colors = S.windowEmotion(days);
+  days.forEach((d, i) => {
+    assert.equal(colors[i] === null, line[i] === null, "same gaps as the line on day " + (i + 1));
+    if (line[i] === null) return;
+    const win = days.slice(Math.max(0, i - 2), i + 1).filter(x => x.summary.validCount);
+    const pos = C.IDS.filter(id => id.startsWith("pos")).reduce((a, id) => a + win.reduce((s, x) => s + x.summary.leaf[id], 0) / win.length, 0);
+    assert.ok(Math.abs(pos - line[i]) < 1e-9, "positive share matches the line on day " + (i + 1));
+  });
+});
+
 test("month delta compares with the previous month across the year boundary", () => {
   const rec = d => ({ recordDate: d });
   assert.deepEqual(S.monthDelta([rec("2026-01-03"), rec("2026-01-09"), rec("2025-12-30")], "2026-01"), { current: 2, previous: 1, delta: 1 });
